@@ -1,0 +1,307 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Modul Fasiliti | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body { background: #f0f4fa; min-height: 100vh; }
+
+        /* ── PARTICLES ── */
+        .particles { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+        .particle { position:absolute; border-radius:50%; background:rgba(37,99,235,.07); animation:floatParticle linear infinite; }
+        @keyframes floatParticle {
+            0%   { transform:translateY(110vh) scale(0); opacity:0; }
+            10%  { opacity:1; }
+            90%  { opacity:.6; }
+            100% { transform:translateY(-12vh) scale(1.1); opacity:0; }
+        }
+
+        /* ── TOPBAR ── */
+        .topbar { background:#fff; border-bottom:1px solid #e5eaf3; box-shadow:0 1px 8px rgba(30,58,138,.07); }
+
+        /* ── HERO ── */
+        .hero-strip {
+            background: linear-gradient(110deg,#1d4ed8 0%,#2563eb 55%,#3b82f6 100%);
+            position:relative; overflow:hidden;
+        }
+        .hero-strip::before {
+            content:''; position:absolute; inset:0;
+            background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='20' cy='20' r='1.5'/%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+        .hero-strip::after {
+            content:''; position:absolute; inset:0;
+            background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.07) 50%, transparent 65%);
+            background-size: 200% 100%;
+            animation: heroShine 4s ease-in-out infinite;
+        }
+        @keyframes heroShine { 0%{background-position:150% 0;} 100%{background-position:-50% 0;} }
+        .hero-blob1 { position:absolute;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.06);right:-60px;top:-90px;pointer-events:none;animation:blobFloat1 9s ease-in-out infinite; }
+        .hero-blob2 { position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.05);right:160px;bottom:-60px;pointer-events:none;animation:blobFloat2 12s ease-in-out infinite; }
+        .hero-blob3 { position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.07);right:100px;top:14px;pointer-events:none;animation:blobFloat3 7s ease-in-out infinite; }
+        @keyframes blobFloat1 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-30px,20px) scale(1.07);} }
+        @keyframes blobFloat2 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(22px,-18px);} }
+        @keyframes blobFloat3 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-14px,14px) scale(1.15);} }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp      { from{opacity:0;transform:translateY(28px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);} }
+        @keyframes iconBounce  { 0%{transform:scale(1);}30%{transform:scale(1.22);}60%{transform:scale(.95);}80%{transform:scale(1.06);}100%{transform:scale(1);} }
+        @keyframes ping-active { 0%{transform:scale(1);opacity:.85;}100%{transform:scale(2.4);opacity:0;} }
+        @keyframes shimmerSweep { 0%{left:-80%;} 100%{left:140%;} }
+        @keyframes modalIn     { from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);} }
+        .fade-in { opacity:0; animation:fadeUp .52s cubic-bezier(.22,1,.36,1) both; }
+
+        /* ── MODULE CARD ── */
+        .mod-card {
+            background:#fff; border:1.5px solid #e8edf5; border-radius:22px;
+            width:200px; padding:32px 20px 26px;
+            display:flex; flex-direction:column; align-items:center; gap:14px;
+            cursor:pointer; text-decoration:none; position:relative; overflow:hidden;
+            transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease, border-color .3s ease;
+        }
+        .mod-card::after {
+            content:''; position:absolute; top:0; left:-80%; width:60%; height:100%;
+            background: linear-gradient(105deg, transparent, rgba(255,255,255,.55), transparent);
+            transform: skewX(-18deg); pointer-events:none; opacity:0; transition: opacity .1s;
+        }
+        .mod-card:hover::after { opacity:1; animation:shimmerSweep .55s ease-out forwards; }
+        .mod-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 24px 52px rgba(30,58,138,.14), 0 0 0 1px var(--accent,#2563eb);
+            border-color: var(--accent,#2563eb);
+        }
+        .mod-card:active { transform:translateY(-4px) scale(.98); transition-duration:.1s; }
+
+        /* active float */
+        .mod-card.active-card { animation:cardFloat 4s ease-in-out infinite; }
+        .mod-card.active-card:hover { animation:none; }
+        @keyframes cardFloat { 0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);} }
+        .mod-card.active-card::before {
+            content:''; position:absolute; top:0; left:20px; right:20px;
+            height:3px; border-radius:0 0 6px 6px;
+            background:linear-gradient(90deg,#1d4ed8,#3b82f6);
+        }
+
+        /* ripple */
+        .ripple-wave { position:absolute;border-radius:50%;background:rgba(37,99,235,.18);transform:scale(0);animation:rippleAnim .55s ease-out forwards;pointer-events:none; }
+        @keyframes rippleAnim { to{transform:scale(4);opacity:0;} }
+
+        /* ── ICON ── */
+        .mod-icon-wrap {
+            width:70px; height:70px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.65rem;
+            background:var(--icon-bg,#eff6ff); color:var(--icon-color,#2563eb);
+            transition: box-shadow .3s ease; flex-shrink:0; position:relative;
+        }
+        .mod-card:hover .mod-icon-wrap { box-shadow:0 8px 28px var(--icon-shadow,rgba(37,99,235,.25)); }
+        .mod-card:hover .mod-icon-wrap i { animation:iconBounce .5s cubic-bezier(.22,1,.36,1) both; }
+
+        /* active dot ping */
+        .active-ping-wrap { position:absolute;top:15px;right:18px;width:11px;height:11px; }
+        .active-ping-wrap .ping { position:absolute;inset:0;border-radius:50%;background:#4ade80;opacity:.75;animation:ping-active 1.8s ease-out infinite; }
+        .active-ping-wrap .dot  { position:absolute;inset:1px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e; }
+
+        /* ── TEXT ── */
+        .mod-title { font-size:.975rem; font-weight:800; color:#1e293b; text-align:center; line-height:1.25; }
+        .mod-desc  { font-size:.72rem; font-weight:500; color:#94a3b8; text-align:center; line-height:1.4; margin-top:-4px; }
+
+        /* ── BADGES ── */
+        .badge-active { display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;font-size:.65rem;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:.05em;text-transform:uppercase; }
+        .badge-soon   { display:inline-flex;align-items:center;gap:5px;background:#fffbeb;border:1px solid #fde68a;color:#b45309;font-size:.65rem;font-weight:800;padding:3px 10px;border-radius:99px;letter-spacing:.05em;text-transform:uppercase; }
+
+        /* ── SECTION LABEL ── */
+        .section-label { font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px; }
+
+        /* ── MODAL ── */
+        .modal-box { animation:modalIn .28s cubic-bezier(.22,1,.36,1) both; }
+    </style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- TOPBAR -->
+<nav class="topbar sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-7 h-7 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-[.18em] text-blue-500 uppercase leading-none mb-0.5">Kementerian Kesihatan Malaysia</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">YBTMK Dashboard</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'home:bahagian' %}"
+               class="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
+                <i class="fas fa-arrow-left text-[10px]"></i> Kembali
+            </a>
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <a href="{% url 'home:superadmin' %}"
+                   class="hidden sm:flex items-center gap-1.5 bg-violet-50 hover:bg-violet-100 border border-violet-200 text-violet-700 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
+                    <i class="fas fa-crown text-[10px]"></i> Superadmin
+                </a>
+                {% endif %}
+                <a href="{% url 'home:profil_saya' %}"
+                   class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition-all">
+                    <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px] font-extrabold shrink-0">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span class="hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
+                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="button" onclick="showLogoutModal(this.closest('form'))"
+                            class="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
+                        <i class="fas fa-sign-out-alt text-[10px]"></i>
+                        <span class="hidden sm:inline">Log Keluar</span>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-strip">
+    <div class="hero-blob1"></div>
+    <div class="hero-blob2"></div>
+    <div class="hero-blob3"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-10">
+        <!-- breadcrumb -->
+        <div class="flex items-center gap-2 mb-5 fade-in" style="animation-delay:.04s;">
+            <a href="{% url 'home:bahagian' %}" class="text-blue-200 text-xs font-semibold opacity-70 hover:opacity-100 transition">
+                <i class="fas fa-home text-[10px] mr-1"></i> Utama
+            </a>
+            <i class="fas fa-chevron-right text-blue-300 text-[9px] opacity-50"></i>
+            <span class="text-white text-xs font-bold opacity-90">Fasiliti</span>
+        </div>
+
+        <div class="fade-in" style="animation-delay:.08s;">
+            <!-- module chip -->
+            <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-4">
+                <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-hospital-alt text-white text-[9px]"></i>
+                </div>
+                <span class="text-white text-[11px] font-bold tracking-widest uppercase opacity-90">Modul Fasiliti</span>
+            </div>
+
+            <h1 class="text-white text-3xl font-extrabold mb-2 leading-tight">
+                Profiling Hospital &amp; Klinik
+            </h1>
+            <p class="text-blue-200 text-sm opacity-80 max-w-lg">
+                Urus data profiling fasiliti KKM — tambah rekod baharu, semak senarai, atau lihat papan pemuka analitik.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- SUB-MODULE CARDS -->
+<main class="max-w-7xl mx-auto px-6 py-12">
+
+    <p class="section-label text-center mb-8 fade-in" style="animation-delay:.1s;">Pilih Tindakan</p>
+
+    <div class="flex flex-wrap justify-center gap-6">
+
+        <!-- TAMBAH PROFIL -->
+        <a href="{% url 'home:tambah_fasiliti' %}" class="mod-card active-card fade-in"
+           style="--accent:#2563eb;--icon-bg:#eff6ff;--icon-color:#2563eb;--icon-shadow:rgba(37,99,235,.28);animation-delay:.14s;">
+            <div class="active-ping-wrap"><span class="ping"></span><span class="dot"></span></div>
+            <div class="mod-icon-wrap"><i class="fas fa-plus-circle"></i></div>
+            <div>
+                <p class="mod-title">Tambah Profil</p>
+                <p class="mod-desc">Daftar fasiliti baharu ke dalam sistem</p>
+            </div>
+            <span class="badge-active">
+                <span style="width:6px;height:6px;border-radius:50%;background:#16a34a;display:inline-block;flex-shrink:0;"></span>
+                Aktif
+            </span>
+        </a>
+
+        <!-- SENARAI FASILITI -->
+        <a href="{% url 'home:senarai_fasiliti' %}" class="mod-card fade-in"
+           style="--accent:#7c3aed;--icon-bg:#f5f3ff;--icon-color:#7c3aed;--icon-shadow:rgba(124,58,237,.25);animation-delay:.21s;">
+            <div class="mod-icon-wrap"><i class="fas fa-list-alt"></i></div>
+            <div>
+                <p class="mod-title">Senarai Fasiliti</p>
+                <p class="mod-desc">Lihat &amp; urus semua rekod fasiliti</p>
+            </div>
+            <span class="badge-active">
+                <span style="width:6px;height:6px;border-radius:50%;background:#16a34a;display:inline-block;flex-shrink:0;"></span>
+                Aktif
+            </span>
+        </a>
+
+        <!-- DASHBOARD FASILITI -->
+        <a href="{% url 'home:dashboard_fasiliti' %}" class="mod-card fade-in"
+           style="--accent:#0d9488;--icon-bg:#f0fdfa;--icon-color:#0d9488;--icon-shadow:rgba(13,148,136,.25);animation-delay:.28s;">
+            <div class="mod-icon-wrap"><i class="fas fa-chart-pie"></i></div>
+            <div>
+                <p class="mod-title">Dashboard</p>
+                <p class="mod-desc">Statistik &amp; analitik profiling fasiliti</p>
+            </div>
+            <span class="badge-active">
+                <span style="width:6px;height:6px;border-radius:50%;background:#16a34a;display:inline-block;flex-shrink:0;"></span>
+                Aktif
+            </span>
+        </a>
+
+    </div>
+</main>
+
+<!-- LOGOUT MODAL -->
+<div id="logout-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="hideLogoutModal()"></div>
+    <div class="modal-box relative z-10 bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-content-center mx-auto mb-4">
+            <i class="fas fa-sign-out-alt text-red-500 text-xl w-full text-center"></i>
+        </div>
+        <h3 class="text-lg font-extrabold text-slate-800 mb-1">Log Keluar?</h3>
+        <p class="text-sm text-slate-500 mb-6">Anda akan ditamatkan sesi semasa.</p>
+        <div class="flex gap-3">
+            <button onclick="hideLogoutModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition">Batal</button>
+            <button id="confirm-logout-btn" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition">Ya, Log Keluar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ── Particles ── */
+(function(){
+    const c = document.getElementById('particles');
+    for(let i=0;i<10;i++){
+        const p=document.createElement('div'); p.className='particle';
+        const s=Math.random()*24+10;
+        p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${Math.random()*14+8}s;animation-delay:${Math.random()*-18}s;`;
+        c.appendChild(p);
+    }
+})();
+
+/* ── Ripple ── */
+document.querySelectorAll('.mod-card').forEach(card=>{
+    card.addEventListener('click',function(e){
+        const r=document.createElement('span'); r.className='ripple-wave';
+        const rect=this.getBoundingClientRect(), d=Math.max(rect.width,rect.height);
+        r.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-rect.left-d/2}px;top:${e.clientY-rect.top-d/2}px;`;
+        this.appendChild(r); setTimeout(()=>r.remove(),600);
+    });
+});
+
+/* ── Logout modal ── */
+let _logoutForm=null;
+function showLogoutModal(form){ _logoutForm=form; document.getElementById('logout-modal').classList.remove('hidden'); }
+function hideLogoutModal(){ document.getElementById('logout-modal').classList.add('hidden'); }
+document.getElementById('confirm-logout-btn').addEventListener('click',()=>{ if(_logoutForm) _logoutForm.submit(); });
+</script>
+</body>
+</html>

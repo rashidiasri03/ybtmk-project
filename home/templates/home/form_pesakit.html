@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Kemaskini Pesakit | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:9px 22px; border-radius:99px;
+            border:2px solid #e2e8f0; cursor:pointer;
+            font-size:.8rem; font-weight:700; color:#64748b; background:#fff;
+            transition:all .15s ease; user-select:none;
+        }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya    { border-color:#22c55e; background:#f0fdf4; color:#16a34a; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .q-card {
+            background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px;
+            padding:16px 18px; transition:box-shadow .2s, border-color .2s, background .2s;
+        }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(37,99,235,.08); border-color:#bfdbfe; }
+        .sec-group {
+            background:#fff; border:1.5px solid #e4eaf5; border-radius:20px;
+            padding:20px 20px 18px; box-shadow:0 2px 16px rgba(30,58,138,.05);
+        }
+        .sec-title {
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:14px; padding-bottom:13px;
+            border-bottom:1.5px solid #f0f4fb;
+        }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; }
+        .f-input {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-input:focus { border-color:#be123c; box-shadow:0 0 0 3px rgba(190,18,60,.1); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .45s cubic-bezier(.22,1,.36,1) both; }
+        .btn-submit {
+            background:linear-gradient(110deg,#be123c,#9f1239); color:#fff;
+            border:none; border-radius:14px; padding:13px 36px;
+            font-size:.9rem; font-weight:800; cursor:pointer;
+            transition:opacity .2s, transform .15s;
+            box-shadow:0 4px 20px rgba(190,18,60,.3);
+        }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        .jump-bar::-webkit-scrollbar { display:none; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP BAR -->
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-widest text-rose-600 uppercase leading-none">KKM</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">Pesakit</p>
+            </div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}"
+           class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali
+        </a>
+    </div>
+</nav>
+
+<!-- HERO STRIP -->
+<div class="bg-gradient-to-r from-rose-700 via-rose-600 to-pink-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <div class="flex items-center gap-2 mb-3 text-rose-200 text-xs">
+            <a href="{% url 'home:bahagian' %}" class="hover:text-white transition"><i class="fas fa-home text-[10px] mr-1"></i>Utama</a>
+            <i class="fas fa-chevron-right text-[9px] opacity-50"></i>
+            <a href="{% url 'home:pilih_modul' fp.pk %}" class="hover:text-white transition">{{ fp.nama_fasiliti }}</a>
+            <i class="fas fa-chevron-right text-[9px] opacity-50"></i>
+            <span class="text-white font-semibold">Pesakit</span>
+        </div>
+        <h1 class="text-white text-xl font-extrabold mb-1">Kemaskini Data Pesakit</h1>
+        <p class="text-rose-200 text-xs opacity-80">Data Klinikal & Rekod Rawatan</p>
+    </div>
+</div>
+
+{% if messages %}
+<div class="px-8 pt-4">
+    {% for msg in messages %}
+    <div class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold mb-3
+        {% if msg.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-red-50 border border-red-200 text-red-700{% endif %}">
+        <i class="fas {% if msg.tags == 'success' %}fa-check-circle text-green-500{% else %}fa-exclamation-circle text-red-400{% endif %}"></i>{{ msg }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main class="px-8 pb-16 pt-5">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<!-- ═══ OSCA (Q48, Q48a) ═══ -->
+<div class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-rose-50 text-rose-600"><i class="fas fa-user-injured"></i></div>
+        <span class="sec-label">OSCA (Q48, Q48a)</span>
+    </div>
+    <div class="space-y-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Q48 — Fasiliti dilengkapi OSCA (On-Site Clinical Assessment)?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ada_osca" id="osca_ya" value="1" {% if ada_osca == True %}checked{% endif %}><label for="osca_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ya, Ada</label></div>
+                <div class="pill-item"><input type="radio" name="ada_osca" id="osca_tidak" value="0" {% if ada_osca == False %}checked{% endif %}><label for="osca_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Q48a — Bilangan Unit OSCA</label>
+            <input type="number" name="bilangan_osca" class="f-input" min="0" placeholder="0" value="{{ bilangan_osca|default:'' }}">
+        </div>
+    </div>
+</div>
+
+<!-- SUBMIT -->
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.15s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}"
+       class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+        <i class="fas fa-times text-xs"></i> Batal
+    </a>
+    <button type="submit" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Data</button>
+</div>
+</form>
+</main>
+</body>
+</html>

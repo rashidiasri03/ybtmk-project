@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>{% if mode == 'edit' %}Kemaskini{% else %}Tambah{% endif %} Aset | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:9px 22px; border-radius:99px;
+            border:2px solid #e2e8f0; cursor:pointer;
+            font-size:.8rem; font-weight:700; color:#64748b; background:#fff;
+            transition:all .15s ease; user-select:none;
+        }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya    { border-color:#22c55e; background:#f0fdf4; color:#16a34a; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .q-card {
+            background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px;
+            padding:16px 18px; transition:box-shadow .2s, border-color .2s, background .2s;
+        }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(37,99,235,.08); border-color:#bfdbfe; }
+        .sec-group {
+            background:#fff; border:1.5px solid #e4eaf5; border-radius:20px;
+            padding:20px 20px 18px; box-shadow:0 2px 16px rgba(30,58,138,.05);
+        }
+        .sec-title {
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:14px; padding-bottom:13px;
+            border-bottom:1.5px solid #f0f4fb;
+        }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; }
+        .f-input {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-input:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,148,136,.1); }
+        .f-textarea {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            resize:vertical; min-height:78px;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-textarea:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,148,136,.1); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .45s cubic-bezier(.22,1,.36,1) both; }
+        .btn-submit {
+            background:linear-gradient(110deg,#0d9488,#0f766e); color:#fff;
+            border:none; border-radius:14px; padding:13px 36px;
+            font-size:.9rem; font-weight:800; cursor:pointer;
+            transition:opacity .2s, transform .15s;
+            box-shadow:0 4px 20px rgba(13,148,136,.3);
+        }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        .jump-bar::-webkit-scrollbar { display:none; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP BAR -->
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-widest text-teal-500 uppercase leading-none">KKM</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">Aset</p>
+            </div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}"
+           class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali
+        </a>
+    </div>
+</nav>
+
+<!-- HERO STRIP -->
+<div class="bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <div class="flex items-center gap-2 mb-3 text-teal-200 text-xs">
+            <a href="{% url 'home:bahagian' %}" class="hover:text-white transition"><i class="fas fa-home text-[10px] mr-1"></i>Utama</a>
+            <i class="fas fa-chevron-right text-[9px] opacity-50"></i>
+            <a href="{% url 'home:pilih_modul' fp.pk %}" class="hover:text-white transition">{{ fp.nama_fasiliti }}</a>
+            <i class="fas fa-chevron-right text-[9px] opacity-50"></i>
+            <span class="text-white font-semibold">Aset</span>
+        </div>
+        <h1 class="text-white text-xl font-extrabold mb-1">Kemaskini Data Aset</h1>
+        <p class="text-teal-200 text-xs opacity-80">Peralatan, Jentera & Inventori</p>
+    </div>
+</div>
+
+<!-- QUICK JUMP BAR -->
+<div class="bg-white border-b border-slate-100 sticky top-[57px] z-30">
+    <div class="px-8 py-2 flex items-center gap-2 overflow-x-auto jump-bar">
+        <a href="#sec-asas"      class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition"><span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>Identiti</a>
+        <a href="#sec-aset"      class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-teal-50 hover:border-teal-300 hover:text-teal-700 transition"><span class="w-2 h-2 rounded-full bg-teal-400 inline-block"></span>Aset</a>
+        <a href="#sec-ambulans"  class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 transition"><span class="w-2 h-2 rounded-full bg-orange-400 inline-block"></span>Ambulans</a>
+        <a href="#sec-digital"   class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-violet-50 hover:border-violet-300 hover:text-violet-700 transition"><span class="w-2 h-2 rounded-full bg-violet-400 inline-block"></span>Digital & Lain</a>
+    </div>
+</div>
+
+<!-- MESSAGES -->
+{% if messages %}
+<div class="px-8 pt-4">
+    {% for msg in messages %}
+    <div class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold mb-3
+        {% if msg.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-red-50 border border-red-200 text-red-700{% endif %}">
+        <i class="fas {% if msg.tags == 'success' %}fa-check-circle text-green-500{% else %}fa-exclamation-circle text-red-400{% endif %}"></i>
+        {{ msg }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- FORM -->
+<main class="px-8 pb-16 pt-5">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<!-- ═══ ASET (Q11, Q12, Q24, Q25) ═══ -->
+<div id="sec-aset" class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-teal-50 text-teal-600"><i class="fas fa-boxes"></i></div>
+        <span class="sec-label">Aset & Peralatan</span>
+    </div>
+    <div class="space-y-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Q11 — Bekalan bahan habis guna (disposable) mencukupi?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="disposable_mencukupi" id="disp_ya" value="1" {% if disposable_mencukupi == True %}checked{% endif %}><label for="disp_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada / Mencukupi</label></div>
+                <div class="pill-item"><input type="radio" name="disposable_mencukupi" id="disp_tidak" value="0" {% if disposable_mencukupi == False %}checked{% endif %}><label for="disp_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tidak Mencukupi</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Q12 — Keadaan Aset (Umur & Fungsi)</label>
+            <textarea name="keadaan_aset" class="f-textarea" placeholder="Huraikan keadaan aset utama — umur, fungsi, dan tahap kebolehpercayaan...">{{ keadaan_aset|default:'' }}</textarea>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Q24 — Aset Yang Perlu Diganti</label>
+            <textarea name="aset_perlu_diganti" class="f-textarea" placeholder="Senaraikan aset yang perlu diganti secara segera atau dalam masa terdekat...">{{ aset_perlu_diganti|default:'' }}</textarea>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Q25 — Aset Tidak Mengikut Spesifikasi KKM</label>
+            <textarea name="aset_tidak_ikut_spec" class="f-textarea" placeholder="Senaraikan aset yang tidak memenuhi spesifikasi standard KKM...">{{ aset_tidak_ikut_spec|default:'' }}</textarea>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ C. AMBULANS (Q15) ═══ -->
+<div id="sec-ambulans" class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-orange-50 text-orange-500"><i class="fas fa-ambulance"></i></div>
+        <span class="sec-label">Ambulans (Q15)</span>
+    </div>
+    <div class="space-y-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Q15 — Fasiliti dilengkapi kenderaan ambulans?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ada_ambulans" id="amb_ya" value="1" {% if ada_ambulans == True %}checked{% endif %}><label for="amb_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label></div>
+                <div class="pill-item"><input type="radio" name="ada_ambulans" id="amb_tidak" value="0" {% if ada_ambulans == False %}checked{% endif %}><label for="amb_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Q15 — Keadaan Ambulans</label>
+            <select name="keadaan_ambulans" class="f-input bg-white">
+                <option value="">-- Pilih Keadaan --</option>
+                <option {% if keadaan_ambulans == 'Baik dan berfungsi sepenuhnya' %}selected{% endif %}>Baik dan berfungsi sepenuhnya</option>
+                <option {% if keadaan_ambulans == 'Perlu servis berkala' %}selected{% endif %}>Perlu servis berkala</option>
+                <option {% if keadaan_ambulans == 'Ada kerosakan minor' %}selected{% endif %}>Ada kerosakan minor</option>
+                <option {% if keadaan_ambulans == 'Ada kerosakan major / luar operasi' %}selected{% endif %}>Ada kerosakan major / luar operasi</option>
+                <option {% if keadaan_ambulans == 'Tiada ambulans' %}selected{% endif %}>Tiada ambulans</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ D. DIGITAL & LAIN (Q9, Q30, Q31) ═══ -->
+<div id="sec-digital" class="sec-group fade-in" style="animation-delay:.2s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-violet-50 text-violet-500"><i class="fas fa-laptop-medical"></i></div>
+        <span class="sec-label">Digital & Lain-lain</span>
+    </div>
+    <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Q9 — Ada Unit Hemodialisis?</label>
+                <div class="flex gap-2 flex-wrap">
+                    <div class="pill-item"><input type="radio" name="ada_hemodialisis" id="hemo_ya" value="1" {% if ada_hemodialisis == True %}checked{% endif %}><label for="hemo_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label></div>
+                    <div class="pill-item"><input type="radio" name="ada_hemodialisis" id="hemo_tidak" value="0" {% if ada_hemodialisis == False %}checked{% endif %}><label for="hemo_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label></div>
+                </div>
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Q9 — Bilangan Unit Hemodialisis</label>
+                <input type="number" name="unit_hemodialisis" class="f-input" min="0" placeholder="0" value="{{ unit_hemodialisis|default:'' }}">
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Q30 — Ada Sistem EMR (Electronic Medical Record)?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ada_emr" id="emr_ya" value="1" {% if ada_emr == True %}checked{% endif %}><label for="emr_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label></div>
+                <div class="pill-item"><input type="radio" name="ada_emr" id="emr_tidak" value="0" {% if ada_emr == False %}checked{% endif %}><label for="emr_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Q31 — Umur Komputer / Peralatan ICT</label>
+            <textarea name="umur_komputer" class="f-textarea" placeholder="Nyatakan anggaran umur komputer dan peralatan ICT yang digunakan...">{{ umur_komputer|default:'' }}</textarea>
+        </div>
+    </div>
+</div>
+
+<!-- SUBMIT -->
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.25s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}"
+       class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+        <i class="fas fa-times text-xs"></i> Batal
+    </a>
+    <button type="submit" class="btn-submit">
+        <i class="fas fa-save mr-2"></i> Kemaskini Data
+    </button>
+</div>
+
+</form>
+</main>
+
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+});
+</script>
+</body>
+</html>

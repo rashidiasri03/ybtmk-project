@@ -1,0 +1,153 @@
+{% load static %}
+<aside class="w-64 bg-gradient-to-b from-slate-900 to-blue-950 text-white flex flex-col shrink-0 fixed inset-y-0 left-0 z-20">
+    <!-- Brand -->
+    <div class="px-6 py-5 border-b border-white border-opacity-10 flex items-center gap-3">
+        <img src="{% static 'home/images/jata negara.png' %}" alt="Logo" class="h-10 w-10 rounded-xl object-cover ring-2 ring-white ring-opacity-20 shrink-0">
+        <div>
+            <p class="text-blue-300 text-xs font-semibold tracking-widest uppercase">
+                {% if request.user.is_superuser %}Superadmin{% elif request.user.profile.is_top_management %}Top Management{% elif request.user.profile.is_jkn %}JKN{% else %}Dashboard{% endif %}
+            </p>
+            <p class="text-white font-bold text-sm leading-tight">YBTMK Dashboard</p>
+        </div>
+    </div>
+
+    <!-- Status badge -->
+    <div class="px-6 py-4 border-b border-white border-opacity-10">
+        <div class="flex items-center gap-2 text-xs text-blue-300">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+            </span>
+            Log masuk sebagai <strong class="text-white ml-0.5">{{ request.user.username }}</strong>
+        </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-4 py-5 space-y-1">
+
+        {% if request.user.is_superuser %}
+        <!-- Superadmin only links -->
+        <p class="px-4 text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">Admin</p>
+        <a href="{% url 'home:superadmin' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'superadmin' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-tachometer-alt w-4 text-center"></i> Panel Utama
+        </a>
+        <a href="{% url 'home:tambah_pengguna' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'tambah_pengguna' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-user-plus w-4 text-center"></i> Tambah Pengguna
+        </a>
+        <a href="{% url 'home:urus_pengguna' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'urus_pengguna' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-users-cog w-4 text-center"></i> Urus Pengguna
+        </a>
+        <div class="border-t border-white border-opacity-10 my-2"></div>
+        {% endif %}
+
+        <!-- Common links (all users) -->
+        {% if request.user.profile.is_top_management %}
+        <a href="{% url 'home:tm_portal' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'tm_portal' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-home w-4 text-center"></i> Laman Utama
+        </a>
+        {% else %}
+        <a href="{% url 'home:bahagian' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'bahagian' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-th-large w-4 text-center"></i> Pilih Bahagian
+        </a>
+        {% endif %}
+
+        <!-- Divider -->
+        <div class="border-t border-white border-opacity-10 my-2"></div>
+        <p class="px-4 text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">Profiling</p>
+
+        <a href="{% url 'home:dashboard_fasiliti' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'dashboard_fasiliti' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-chart-bar w-4 text-center"></i> Dashboard Profiling
+        </a>
+        <a href="{% url 'home:senarai_fasiliti' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'senarai_fasiliti' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-hospital-alt w-4 text-center"></i> Senarai Fasiliti
+        </a>
+        <a href="{% if request.user.profile.is_top_management %}{% url 'home:peta_tm' %}{% else %}{% url 'home:peta_fasiliti' %}{% endif %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'peta_fasiliti' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-map-marked-alt w-4 text-center"></i> Peta Fasiliti
+        </a>
+        {% if request.user.is_superuser or request.user.is_staff or request.user.profile.is_jkn %}
+        <a href="{% url 'home:tambah_fasiliti' %}"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+           {% if active_page == 'tambah_fasiliti_f' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            <i class="fas fa-plus-circle w-4 text-center"></i> Tambah Profil
+        </a>
+        {% endif %}
+
+        {% if request.user.is_superuser %}
+        <!-- Divider -->
+        <div class="border-t border-white border-opacity-10 my-2"></div>
+        <a href="/admin/"
+           class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white transition-colors">
+            <i class="fas fa-shield-alt w-4 text-center"></i> Django Admin
+        </a>
+        {% endif %}
+    </nav>
+
+    <!-- Logout -->
+    <div class="px-4 py-5 border-t border-white border-opacity-10">
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="button" onclick="showLogoutModal(this.closest('form'))" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-300 hover:bg-red-500 hover:bg-opacity-20 hover:text-white transition-colors">
+                <i class="fas fa-sign-out-alt w-4 text-center"></i> Log Keluar
+            </button>
+        </form>
+    </div>
+</aside>
+
+<!-- Logout Confirmation Modal -->
+<div id="logout-modal" class="hidden fixed inset-0 z-[9999] items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm" onclick="hideLogoutModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto flex flex-col items-center text-center p-8">
+        <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-5">
+            <i class="fas fa-sign-out-alt text-red-500 text-2xl"></i>
+        </div>
+        <h2 class="text-lg font-bold text-slate-800 mb-2">Log Keluar?</h2>
+        <p class="text-sm text-slate-500 mb-7">Adakah anda pasti mahu log keluar<br>daripada sistem YBTMK Dashboard?</p>
+        <div class="flex gap-3 w-full">
+            <button type="button" onclick="hideLogoutModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                Batal
+            </button>
+            <button type="button" onclick="confirmLogout()" class="flex-1 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition shadow-sm">
+                <i class="fas fa-sign-out-alt mr-1.5"></i> Ya, Log Keluar
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+let _logoutTargetForm = null;
+function showLogoutModal(form) {
+    _logoutTargetForm = form;
+    const m = document.getElementById('logout-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+function hideLogoutModal() {
+    const m = document.getElementById('logout-modal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow = '';
+    _logoutTargetForm = null;
+}
+function confirmLogout() {
+    if (_logoutTargetForm) _logoutTargetForm.submit();
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideLogoutModal();
+});
+</script>

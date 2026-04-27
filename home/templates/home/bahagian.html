@@ -1,0 +1,693 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Pilih Modul | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body { background: #f0f4fa; min-height: 100vh; }
+
+        /* ── FLOATING PARTICLES ── */
+        .particles { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+        .particle {
+            position:absolute; border-radius:50%;
+            background:rgba(37,99,235,.07);
+            animation: floatParticle linear infinite;
+        }
+        @keyframes floatParticle {
+            0%   { transform:translateY(110vh) scale(0); opacity:0; }
+            10%  { opacity:1; }
+            90%  { opacity:.6; }
+            100% { transform:translateY(-12vh) scale(1.1); opacity:0; }
+        }
+
+        /* ── TOPBAR ── */
+        .topbar { background:#fff; border-bottom:1px solid #e5eaf3; box-shadow:0 1px 8px rgba(30,58,138,.07); }
+
+        /* ── HERO ── */
+        .hero-strip {
+            background: linear-gradient(110deg,#1d4ed8 0%,#2563eb 55%,#3b82f6 100%);
+            position:relative; overflow:hidden;
+        }
+        .hero-strip::before {
+            content:''; position:absolute; inset:0;
+            background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='20' cy='20' r='1.5'/%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+        /* animated shine wave across hero */
+        .hero-strip::after {
+            content:''; position:absolute; inset:0;
+            background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.07) 50%, transparent 65%);
+            background-size: 200% 100%;
+            animation: heroShine 4s ease-in-out infinite;
+        }
+        @keyframes heroShine {
+            0%   { background-position: 150% 0; }
+            100% { background-position: -50% 0; }
+        }
+        /* hero decorative circles */
+        .hero-blob1 {
+            position:absolute; width:320px; height:320px; border-radius:50%;
+            background:rgba(255,255,255,.06); right:-60px; top:-90px;
+            pointer-events:none;
+            animation: blobFloat1 9s ease-in-out infinite;
+        }
+        .hero-blob2 {
+            position:absolute; width:180px; height:180px; border-radius:50%;
+            background:rgba(255,255,255,.05); right:160px; bottom:-60px;
+            pointer-events:none;
+            animation: blobFloat2 12s ease-in-out infinite;
+        }
+        .hero-blob3 {
+            position:absolute; width:80px; height:80px; border-radius:50%;
+            background:rgba(255,255,255,.07); right:100px; top:14px;
+            pointer-events:none;
+            animation: blobFloat3 7s ease-in-out infinite;
+        }
+        @keyframes blobFloat1 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-30px,20px) scale(1.07);} }
+        @keyframes blobFloat2 { 0%,100%{transform:translate(0,0);} 50%{transform:translate(22px,-18px);} }
+        @keyframes blobFloat3 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-14px,14px) scale(1.15);} }
+        /* avatar */
+        .hero-avatar {
+            width:52px; height:52px; border-radius:16px;
+            background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.28);
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.3rem; font-weight:900; color:#fff;
+            flex-shrink:0;
+            animation: avatarPulse 3s ease-in-out infinite;
+        }
+        @keyframes avatarPulse {
+            0%,100% { box-shadow:0 0 0 0 rgba(255,255,255,.3); }
+            50%      { box-shadow:0 0 0 8px rgba(255,255,255,.0); }
+        }
+        /* greeting chip */
+        .greeting-chip {
+            display:inline-flex; align-items:center; gap:7px;
+            background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.2);
+            border-radius:99px; padding:4px 14px 4px 6px;
+            margin-bottom:14px;
+        }
+        /* name gradient */
+        .hero-name {
+            font-size:1.7rem; font-weight:900; line-height:1.2;
+            background: linear-gradient(90deg,#fff 0%,#bfdbfe 60%,#e0e7ff 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            background-clip:text;
+            background-size:200% auto;
+            animation: nameShimmer 4s linear infinite;
+        }
+        @keyframes nameShimmer {
+            0%   { background-position:0% center; }
+            100% { background-position:200% center; }
+        }
+        /* typewriter cursor */
+        .hero-name .cursor {
+            display:inline-block; width:3px; border-radius:2px;
+            background:#bfdbfe; margin-left:3px; vertical-align:middle;
+            animation:blink .8s step-end infinite;
+            -webkit-text-fill-color:#bfdbfe;
+        }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+        @media(min-width:640px){ .hero-name{font-size:2.1rem;} }
+        /* stat pill upgrade */
+        .stat-card {
+            background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.2);
+            border-radius:16px; padding:14px 24px;
+            display:flex; align-items:center; gap:12px;
+            transition:background .2s, transform .2s;
+        }
+        .stat-card:hover { background:rgba(255,255,255,.2); transform:translateY(-2px); }
+        .stat-icon {
+            width:38px; height:38px; border-radius:10px;
+            background:rgba(255,255,255,.18);
+            display:flex; align-items:center; justify-content:center;
+            font-size:.95rem; color:#fff; flex-shrink:0;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp      { from{opacity:0;transform:translateY(28px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);} }
+        @keyframes iconBounce  { 0%{transform:scale(1);}30%{transform:scale(1.22);}60%{transform:scale(.95);}80%{transform:scale(1.06);}100%{transform:scale(1);} }
+        @keyframes ping-active { 0%{transform:scale(1);opacity:.85;}100%{transform:scale(2.4);opacity:0;} }
+        @keyframes toastIn     { from{opacity:0;transform:translate(-50%,18px);}to{opacity:1;transform:translate(-50%,0);} }
+        @keyframes toastOut    { from{opacity:1;}to{opacity:0;transform:translate(-50%,10px);} }
+        @keyframes shimmerSweep {
+            0%   { left:-80%; }
+            100% { left:140%; }
+        }
+        @keyframes modalIn     { from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);} }
+        @keyframes countUp     { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }
+
+        .fade-in   { opacity:0; animation:fadeUp .52s cubic-bezier(.22,1,.36,1) both; }
+        .toast-in  { animation:toastIn  .3s cubic-bezier(.22,1,.36,1) both; }
+        .toast-out { animation:toastOut .22s ease-in both; }
+
+        /* ── STAT PILL ── */
+        .stat-pill {
+            background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.22);
+            border-radius:14px; padding:12px 22px;
+            display:flex; flex-direction:column; align-items:center; gap:2px;
+            transition: background .2s, transform .2s;
+        }
+        .stat-pill:hover { background:rgba(255,255,255,.22); transform:translateY(-2px); }
+        .stat-num { animation: countUp .6s cubic-bezier(.22,1,.36,1) both; }
+
+        /* ── MODULE CARD ── */
+        .mod-card {
+            background:#fff; border:1.5px solid #e8edf5; border-radius:22px;
+            width:200px; padding:32px 20px 26px;
+            display:flex; flex-direction:column; align-items:center; gap:14px;
+            cursor:pointer; text-decoration:none; position:relative; overflow:hidden;
+            transition: transform .3s cubic-bezier(.22,1,.36,1),
+                        box-shadow .3s ease,
+                        border-color .3s ease;
+            will-change: transform;
+        }
+        /* shimmer overlay */
+        .mod-card::after {
+            content:''; position:absolute; top:0; left:-80%; width:60%; height:100%;
+            background: linear-gradient(105deg, transparent, rgba(255,255,255,.55), transparent);
+            transform: skewX(-18deg);
+            pointer-events:none; opacity:0;
+            transition: opacity .1s;
+        }
+        .mod-card:not(.soon):hover::after {
+            opacity:1;
+            animation: shimmerSweep .55s ease-out forwards;
+        }
+        /* hover state */
+        .mod-card:not(.soon):hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 24px 52px rgba(30,58,138,.14), 0 0 0 1px var(--accent,#2563eb);
+            border-color: var(--accent,#2563eb);
+        }
+        /* press state */
+        .mod-card:not(.soon):active {
+            transform: translateY(-4px) scale(.98);
+            transition-duration:.1s;
+        }
+        .mod-card.soon { opacity:.68; cursor:not-allowed; }
+        .mod-card.soon:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(30,58,138,.06); border-color:#e8edf5; }
+
+        /* idle float on active card */
+        .mod-card.active-card {
+            animation: cardFloat 4s ease-in-out infinite;
+            opacity: 1;
+        }
+        .mod-card.active-card:hover {
+            animation: none;
+        }
+        @keyframes cardFloat {
+            0%,100% { transform:translateY(0); }
+            50%      { transform:translateY(-7px); }
+        }
+
+        /* active top line */
+        .mod-card.active-card::before {
+            content:''; position:absolute; top:0; left:20px; right:20px;
+            height:3px; border-radius:0 0 6px 6px;
+            background:linear-gradient(90deg,#1d4ed8,#3b82f6);
+        }
+
+        /* ripple */
+        .ripple-wave {
+            position:absolute; border-radius:50%;
+            background:rgba(37,99,235,.18);
+            transform:scale(0); animation:rippleAnim .55s ease-out forwards;
+            pointer-events:none;
+        }
+        @keyframes rippleAnim { to{transform:scale(4);opacity:0;} }
+
+        /* ── ICON ── */
+        .mod-icon-wrap {
+            width:70px; height:70px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.65rem;
+            background:var(--icon-bg,#eff6ff); color:var(--icon-color,#2563eb);
+            transition: box-shadow .3s ease;
+            flex-shrink:0; position:relative;
+        }
+        .mod-icon-wrap i { transition: none; }
+        .mod-card:not(.soon):hover .mod-icon-wrap {
+            box-shadow: 0 8px 28px var(--icon-shadow, rgba(37,99,235,.25));
+        }
+        .mod-card:not(.soon):hover .mod-icon-wrap i {
+            animation: iconBounce .5s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        /* active dot ping */
+        .active-ping-wrap {
+            position:absolute; top:15px; right:18px;
+            width:11px; height:11px;
+        }
+        .active-ping-wrap .ping {
+            position:absolute; inset:0; border-radius:50%;
+            background:#4ade80; opacity:.75;
+            animation: ping-active 1.8s ease-out infinite;
+        }
+        .active-ping-wrap .dot {
+            position:absolute; inset:1px; border-radius:50%;
+            background:#22c55e;
+            box-shadow:0 0 6px #22c55e;
+        }
+
+        /* ── TEXT ── */
+        .mod-title { font-size:.975rem; font-weight:800; color:#1e293b; text-align:center; line-height:1.25; letter-spacing:-.01em; }
+        .mod-desc  { font-size:.72rem; font-weight:500; color:#94a3b8; text-align:center; line-height:1.4; margin-top:-4px; }
+
+        /* ── BADGES ── */
+        .badge-active {
+            display:inline-flex; align-items:center; gap:5px;
+            background:#f0fdf4; border:1px solid #bbf7d0; color:#16a34a;
+            font-size:.65rem; font-weight:800; padding:3px 10px; border-radius:99px;
+            letter-spacing:.05em; text-transform:uppercase;
+        }
+        .badge-soon {
+            display:inline-flex; align-items:center; gap:5px;
+            background:#fffbeb; border:1px solid #fde68a; color:#b45309;
+            font-size:.65rem; font-weight:800; padding:3px 10px; border-radius:99px;
+            letter-spacing:.05em; text-transform:uppercase;
+        }
+
+        /* ── SECTION LABEL ── */
+        .section-label {
+            font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+            color:#94a3b8; margin-bottom:8px;
+        }
+
+        /* ── MODAL ── */
+        .modal-box { animation: modalIn .28s cubic-bezier(.22,1,.36,1) both; }
+    </style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- TOPBAR -->
+<nav class="topbar sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-7 h-7 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-[.18em] text-blue-500 uppercase leading-none mb-0.5">Kementerian Kesihatan Malaysia</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">YBTMK Dashboard</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <a href="{% url 'home:superadmin' %}"
+                   class="hidden sm:flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-xl transition-all">
+                    <i class="fas fa-arrow-left text-[10px]"></i> Kembali
+                </a>
+                {% else %}
+                <a href="{% url 'home:profil_saya' %}"
+                   class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl transition-all">
+                    <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px] font-extrabold shrink-0">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span class="hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
+                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="button" onclick="showLogoutModal(this.closest('form'))"
+                            class="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-bold px-4 py-2.5 rounded-xl transition-all">
+                        <i class="fas fa-sign-out-alt text-[10px]"></i>
+                        <span class="hidden sm:inline">Log Keluar</span>
+                    </button>
+                </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-strip">
+    <!-- decorative blobs -->
+    <div class="hero-blob1"></div>
+    <div class="hero-blob2"></div>
+    <div class="hero-blob3"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-10 sm:py-12 flex flex-col items-center text-center gap-8">
+
+        <!-- greeting -->
+        <div class="fade-in" style="animation-delay:.04s;">
+            <!-- chip -->
+            <div class="greeting-chip justify-center">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+                <span class="text-blue-100 text-[10px] font-bold tracking-[.14em] uppercase opacity-80">Sistem Profiling Fasiliti KKM</span>
+            </div>
+
+            <!-- avatar + name row -->
+            <div class="flex flex-col items-center gap-3 mb-3">
+                <div class="hero-avatar">{{ user.username|first|upper }}</div>
+                <div>
+                    <p class="text-blue-200 text-[11px] font-semibold mb-0.5 opacity-70">Selamat Datang,</p>
+                    <h1 class="hero-name">{{ user.get_full_name|default:user.username }}</h1>
+                </div>
+            </div>
+
+            <!-- sub info row -->
+            <div class="flex items-center justify-center gap-4 flex-wrap">
+                <div class="flex items-center gap-1.5 text-blue-200 opacity-70">
+                    <i class="fas fa-calendar-alt text-[11px]"></i>
+                    <span class="text-xs font-medium" id="hero-date"></span>
+                </div>
+                <span style="width:1px;height:14px;background:rgba(255,255,255,.2);display:inline-block;"></span>
+                <div class="flex items-center gap-1.5 text-blue-200 opacity-70">
+                    <i class="fas fa-user-circle text-[11px]"></i>
+                    <span class="text-xs font-medium">{{ user.username }}</span>
+                </div>
+                <span style="width:1px;height:14px;background:rgba(255,255,255,.2);display:inline-block;"></span>
+                <div class="flex items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 text-emerald-300 text-xs font-semibold">
+                        <i class="fas fa-check-circle text-[10px]"></i> Sistem Aktif
+                    </span>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<!-- SENARAI FASILITI -->
+<main class="max-w-7xl mx-auto px-6 py-10">
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- REGULAR USER FACILITY LIST                                  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Tajuk + Butang Tambah -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6 fade-in" style="animation-delay:.1s;">
+        <div>
+            <p class="section-label">Senarai Fasiliti</p>
+            <p class="text-slate-400 text-xs mt-0.5">Pilih fasiliti untuk kemaskini maklumat mengikut modul</p>
+        </div>
+    </div>
+
+    <!-- Carian -->
+    <div class="mb-5 fade-in flex gap-3 items-center" style="animation-delay:.14s;">
+        <div class="relative flex-1 max-w-sm">
+            <i id="carian-icon" class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input id="carian-input" type="text" value="{{ carian|default:'' }}"
+                   placeholder="Cari nama fasiliti..."
+                   autocomplete="off"
+                   class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition">
+        </div>
+        <span id="carian-count" class="text-xs text-slate-400 font-medium"></span>
+    </div>
+
+    <div id="fasiliti-section">
+    {% if fasiliti %}
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden fade-in" style="animation-delay:.18s;">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-slate-50 border-b border-slate-100">
+                    <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">#</th>
+                    <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Nama Fasiliti</th>
+                    <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Jenis</th>
+                    <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Negeri</th>
+                    <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Status</th>
+                    <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Tahun</th>
+                    <th class="px-6 py-4"></th>
+                </tr>
+            </thead>
+            <tbody id="fasiliti-tbody" class="divide-y divide-slate-50">
+                {% for fp in fasiliti %}
+                <tr class="hover:bg-slate-50 transition group">
+                    <td class="px-6 py-4 text-slate-400 font-medium">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-slate-800 nama-fasiliti">{{ fp.nama_fasiliti }}</p>
+                        <p class="text-xs text-slate-400">{{ fp.daerah }}</p>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600 text-xs">{{ fp.get_jenis_fasiliti_display }}</td>
+                    <td class="px-6 py-4 text-slate-600 text-xs">{{ fp.get_negeri_display }}</td>
+                    <td class="px-6 py-4">
+                        {% if fp.status == 'selesai' %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Selesai
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Draf
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                            <i class="fas fa-calendar-alt text-[10px]"></i> {{ fp.tahun }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-1.5">
+                            <a href="{% url 'home:detail_fasiliti' fp.pk %}" class="w-8 h-8 flex items-center justify-content rounded-lg text-emerald-500 hover:bg-emerald-50 transition" title="Lihat Laporan"><i class="fas fa-eye text-xs"></i></a>
+                            <a href="{% url 'home:detail_fasiliti' fp.pk %}?print=1" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition" title="Cetak Laporan"><i class="fas fa-print text-xs"></i></a>
+                            <a href="{% url 'home:pilih_modul' fp.pk %}" class="w-8 h-8 flex items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 transition" title="Edit Modul"><i class="fas fa-pen text-xs"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-between mt-5 fade-in" style="animation-delay:.22s;">
+        <p class="text-xs text-slate-400">
+            Menunjukkan <span class="font-semibold text-slate-600">{{ page_obj.start_index }}–{{ page_obj.end_index }}</span>
+            daripada <span class="font-semibold text-slate-600">{{ page_obj.paginator.count }}</span> fasiliti
+        </p>
+        <div class="flex items-center gap-1">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if carian %}&carian={{ carian }}{% endif %}"
+               class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
+                <i class="fas fa-chevron-left mr-1"></i> Sebelum
+            </a>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold">{{ num }}</span>
+                {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <a href="?page={{ num }}{% if carian %}&carian={{ carian }}{% endif %}"
+                   class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if carian %}&carian={{ carian }}{% endif %}"
+               class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
+                Seterus <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}{% comment %}end pagination{% endcomment %}
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-24 text-center fade-in" style="animation-delay:.18s;">
+        <div class="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center mb-5">
+            <i class="fas fa-hospital-alt text-3xl text-blue-300"></i>
+        </div>
+        {% if carian %}
+        <h3 class="text-lg font-bold text-slate-700 mb-2">Tiada fasiliti dijumpai</h3>
+        <p class="text-slate-400 text-sm mb-5">Cuba ubah kata carian.</p>
+        <a href="{% url 'home:bahagian' %}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">
+            <i class="fas fa-times mr-1"></i> Buang Carian
+        </a>
+        {% else %}
+        <h3 class="text-lg font-bold text-slate-700 mb-2">Tiada fasiliti lagi</h3>
+        <p class="text-slate-400 text-sm mb-5">Mulakan dengan menambah fasiliti pertama.</p>
+        <a href="{% url 'home:tambah_fasiliti_ringkas' %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
+            <i class="fas fa-plus"></i> Tambah Fasiliti Pertama
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}{% comment %}end fasiliti{% endcomment %}
+    </div>{% comment %}end fasiliti-section{% endcomment %}
+
+</main>
+
+<script>
+(function(){
+    var input = document.getElementById('carian-input');
+    if (!input) return;
+    var icon  = document.getElementById('carian-icon');
+    var timer;
+    input.addEventListener('input', function(){
+        clearTimeout(timer);
+        icon.className = 'fas fa-circle-notch fa-spin absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-sm';
+        timer = setTimeout(function(){
+            var q = input.value.trim();
+            fetch('?carian=' + encodeURIComponent(q))
+                .then(function(r){ return r.text(); })
+                .then(function(html){
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var newSection = doc.getElementById('fasiliti-section');
+                    if(newSection){
+                        document.getElementById('fasiliti-section').innerHTML = newSection.innerHTML;
+                    }
+                    icon.className = 'fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm';
+                });
+        }, 350);
+    });
+})();
+</script>
+
+<footer class="text-center pb-8">
+    <p class="text-xs text-slate-400 font-medium">&copy; 2026 Kementerian Kesihatan Malaysia &middot; YBTMK Dashboard</p>
+</footer>
+
+<!-- TOAST -->
+<div id="soon-toast" class="hidden fixed bottom-8 left-1/2 z-50 flex items-center gap-3 bg-white border border-slate-200 px-5 py-3.5 rounded-2xl"
+     style="transform:translateX(-50%);box-shadow:0 16px 48px rgba(30,58,138,.15);">
+    <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+        <i class="fas fa-clock text-amber-500 text-sm"></i>
+    </div>
+    <div>
+        <p class="text-slate-800 font-bold text-sm leading-tight" id="soon-title"></p>
+        <p class="text-slate-400 text-xs font-medium" id="soon-msg"></p>
+    </div>
+</div>
+
+<!-- LOGOUT MODAL -->
+<div id="logout-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900 bg-opacity-40 backdrop-blur-sm" onclick="hideLogoutModal()"></div>
+    <div class="modal-box relative bg-white rounded-2xl w-full max-w-sm mx-auto p-8 flex flex-col items-center text-center border border-slate-100"
+         style="box-shadow:0 24px 80px rgba(30,58,138,.18);">
+        <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
+            <i class="fas fa-sign-out-alt text-red-500 text-xl"></i>
+        </div>
+        <h2 class="text-slate-800 font-extrabold text-lg mb-1.5">Log Keluar?</h2>
+        <p class="text-slate-500 text-sm mb-7">Adakah anda pasti mahu log keluar<br>daripada sistem YBTMK Dashboard?</p>
+        <div class="flex gap-3 w-full">
+            <button type="button" onclick="hideLogoutModal()"
+                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                Batal
+            </button>
+            <button type="button" onclick="confirmLogout()"
+                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white bg-red-500 hover:bg-red-600 transition">
+                <i class="fas fa-sign-out-alt mr-1.5"></i> Ya, Log Keluar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ── Particles ── */
+    (function(){
+        const container = document.getElementById('particles');
+        const sizes  = [14,20,28,18,24,16,22,30,12,26];
+        const delays = [0,1.2,2.5,0.7,3.1,1.8,4.0,0.4,2.9,1.5];
+        const durs   = [14,18,12,20,16,22,11,17,13,19];
+        const lefts  = [5,12,22,32,45,55,65,75,85,93];
+        sizes.forEach((s,i)=>{
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.cssText = `width:${s}px;height:${s}px;left:${lefts[i]}%;animation-duration:${durs[i]}s;animation-delay:${delays[i]}s;`;
+            container.appendChild(p);
+        });
+    })();
+
+    /* ── Typewriter on hero name ── */
+    (function(){
+        const el = document.querySelector('.hero-name');
+        if(!el) return;
+        const full = el.textContent.trim();
+        el.textContent = '';
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor'; cursor.textContent = '|';
+        el.appendChild(cursor);
+        let i = 0;
+        const type = () => {
+            if(i < full.length){
+                el.insertBefore(document.createTextNode(full[i]), cursor);
+                i++;
+                setTimeout(type, i < 4 ? 60 : 55);
+            } else {
+                setTimeout(()=>{ cursor.style.display='none'; }, 1800);
+            }
+        };
+        setTimeout(type, 350);
+    })();
+
+    /* ── Count-up for stat numbers ── */
+    document.querySelectorAll('[data-count]').forEach(el=>{
+        const target = parseInt(el.dataset.count);
+        let n = 0;
+        const step = () => {
+            n++; el.textContent = n;
+            if(n < target) setTimeout(step, 120);
+        };
+        setTimeout(step, 500);
+    });
+
+    /* ── Live date in hero ── */
+    (function(){
+        const d = new Date();
+        const days = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+        const months = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogos','Sep','Okt','Nov','Dis'];
+        const el = document.getElementById('hero-date');
+        if(el) el.textContent = days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    })();
+
+    /* ── Ripple on active card ── */
+    document.querySelectorAll('.mod-card:not(.soon)').forEach(card => {
+        card.addEventListener('click', function(e) {
+            const r = document.createElement('span');
+            r.className = 'ripple-wave';
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
+            this.appendChild(r);
+            setTimeout(() => r.remove(), 600);
+        });
+    });
+
+    /* ── Toast ── */
+    let _tt;
+    function showSoon(el, name) {
+        clearTimeout(_tt);
+        /* brief shake on card */
+        el.style.transition = 'transform .08s ease';
+        el.style.transform = 'translateY(-3px) scale(.97)';
+        setTimeout(() => { el.style.transform = ''; el.style.transition = ''; }, 160);
+
+        const t = document.getElementById('soon-toast');
+        document.getElementById('soon-title').textContent = name;
+        document.getElementById('soon-msg').textContent = 'Modul ini akan datang tidak lama lagi!';
+        t.classList.remove('hidden','toast-out'); t.classList.add('toast-in');
+        _tt = setTimeout(() => {
+            t.classList.remove('toast-in'); t.classList.add('toast-out');
+            setTimeout(() => { t.classList.add('hidden'); t.classList.remove('toast-out'); }, 240);
+        }, 2800);
+    }
+
+    /* ── Logout modal ── */
+    let _lf = null;
+    function showLogoutModal(f) {
+        _lf = f;
+        const m = document.getElementById('logout-modal');
+        m.classList.remove('hidden'); m.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+    function hideLogoutModal() {
+        const m = document.getElementById('logout-modal');
+        m.classList.add('hidden'); m.classList.remove('flex');
+        document.body.style.overflow = '';
+        _lf = null;
+    }
+    function confirmLogout() { if (_lf) _lf.submit(); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') hideLogoutModal(); });
+</script>
+</body>
+</html>

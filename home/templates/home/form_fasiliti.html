@@ -1,0 +1,1191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>{% if mode == 'edit' %}Edit Profil{% else %}Tambah Profil{% endif %} | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+        .radio-pill input[type="radio"] { display: none; }
+        .radio-pill label {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 18px; border-radius: 999px; border: 2px solid #e2e8f0;
+            cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.15s;
+            color: #64748b; background: #fff;
+        }
+        .radio-pill input[type="radio"]:checked + label.ya { border-color: #22c55e; background: #f0fdf4; color: #16a34a; }
+        .radio-pill input[type="radio"]:checked + label.tidak { border-color: #ef4444; background: #fef2f2; color: #dc2626; }
+        .radio-pill label:hover { border-color: #94a3b8; }
+        .svc-chip.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+        .dis-chip.selected { border-color: #8b5cf6; background: #f5f3ff; color: #6d28d9; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen antialiased">
+<div class="flex min-h-screen">
+    {% include 'home/_sidebar.html' with active_page='tambah_fasiliti_f' %}
+
+    <div class="ml-64 flex-1 min-w-0 flex flex-col">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">
+                    {% if mode == 'edit' %}Edit Profil Fasiliti{% else %}Tambah Profil Fasiliti{% endif %}
+                </h1>
+                <p class="text-slate-400 text-xs mt-0.5">Isikan maklumat fasiliti secara berperingkat mengikut kluster yang ditetapkan</p>
+            </div>
+            <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </header>
+
+        <main class="flex-1 px-5 py-6 w-full">
+            <!-- Messages -->
+            {% for msg in messages %}
+            <div class="mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
+                {% if msg.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-red-50 border border-red-200 text-red-700{% endif %}">
+                <i class="fas {% if msg.tags == 'success' %}fa-check-circle text-green-500{% else %}fa-exclamation-circle text-red-500{% endif %}"></i>
+                {{ msg }}
+            </div>
+            {% endfor %}
+
+            <!-- Step progress bar -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-slate-600">Langkah <span id="currentStepLabel">1</span> daripada {{ allowed_steps_list|length }}</span>
+                    <span class="text-xs font-bold text-blue-600" id="stepTitle">Maklumat Asas</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2">
+                    <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-300" style="width:12.5%"></div>
+                </div>
+                <!-- Step dots -->
+                <div class="flex justify-between mt-3">
+                    {% for i in "01234567" %}
+                    {% with s=forloop.counter0 %}
+                    <div class="step-dot flex flex-col items-center gap-1" data-step="{{ s }}">
+                        {% if s in allowed_steps_list %}
+                        <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all cursor-pointer hover:scale-110
+                            {% if forloop.first %}border-blue-500 bg-blue-500 text-white{% else %}border-slate-200 bg-white text-slate-400{% endif %}"
+                            id="dot-{{ s }}"
+                            onclick="jumpToStep({{ s }})"
+                            title="Kluster {{ forloop.counter }}: {{ forloop.counter|add:'0' }} — klik untuk pergi terus">
+                            {{ forloop.counter }}
+                        </div>
+                        {% else %}
+                        <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all border-slate-200 bg-slate-100 text-slate-300" id="dot-{{ s }}"
+                            title="Kluster {{ forloop.counter }}: dikunci (bahagian lain)">
+                            <i class="fas fa-lock text-[9px]"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Bahagian access notice -->
+            {% if is_copy %}
+            <div class="mb-5 flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-5 py-4">
+                <i class="fas fa-copy text-blue-500 mt-0.5 text-base"></i>
+                <div>
+                    <p class="text-sm font-semibold text-blue-800">Pengisian Tahun Baru — {{ current_year }}</p>
+                    <p class="text-xs text-blue-700 mt-1">
+                        Maklumat Asas (nama, jenis, negeri, daerah) telah diisi semula daripada rekod tahun lepas.
+                        Sila kemaskini maklumat kluster mengikut keadaan semasa tahun <strong>{{ current_year }}</strong>.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Bahagian access notice -->
+            {% if not request.user.is_superuser %}
+            <div class="mb-5 flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
+                <i class="fas fa-shield-alt text-amber-500 mt-0.5 text-base"></i>
+                <div>
+                    <p class="text-sm font-semibold text-amber-800">Akses Terhad Mengikut Bahagian</p>
+                    <p class="text-xs text-amber-700 mt-1">
+                        Anda bertanggungjawab mengisi:
+                        {% if allowed_cluster_names %}
+                        <strong>{{ allowed_cluster_names|join:', ' }}</strong>
+                        {% else %}
+                        <strong>Maklumat Asas sahaja</strong>
+                        {% endif %}.
+                        Kluster lain (<i class="fas fa-lock text-amber-500"></i>) akan diisi oleh bahagian berkenaan.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Cluster Navigation -->
+            {% if allowed_steps_list|length > 1 %}
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-6">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Pergi Terus ke Kluster</p>
+                <div class="flex flex-wrap gap-2">
+                    {% with icons="fas fa-info-circle,fas fa-hard-hat,fas fa-users,fas fa-stethoscope,fas fa-tools,fas fa-building,fas fa-clipboard-list,fas fa-handshake" %}
+                    {% with colors="blue,yellow,purple,red,orange,green,indigo,teal" %}
+                    {% for i in "01234567" %}
+                    {% with s=forloop.counter0 label=STEP_TITLES_PY|default:'' %}
+                    {% if s in allowed_steps_list %}
+                    <button type="button" onclick="jumpToStep({{ s }})"
+                        class="cluster-nav-btn flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 transition"
+                        data-step="{{ s }}">
+                        <span class="w-5 h-5 rounded-lg flex items-center justify-center text-xs
+                            {% if s == 0 %}bg-blue-100 text-blue-600
+                            {% elif s == 1 %}bg-yellow-100 text-yellow-600
+                            {% elif s == 2 %}bg-purple-100 text-purple-600
+                            {% elif s == 3 %}bg-red-100 text-red-500
+                            {% elif s == 4 %}bg-orange-100 text-orange-500
+                            {% elif s == 5 %}bg-green-100 text-green-600
+                            {% elif s == 6 %}bg-indigo-100 text-indigo-600
+                            {% else %}bg-teal-100 text-teal-600{% endif %}">
+                            {{ forloop.counter }}
+                        </span>
+                        {% if s == 0 %}Maklumat Asas
+                        {% elif s == 1 %}Kejuruteraan
+                        {% elif s == 2 %}Sumber Manusia
+                        {% elif s == 3 %}Perkhidmatan
+                        {% elif s == 4 %}Aset
+                        {% elif s == 5 %}Fasiliti
+                        {% elif s == 6 %}Perancangan
+                        {% else %}Konsesi{% endif %}
+                    </button>
+                    {% endif %}
+                    {% endwith %}
+                    {% endfor %}
+                    {% endwith %}
+                    {% endwith %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- FORM -->
+            <form method="post" id="mainForm">
+                {% csrf_token %}
+
+                <!-- ── STEP 0: Maklumat Asas ─────────────────── -->
+                <div class="step-panel active" id="step-0">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                                <i class="fas fa-info-circle text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Maklumat Asas</h2>
+                                <p class="text-xs text-slate-400">Maklumat identiti fasiliti</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nama Fasiliti <span class="text-red-400">*</span></label>
+                            <input type="text" name="nama_fasiliti" id="f_nama_fasiliti" placeholder="cth. Hospital Sultanah Bahiyah"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Jenis Fasiliti <span class="text-red-400">*</span></label>
+                            <select name="jenis_fasiliti" id="f_jenis_fasiliti"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition bg-white">
+                                <option value="">-- Pilih Jenis --</option>
+                                <option value="hospital">Hospital</option>
+                                <option value="hospital_pakar">Hospital Pakar</option>
+                                <option value="klinik_kesihatan">Klinik Kesihatan</option>
+                                <option value="klinik_desa">Klinik Desa</option>
+                                <option value="klinik_komuniti">Klinik Komuniti</option>
+                                <option value="institusi_perubatan_khas">Institusi Perubatan Khas</option>
+                                <option value="institusi_latihan">Institusi Latihan</option>
+                                <option value="jabatan_kes_negeri">Jabatan Kesihatan Negeri</option>
+                                <option value="klinik_pergigian_hosp">Klinik Pergigian di Hospital</option>
+                                <option value="kk_ibu_anak">Klinik Kesihatan Ibu dan Anak</option>
+                                <option value="klinik_pergigian_utc">Klinik Pergigian UTC</option>
+                                <option value="klinik_pergigian_sekolah">Klinik Pergigian di Sekolah</option>
+                                <option value="kp_kk_utc">Klinik Pergigian di Klinik Kesihatan UTC</option>
+                                <option value="kp_kk_ibu_anak">Klinik Pergigian di Klinik Kesihatan Ibu dan Anak</option>
+                                <option value="klinik_pergigian_rtc">Klinik Pergigian RTC</option>
+                                <option value="klinik_kesihatan_utc">Klinik Kesihatan UTC</option>
+                                <option value="klinik_pergigian">Klinik Pergigian</option>
+                                <option value="pkp_bahagian">Pejabat Kesihatan Pergigian Bahagian</option>
+                                <option value="pkp">Pejabat Kesihatan Pergigian</option>
+                                <option value="pkp_daerah">Pejabat Kesihatan Pergigian Daerah</option>
+                                <option value="pkp_kawasan">Pejabat Kesihatan Pergigian Kawasan</option>
+                                <option value="lain">Lain-lain</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Negeri <span class="text-red-400">*</span></label>
+                                <select name="negeri" id="f_negeri"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition bg-white">
+                                    <option value="">-- Pilih Negeri --</option>
+                                    <option value="johor">Johor</option>
+                                    <option value="kedah">Kedah</option>
+                                    <option value="kelantan">Kelantan</option>
+                                    <option value="melaka">Melaka</option>
+                                    <option value="negeri_sembilan">Negeri Sembilan</option>
+                                    <option value="pahang">Pahang</option>
+                                    <option value="perak">Perak</option>
+                                    <option value="perlis">Perlis</option>
+                                    <option value="pulau_pinang">Pulau Pinang</option>
+                                    <option value="sabah">Sabah</option>
+                                    <option value="sarawak">Sarawak</option>
+                                    <option value="selangor">Selangor</option>
+                                    <option value="terengganu">Terengganu</option>
+                                    <option value="kuala_lumpur">Kuala Lumpur</option>
+                                    <option value="labuan">Labuan</option>
+                                    <option value="putrajaya">Putrajaya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Daerah</label>
+                                <div class="relative" id="daerah-wrapper">
+                                    <input type="hidden" name="daerah" id="f_daerah">
+                                    <input type="text" id="f_daerah_display" placeholder="Pilih atau taip daerah..."
+                                        autocomplete="off"
+                                        class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition">
+                                    <div id="daerah-dropdown"
+                                        class="hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-52 overflow-y-auto">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Wilayah</label>
+                                <select name="wilayah" id="f_wilayah" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option value="utara">Utara</option>
+                                    <option value="tengah">Tengah</option>
+                                    <option value="selatan">Selatan</option>
+                                    <option value="timur">Timur</option>
+                                    <option value="sabah">Sabah</option>
+                                    <option value="sarawak">Sarawak</option>
+                                    <option value="labuan">W.P. Labuan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Zon</label>
+                                <input type="text" name="zon" id="f_zon" placeholder="cth. Zon A"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Parlimen</label>
+                                <input type="text" name="parlimen" id="f_parlimen" placeholder="cth. P141 Alor Gajah"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Alamat</label>
+                            <textarea name="alamat" id="f_alamat" rows="2" placeholder="cth. Jalan Hospital, Taman Kesihatan"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition resize-none"></textarea>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Poskod</label>
+                                <input type="text" name="poskod" id="f_poskod" maxlength="10" placeholder="cth. 70400"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Latitud <span class="text-slate-400 font-normal text-xs">(GPS)</span></label>
+                                <input type="number" name="latitud" id="f_latitud" step="any" placeholder="cth. 3.14159"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Longitud <span class="text-slate-400 font-normal text-xs">(GPS)</span></label>
+                                <input type="number" name="longitud" id="f_longitud" step="any" placeholder="cth. 101.68653"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition">
+                            </div>
+                        </div>
+                        <input type="hidden" name="tahun" id="f_tahun" value="{{ current_year }}">
+                    </div>
+                </div>
+                <div class="step-panel" id="step-1">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-yellow-50 flex items-center justify-center">
+                                <i class="fas fa-hard-hat text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Kluster 1 — Kejuruteraan</h2>
+                                <p class="text-xs text-slate-400">Maklumat fizikal bangunan dan infrastruktur</p>
+                            </div>
+                        </div>
+                        <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Kod Fasiliti</label>
+                                <input type="text" name="kod_fasiliti" id="f_kod_fasiliti" placeholder="cth. KKM-MEL-001"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none transition font-mono">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Tahun Dibina</label>
+                                <select name="tahun_dibina" id="f_tahun_dibina" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih Tahun --</option>
+                                    <option value="1950">1950</option><option value="1955">1955</option><option value="1960">1960</option>
+                                    <option value="1965">1965</option><option value="1970">1970</option><option value="1975">1975</option>
+                                    <option value="1980">1980</option><option value="1985">1985</option><option value="1990">1990</option>
+                                    <option value="1991">1991</option><option value="1992">1992</option><option value="1993">1993</option>
+                                    <option value="1994">1994</option><option value="1995">1995</option><option value="1996">1996</option>
+                                    <option value="1997">1997</option><option value="1998">1998</option><option value="1999">1999</option>
+                                    <option value="2000">2000</option><option value="2001">2001</option><option value="2002">2002</option>
+                                    <option value="2003">2003</option><option value="2004">2004</option><option value="2005">2005</option>
+                                    <option value="2006">2006</option><option value="2007">2007</option><option value="2008">2008</option>
+                                    <option value="2009">2009</option><option value="2010">2010</option><option value="2011">2011</option>
+                                    <option value="2012">2012</option><option value="2013">2013</option><option value="2014">2014</option>
+                                    <option value="2015">2015</option><option value="2016">2016</option><option value="2017">2017</option>
+                                    <option value="2018">2018</option><option value="2019">2019</option><option value="2020">2020</option>
+                                    <option value="2021">2021</option><option value="2022">2022</option><option value="2023">2023</option>
+                                    <option value="2024">2024</option><option value="2025">2025</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Jenis Hospital/Klinik</label>
+                                <select name="jenis_hospital_klinik" id="f_jenis_hospital_klinik" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih Jenis --</option>
+                                    <option value="hospital">Hospital</option>
+                                    <option value="hospital_pakar">Hospital Pakar</option>
+                                    <option value="klinik_kesihatan">Klinik Kesihatan</option>
+                                    <option value="klinik_desa">Klinik Desa</option>
+                                    <option value="klinik_komuniti">Klinik Komuniti</option>
+                                    <option value="institusi_perubatan_khas">Institusi Perubatan Khas</option>
+                                    <option value="institusi_latihan">Institusi Latihan</option>
+                                    <option value="jabatan_kes_negeri">Jabatan Kesihatan Negeri</option>
+                                    <option value="klinik_pergigian_hosp">Klinik Pergigian di Hospital</option>
+                                    <option value="kk_ibu_anak">Klinik Kesihatan Ibu dan Anak</option>
+                                    <option value="klinik_pergigian_utc">Klinik Pergigian UTC</option>
+                                    <option value="klinik_pergigian_sekolah">Klinik Pergigian di Sekolah</option>
+                                    <option value="kp_kk_utc">Klinik Pergigian di Klinik Kesihatan UTC</option>
+                                    <option value="kp_kk_ibu_anak">Klinik Pergigian di Klinik Kesihatan Ibu dan Anak</option>
+                                    <option value="klinik_pergigian_rtc">Klinik Pergigian RTC</option>
+                                    <option value="klinik_kesihatan_utc">Klinik Kesihatan UTC</option>
+                                    <option value="klinik_pergigian">Klinik Pergigian</option>
+                                    <option value="pkp_bahagian">Pejabat Kesihatan Pergigian Bahagian</option>
+                                    <option value="pkp">Pejabat Kesihatan Pergigian</option>
+                                    <option value="pkp_daerah">Pejabat Kesihatan Pergigian Daerah</option>
+                                    <option value="pkp_kawasan">Pejabat Kesihatan Pergigian Kawasan</option>
+                                    <option value="lain">Lain-lain</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Keluasan Tanah (ekar)</label>
+                                <select name="ukuran_tanah" id="f_ukuran_tanah" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih Saiz --</option>
+                                    <option>Kurang dari 1 ekar</option>
+                                    <option>1 - 2 ekar</option>
+                                    <option>2 - 5 ekar</option>
+                                    <option>5 - 10 ekar</option>
+                                    <option>10 - 20 ekar</option>
+                                    <option>Lebih dari 20 ekar</option>
+                                    <option>Tidak diketahui</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end pb-2.5">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" name="boleh_extend" id="f_boleh_extend" value="1" class="w-4 h-4 rounded accent-blue-600">
+                                    <span class="text-sm font-semibold text-slate-700">Tapak berpotensi untuk diperluaskan?</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Struktur siling binaan dalam keadaan baik dan selamat?</label>
+                            <div class="flex gap-3">
+                                <div class="radio-pill"><input type="radio" name="siling_okay" id="siling_ya" value="1"><label for="siling_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                <div class="radio-pill"><input type="radio" name="siling_okay" id="siling_tidak" value="0"><label for="siling_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 2: Sumber Manusia ────────────────── -->
+                <div class="step-panel" id="step-2">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center">
+                                <i class="fas fa-users text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Kluster 2 — Sumber Manusia</h2>
+                                <p class="text-xs text-slate-400">Bilangan dan pengurusan kakitangan</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Kakitangan Tetap</label>
+                                <input type="number" name="kakitangan_tetap" id="f_kakitangan_tetap" min="0" placeholder="0"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Kakitangan Kontrak</label>
+                                <input type="number" name="kakitangan_kontrak" id="f_kakitangan_kontrak" min="0" placeholder="0"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Kakitangan MySTeP</label>
+                                <input type="number" name="kakitangan_mystep" id="f_kakitangan_mystep" min="0" placeholder="0"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Bilangan Shift Sehari</label>
+                                <select name="bilangan_shift" id="f_bilangan_shift" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option value="1">1 Shift</option>
+                                    <option value="2">2 Shift</option>
+                                    <option value="3">3 Shift</option>
+                                    <option value="4">4 Shift</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Bilangan Kakitangan Sokongan (Non-Perubatan)</label>
+                                <input type="number" name="bilangan_staff_non_medical" id="f_bilangan_staff_non_medical" min="0" placeholder="0"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Waktu Beroperasi</label>
+                                <select name="waktu_beroperasi" id="f_waktu_beroperasi" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option>24 Jam</option>
+                                    <option>8 pagi – 5 petang</option>
+                                    <option>8 pagi – 10 malam</option>
+                                    <option>Isnin – Jumaat sahaja</option>
+                                    <option>Isnin – Sabtu</option>
+                                    <option>Mengikut shift</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Mekanisme Permohonan Cuti Kakitangan</label>
+                                <select name="cara_minta_cuti" id="f_cara_minta_cuti" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option>Sistem HCM (online)</option>
+                                    <option>Borang manual/kertas</option>
+                                    <option>Aplikasi WhatsApp/Telegram</option>
+                                    <option>Kombinasi sistem & manual</option>
+                                    <option>Lain-lain</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Terdapat kakitangan dipinjamkan dari agensi lain?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjaman_ya" value="1"><label for="pinjaman_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjaman_tidak" value="0"><label for="pinjaman_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Kakitangan layak menerima elaun lebih masa (OT)?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_ot_allowance" id="ot_ya" value="1"><label for="ot_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_ot_allowance" id="ot_tidak" value="0"><label for="ot_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Isu dan Cabaran Penempatan Kakitangan</label>
+                            <textarea name="isu_penempatan" id="f_isu_penempatan" rows="2" placeholder="Nyatakan isu penempatan kakitangan yang dihadapi, jika berkenaan..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 3: Perkhidmatan Kesihatan ────────── -->
+                <div class="step-panel" id="step-3">
+
+                    <!-- SUB-SECTION: SERVIS -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5 mb-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+                                <i class="fas fa-stethoscope text-red-500"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Servis</h2>
+                                <p class="text-xs text-slate-400">Q4, Q6, Q7, Q15, Q18, Q33, Q35, Q43, Q46</p>
+                            </div>
+                        </div>
+                        <!-- Q4: Jenis Perkhidmatan -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Q4 — Jenis Perkhidmatan <span class="text-slate-400 font-normal">(pilih semua yang berkaitan)</span></label>
+                            <input type="hidden" name="jenis_perkhidmatan" id="f_jenis_perkhidmatan" value="">
+                            <div class="flex flex-wrap gap-2" id="svc-group">
+                                {% for svc in svc_choices %}
+                                <label class="svc-chip cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-slate-200 text-xs font-semibold text-slate-500 hover:border-blue-400 hover:text-blue-600 transition select-none">
+                                    <input type="checkbox" class="hidden svc-cb" value="{{ svc }}"> {{ svc }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- Q6: Penyakit Kerap -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Q6 — Penyakit Kerap Ditemui <span class="text-slate-400 font-normal">(pilih semua yang berkaitan)</span></label>
+                            <input type="hidden" name="jenis_penyakit_kerap" id="f_jenis_penyakit_kerap" value="">
+                            <div class="flex flex-wrap gap-2" id="dis-group">
+                                {% for dis in dis_choices %}
+                                <label class="dis-chip cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-slate-200 text-xs font-semibold text-slate-500 hover:border-purple-400 hover:text-purple-600 transition select-none">
+                                    <input type="checkbox" class="hidden dis-cb" value="{{ dis }}"> {{ dis }}
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- Q7: Selesaikan kes + Rujukan ke -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q7 — Fasiliti berupaya menyelesaikan kes tanpa perlu dirujuk?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="boleh_selesaikan_kes" id="selesai_ya" value="1"><label for="selesai_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="boleh_selesaikan_kes" id="selesai_tidak" value="0"><label for="selesai_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q7 — Jika Tidak, Rujukan Ke</label>
+                                <input type="text" name="rujukan_ke" id="f_rujukan_ke" placeholder="cth. Hospital Sultanah Bahiyah"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                        </div>
+                        <!-- Q15: Ambulans -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q15 — Fasiliti dilengkapi kenderaan ambulans?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_ambulans" id="amb_ya" value="1"><label for="amb_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_ambulans" id="amb_tidak" value="0"><label for="amb_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q15 — Keadaan Ambulans</label>
+                                <select name="keadaan_ambulans" id="f_keadaan_ambulans" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih Keadaan --</option>
+                                    <option>Baik dan berfungsi sepenuhnya</option>
+                                    <option>Perlu servis berkala</option>
+                                    <option>Ada kerosakan minor</option>
+                                    <option>Ada kerosakan major / luar operasi</option>
+                                    <option>Tiada ambulans</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Q18: Perkhidmatan Baru -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q18 — Perkhidmatan Baru Yang Ingin Diwujudkan</label>
+                            <textarea name="perkhidmatan_baru" id="f_perkhidmatan_baru" rows="2" placeholder="Nyatakan perkhidmatan baru yang diperlukan..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+                        <!-- Q33: Bilik Mayat + Q43: Waktu Beroperasi -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q33 — Fasiliti mempunyai bilik mayat?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_bilik_mayat" id="mayat_ya" value="1"><label for="mayat_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_bilik_mayat" id="mayat_tidak" value="0"><label for="mayat_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q43 — Waktu Beroperasi</label>
+                                <input type="text" name="waktu_beroperasi" id="f_waktu_beroperasi" placeholder="cth. 8:00 pagi – 5:00 petang"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                        </div>
+                        <!-- Q35: Kualiti Makanan + Q46: Masa Tunggu -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q35 — Tahap Kualiti Perkhidmatan Makanan Pesakit</label>
+                                <select name="kualiti_makanan" id="f_kualiti_makanan" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option>Baik</option>
+                                    <option>Memuaskan</option>
+                                    <option>Perlu penambahbaikan</option>
+                                    <option>Lemah / Ada aduan</option>
+                                    <option>Tiada perkhidmatan makanan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q46 — Masa Tunggu Purata</label>
+                                <select name="masa_tunggu" id="f_masa_tunggu" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option>Kurang 30 minit</option>
+                                    <option>30 – 60 minit</option>
+                                    <option>1 – 2 jam</option>
+                                    <option>2 – 4 jam</option>
+                                    <option>Lebih 4 jam</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECTION: PESAKIT -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5 mb-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                                <i class="fas fa-user-injured text-blue-500"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Pesakit</h2>
+                                <p class="text-xs text-slate-400">Q48, Q48a</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q48 — Fasiliti dilengkapi OSCA (On-Site Clinical Assessment)?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_osca" id="osca_ya" value="1"><label for="osca_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_osca" id="osca_tidak" value="0"><label for="osca_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q48a — Bilangan Unit OSCA</label>
+                                <input type="number" name="bilangan_osca" id="f_bilangan_osca" min="0" placeholder="0"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECTION: UBAT -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
+                                <i class="fas fa-pills text-green-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Ubat</h2>
+                                <p class="text-xs text-slate-400">Q10, Q11, Q20</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q10/Q20 — Bekalan ubatan dan farmaseutikal mencukupi?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="bekalan_ubat_mencukupi" id="ubat_ya" value="1"><label for="ubat_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="bekalan_ubat_mencukupi" id="ubat_tidak" value="0"><label for="ubat_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q11 — Bekalan bahan habis guna (disposable) mencukupi?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="disposable_mencukupi" id="disp_ya" value="1"><label for="disp_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="disposable_mencukupi" id="disp_tidak" value="0"><label for="disp_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 4: Aset ──────────────────────────── -->
+                <div class="step-panel" id="step-4">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
+                                <i class="fas fa-tools text-orange-500"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Kluster 4 — Aset</h2>
+                                <p class="text-xs text-slate-400">Keadaan peralatan dan aset perubatan</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q9 — Status Kesediaan dan Keadaan Aset Keseluruhan</label>
+                                <select name="keadaan_aset" id="f_keadaan_aset" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option>Baik — Semua berfungsi</option>
+                                    <option>Memuaskan — Sebahagian perlu servis</option>
+                                    <option>Perlu perhatian — Ramai aset rosak</option>
+                                    <option>Kritikal — Kekurangan aset utama</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q31 — Umur Purata Komputer</label>
+                                <select name="umur_komputer" id="f_umur_komputer" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                    <option value="">-- Pilih --</option>
+                                    <option>Kurang 3 tahun</option>
+                                    <option>3 – 5 tahun</option>
+                                    <option>5 – 7 tahun</option>
+                                    <option>Lebih 7 tahun</option>
+                                    <option>Gabungan pelbagai umur</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q9 — Fasiliti menyediakan unit perkhidmatan hemodialisis?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_hemodialisis" id="hemo_ya" value="1"><label for="hemo_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_hemodialisis" id="hemo_tidak" value="0"><label for="hemo_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Q9 — Bilangan Unit Hemodialisis</label>
+                                <input type="number" name="unit_hemodialisis" id="f_unit_hemodialisis" min="0" placeholder="0"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Q30 — Sistem Rekod Perubatan Elektronik (EMR) telah dilaksanakan?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_emr" id="emr_ya" value="1"><label for="emr_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_emr" id="emr_tidak" value="0"><label for="emr_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Senarai Aset yang Memerlukan Penggantian</label>
+                            <textarea name="aset_perlu_diganti" id="f_aset_perlu_diganti" rows="2" placeholder="Senaraikan aset-aset yang memerlukan penggantian segera atau dalam tempoh terdekat..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Aset yang Tidak Memenuhi Spesifikasi Teknikal</label>
+                            <textarea name="aset_tidak_ikut_spec" id="f_aset_tidak_ikut_spec" rows="2" placeholder="Senaraikan aset yang tidak menepati spesifikasi teknikal yang ditetapkan..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Bekalan bahan habis guna (disposable) mencukupi?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="disposable_mencukupi" id="disp_ya" value="1"><label for="disp_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="disposable_mencukupi" id="disp_tidak" value="0"><label for="disp_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Fasiliti dilengkapi kenderaan ambulans?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_ambulans" id="amb_ya" value="1"><label for="amb_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_ambulans" id="amb_tidak" value="0"><label for="amb_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Keadaan Ambulans</label>
+                            <select name="keadaan_ambulans" id="f_keadaan_ambulans" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                <option value="">-- Pilih Keadaan --</option>
+                                <option>Baik dan berfungsi sepenuhnya</option>
+                                <option>Perlu servis berkala</option>
+                                <option>Ada kerosakan minor</option>
+                                <option>Ada kerosakan major / luar operasi</option>
+                                <option>Tiada ambulans</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 5: Fasiliti ──────────────────────── -->
+                <div class="step-panel" id="step-5">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-green-50 flex items-center justify-center">
+                                <i class="fas fa-building text-green-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Kluster 5 — Fasiliti</h2>
+                                <p class="text-xs text-slate-400">Kemudahan dan persekitaran bangunan</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Keadaan Perabot dan Infrastruktur Dalaman</label>
+                            <select name="keadaan_perabot" id="f_keadaan_perabot" class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition bg-white">
+                                <option value="">-- Pilih Keadaan --</option>
+                                <option>Baik — Dalam kondisi baik</option>
+                                <option>Memuaskan — Boleh guna tapi sudah lama</option>
+                                <option>Perlu ganti — Rosak / lapuk</option>
+                                <option>Kritikal — Tidak selamat untuk digunakan</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Fasiliti menyediakan kuarters / penginapan untuk kakitangan?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_quarters" id="qrt_ya" value="1"><label for="qrt_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_quarters" id="qrt_tidak" value="0"><label for="qrt_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Kuarters yang disediakan mencukupi untuk keperluan kakitangan?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="quarters_mencukupi" id="qrtm_ya" value="1"><label for="qrtm_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="quarters_mencukupi" id="qrtm_tidak" value="0"><label for="qrtm_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Terdapat isu kemudahan tempat letak kenderaan?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_isu_parking" id="park_ya" value="1"><label for="park_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_isu_parking" id="park_tidak" value="0"><label for="park_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Sistem penghawa dingin menghadapi masalah atau kerosakan?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="masalah_aircond" id="ac_ya" value="1"><label for="ac_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="masalah_aircond" id="ac_tidak" value="0"><label for="ac_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Ruang bekerja kakitangan mencukupi dan kondusif?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ruang_kerja_mencukupi" id="rk_ya" value="1"><label for="rk_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ruang_kerja_mencukupi" id="rk_tidak" value="0"><label for="rk_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Fasiliti dilengkapi bilik forensik / bilik jenazah?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_bilik_mayat" id="bm_ya" value="1"><label for="bm_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_bilik_mayat" id="bm_tidak" value="0"><label for="bm_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Terdapat kemudahan pantri untuk kakitangan?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_pantry" id="pnt_ya" value="1"><label for="pnt_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_pantry" id="pnt_tidak" value="0"><label for="pnt_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Fasiliti menyediakan perkhidmatan kantin?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_kantin" id="kan_ya" value="1"><label for="kan_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_kantin" id="kan_tidak" value="0"><label for="kan_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-2">Fasiliti dilengkapi perkhidmatan keselamatan (pengawal)?</label>
+                                <div class="flex gap-2">
+                                    <div class="radio-pill"><input type="radio" name="ada_security" id="sec_ya" value="1"><label for="sec_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="radio-pill"><input type="radio" name="ada_security" id="sec_tidak" value="0"><label for="sec_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 6: Perancangan ───────────────────── -->
+                <div class="step-panel" id="step-6">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center">
+                                <i class="fas fa-clipboard-list text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Kluster 6 — Perancangan</h2>
+                                <p class="text-xs text-slate-400">Perancangan penambahbaikan masa hadapan</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Perancangan Penambahan Perkhidmatan Baharu</label>
+                            <textarea name="perkhidmatan_baru" id="f_perkhidmatan_baru" rows="3" placeholder="Nyatakan perkhidmatan baharu yang dirancang untuk diperkenalkan dalam tempoh terdekat..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Keperluan Infrastruktur dan Kemudahan Tambahan</label>
+                            <textarea name="fasiliti_diperlukan" id="f_fasiliti_diperlukan" rows="3" placeholder="Nyatakan keperluan infrastruktur, peralatan atau kemudahan tambahan yang diperlukan..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── STEP 7: Konsesi & Lain-lain ───────────── -->
+                <div class="step-panel" id="step-7">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
+                                <i class="fas fa-handshake text-teal-600"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-800">Kluster 7 & 8 — Konsesi & Lain-lain</h2>
+                                <p class="text-xs text-slate-400">Penyelenggaraan, masalah utama dan harapan</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Perkhidmatan penyelenggaraan fasiliti berjalan dengan memuaskan?</label>
+                            <div class="flex gap-3">
+                                <div class="radio-pill"><input type="radio" name="maintenance_okay" id="maint_ya" value="1"><label for="maint_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                <div class="radio-pill"><input type="radio" name="maintenance_okay" id="maint_tidak" value="0"><label for="maint_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Isu dan Cabaran Utama yang Dihadapi Fasiliti</label>
+                            <textarea name="masalah_utama" id="f_masalah_utama" rows="4" placeholder="Huraikan isu-isu utama dan cabaran operasi yang sedang dihadapi oleh fasiliti ini..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Cadangan dan Harapan Pihak Pengurusan Fasiliti</label>
+                            <textarea name="wishlist" id="f_wishlist" rows="4" placeholder="Nyatakan cadangan, harapan atau keperluan yang ingin disampaikan kepada pihak pengurusan atasan..."
+                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-300 outline-none transition resize-none"></textarea>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!-- Navigation buttons -->
+                <div class="flex justify-between items-center mt-6">
+                    <button type="button" id="btnPrev" onclick="changeStep(-1)"
+                        class="hidden flex items-center gap-2 px-6 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
+                        <i class="fas fa-arrow-left"></i> Sebelumnya
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <!-- Next button (hidden on last step) -->
+                        <button type="button" id="btnNext" onclick="changeStep(1)"
+                            class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition shadow-sm">
+                            Seterusnya <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <!-- Submit buttons (shown on last step only) -->
+                        <div id="btnSubmitGroup" style="display:none;" class="flex items-center gap-3">
+                            <button type="submit" name="action" value="simpan"
+                                class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition shadow-sm">
+                                <i class="fas fa-save"></i> Simpan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+
+<script>
+const STEP_TITLES = [
+    'Maklumat Asas',
+    'Kejuruteraan',
+    'Sumber Manusia',
+    'Perkhidmatan Kesihatan',
+    'Aset',
+    'Fasiliti',
+    'Perancangan',
+    'Konsesi & Lain-lain'
+];
+const TOTAL_STEPS = 8;
+const allowedSteps = {{ allowed_steps|safe }}; // e.g. [0,1,3,5]
+const KLUSTER_OWNER = {{ kluster_owner|safe }}; // {1: 'Bahagian Kejuruteraan', ...}
+let currentStepIdx = 0; // index into allowedSteps array (not the absolute step number)
+
+// On page load: add locked overlay to panels not in allowedSteps
+document.addEventListener('DOMContentLoaded', function () {
+    for (let s = 0; s < TOTAL_STEPS; s++) {
+        if (!allowedSteps.includes(s)) {
+            const panel = document.getElementById('step-' + s);
+            if (!panel) continue;
+            const owner = KLUSTER_OWNER[s] || 'Bahagian lain';
+            const overlay = document.createElement('div');
+            overlay.className = 'locked-overlay flex flex-col items-center justify-center gap-3 py-16 text-center';
+            overlay.innerHTML = `
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
+                    <i class="fas fa-lock text-slate-400 text-2xl"></i>
+                </div>
+                <p class="text-base font-bold text-slate-500">Kluster Dikunci</p>
+                <p class="text-sm text-slate-400 max-w-xs">Kluster ini akan diisi oleh <strong class="text-slate-500">${owner}</strong>. Anda tidak perlu mengisi bahagian ini.</p>
+            `;
+            const inner = panel.querySelector('.bg-white');
+            if (inner) {
+                inner.innerHTML = '';
+                inner.classList.add('p-10');
+                inner.appendChild(overlay);
+            }
+        }
+    }
+    renderStep();
+});
+
+function currentStepNum() { return allowedSteps[currentStepIdx]; }
+
+function renderStep() {
+    const stepNum = currentStepNum();
+    const panels = document.querySelectorAll('.step-panel');
+    panels.forEach(p => p.classList.remove('active'));
+    const activePanel = document.getElementById('step-' + stepNum);
+    if (activePanel) activePanel.classList.add('active');
+
+    // Update dots: completed allowed steps = green, current = blue, future allowed = slate, locked = unchanged
+    allowedSteps.forEach((s, idx) => {
+        const dot = document.getElementById('dot-' + s);
+        if (!dot) return;
+        if (idx < currentStepIdx) {
+            dot.className = 'w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all border-green-400 bg-green-400 text-white';
+            dot.textContent = (s + 1);
+        } else if (idx === currentStepIdx) {
+            dot.className = 'w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all border-blue-500 bg-blue-500 text-white';
+            dot.textContent = (s + 1);
+        } else {
+            dot.className = 'w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all border-slate-200 bg-white text-slate-400';
+            dot.textContent = (s + 1);
+        }
+    });
+
+    // Progress bar based on position in allowedSteps
+    document.getElementById('progressBar').style.width = ((currentStepIdx + 1) / allowedSteps.length * 100) + '%';
+    document.getElementById('currentStepLabel').textContent = currentStepIdx + 1;
+    document.getElementById('stepTitle').textContent = STEP_TITLES[stepNum];
+
+    // Highlight active cluster nav button
+    document.querySelectorAll('.cluster-nav-btn').forEach(btn => {
+        const s = parseInt(btn.dataset.step);
+        if (s === stepNum) {
+            btn.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700');
+            btn.classList.remove('border-slate-200', 'text-slate-600');
+        } else {
+            btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700');
+            btn.classList.add('border-slate-200', 'text-slate-600');
+        }
+    });
+
+    const isLastStep = currentStepIdx === allowedSteps.length - 1;
+    document.getElementById('btnPrev').style.display = currentStepIdx === 0 ? 'none' : 'flex';
+    document.getElementById('btnNext').style.display = isLastStep ? 'none' : 'flex';
+    document.getElementById('btnSubmitGroup').style.display = isLastStep ? 'flex' : 'none';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function changeStep(dir) {
+    const newIdx = currentStepIdx + dir;
+    if (newIdx < 0 || newIdx >= allowedSteps.length) return;
+    currentStepIdx = newIdx;
+    renderStep();
+}
+
+function jumpToStep(stepNum) {
+    const idx = allowedSteps.indexOf(stepNum);
+    if (idx === -1) return; // not allowed
+    currentStepIdx = idx;
+    renderStep();
+    // Scroll to top of form
+    const form = document.getElementById('mainForm');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Chip checkbox groups
+function initChipGroup(groupId, hiddenId, cbClass, chipClass) {
+    const group = document.getElementById(groupId);
+    const hidden = document.getElementById(hiddenId);
+    if (!group || !hidden) return;
+    group.querySelectorAll('.' + chipClass).forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            // Prevent browser from natively toggling the checkbox a second time
+            e.preventDefault();
+            chip.classList.toggle('selected');
+            const cb = chip.querySelector('.' + cbClass);
+            cb.checked = chip.classList.contains('selected');
+            const selected = [...group.querySelectorAll('.' + chipClass + '.selected')]
+                .map(c => c.querySelector('.' + cbClass).value);
+            hidden.value = selected.join(', ');
+        });
+    });
+}
+initChipGroup('svc-group', 'f_jenis_perkhidmatan', 'svc-cb', 'svc-chip');
+initChipGroup('dis-group', 'f_jenis_penyakit_kerap', 'dis-cb', 'dis-chip');
+
+// (renderStep is called via DOMContentLoaded above)
+
+{% if facility_json %}
+// Pre-fill form (edit mode or salin tahun baru)
+const fd = {{ facility_json|safe }};
+for (const [key, val] of Object.entries(fd)) {
+    const el = document.getElementById('f_' + key);
+    if (el && el.tagName !== 'INPUT') { el.value = val; continue; }
+    if (el && el.type !== 'radio') { el.value = val; continue; }
+    // Radio buttons (yes/no: 1/0)
+    if (val === '1' || val === '0') {
+        const r = document.querySelector(`input[name="${key}"][value="${val}"]`);
+        if (r) r.checked = true;
+    }
+    // Select
+    const sel = document.querySelector(`select[name="${key}"]`);
+    if (sel && val) sel.value = val;
+}
+// Pre-fill chip groups
+function prefillChips(hiddenId, groupId, chipClass, cbClass) {
+    const hidden = document.getElementById(hiddenId);
+    if (!hidden || !hidden.value) return;
+    const vals = hidden.value.split(', ').map(v => v.trim().toLowerCase());
+    document.querySelectorAll('#' + groupId + ' .' + chipClass).forEach(chip => {
+        const cb = chip.querySelector('.' + cbClass);
+        if (vals.includes(cb.value.trim().toLowerCase())) {
+            chip.classList.add('selected');
+            cb.checked = true;
+        }
+    });
+}
+prefillChips('f_jenis_perkhidmatan', 'svc-group', 'svc-chip', 'svc-cb');
+prefillChips('f_jenis_penyakit_kerap', 'dis-group', 'dis-chip', 'dis-cb');
+// Pre-fill daerah display input
+if (fd.daerah) {
+    const daerahHidden = document.getElementById('f_daerah');
+    const daerahDisplay = document.getElementById('f_daerah_display');
+    if (daerahHidden) daerahHidden.value = fd.daerah;
+    if (daerahDisplay) daerahDisplay.value = fd.daerah;
+}
+{% endif %}
+
+// ── Daerah Searchable Dropdown ──────────────────────────────────
+const DAERAH_BY_NEGERI = {
+    johor:           ['Batu Pahat','Johor Bahru','Kluang','Kota Tinggi','Kulai','Mersing','Muar','Pontian','Segamat','Simpang Renggam','Tangkak'],
+    kedah:           ['Baling','Bandar Bharu','Kota Setar','Kuala Muda','Kubang Pasu','Kulim','Langkawi','Padang Terap','Pendang','Pokok Sena','Sik'],
+    kelantan:        ['Bachok','Gua Musang','Jeli','Kota Bharu','Kuala Krai','Machang','Pasir Mas','Pasir Puteh','Tanah Merah','Tumpat'],
+    melaka:          ['Alor Gajah','Jasin','Melaka Tengah'],
+    negeri_sembilan: ['Jelebu','Jempol','Kuala Pilah','Port Dickson','Rembau','Seremban','Tampin'],
+    pahang:          ['Bentong','Bera','Cameron Highlands','Jerantut','Kuantan','Lipis','Maran','Pekan','Raub','Rompin','Temerloh'],
+    perak:           ['Bagan Datuk','Batang Padang','Hilir Perak','Hulu Perak','Kampar','Kerian','Kinta','Kuala Kangsar','Larut Matang dan Selama','Manjung','Muallim','Perak Tengah'],
+    perlis:          ['Arau','Kangar','Padang Besar'],
+    pulau_pinang:    ['Barat Daya','Seberang Perai Selatan','Seberang Perai Tengah','Seberang Perai Utara','Timur Laut'],
+    sabah:           ['Beaufort','Beluran','Keningau','Kinabatangan','Kota Belud','Kota Kinabalu','Kota Marudu','Kudat','Kunak','Lahad Datu','Nabawan','Papar','Penampang','Pensiangan','Pitas','Putatan','Ranau','Sandakan','Semporna','Sipitang','Tambunan','Tawau','Tenom','Tongod','Tuaran'],
+    sarawak:         ['Asajaya','Bau','Betong','Bintulu','Dalat','Julau','Kanowit','Kapit','Kota Samarahan','Kuching','Lawas','Limbang','Lundu','Marudi','Matu','Meradong','Miri','Mukah','Pakan','Saratok','Sarikei','Serian','Sibu','Simunjan','Sri Aman','Subis','Tatau'],
+    selangor:        ['Gombak','Hulu Langat','Hulu Selangor','Klang','Kuala Langat','Kuala Selangor','Petaling','Sabak Bernam','Sepang'],
+    terengganu:      ['Besut','Dungun','Hulu Terengganu','Kemaman','Kuala Terengganu','Marang','Setiu'],
+    kuala_lumpur:    ['Kuala Lumpur'],
+    labuan:          ['Labuan'],
+    putrajaya:       ['Putrajaya'],
+};
+
+function initDaerahDropdown() {
+    const display  = document.getElementById('f_daerah_display');
+    const hidden   = document.getElementById('f_daerah');
+    const dropdown = document.getElementById('daerah-dropdown');
+    const negeriSel = document.getElementById('f_negeri');
+    if (!display || !hidden || !dropdown) return;
+
+    function getOpts(negeri, query) {
+        const list = DAERAH_BY_NEGERI[negeri] || [];
+        if (!query) return list;
+        return list.filter(d => d.toLowerCase().includes(query.toLowerCase()));
+    }
+
+    function renderDropdown() {
+        const negeri = negeriSel ? negeriSel.value : '';
+        const q = display.value.trim();
+        const opts = getOpts(negeri, q);
+        if (opts.length === 0) {
+            dropdown.innerHTML = '<div class="px-4 py-3 text-sm text-slate-400 italic">Tiada pilihan daerah</div>';
+        } else {
+            dropdown.innerHTML = opts.map(d =>
+                `<div class="px-4 py-2.5 text-sm cursor-pointer hover:bg-blue-50 text-slate-700 daerah-opt" data-val="${d}">${d}</div>`
+            ).join('');
+            dropdown.querySelectorAll('.daerah-opt').forEach(opt => {
+                opt.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    display.value = opt.dataset.val;
+                    hidden.value  = opt.dataset.val;
+                    dropdown.classList.add('hidden');
+                });
+            });
+        }
+        dropdown.classList.remove('hidden');
+    }
+
+    display.addEventListener('focus', renderDropdown);
+    display.addEventListener('input', () => { hidden.value = display.value; renderDropdown(); });
+    display.addEventListener('blur', () => { setTimeout(() => dropdown.classList.add('hidden'), 150); });
+
+    if (negeriSel) {
+        negeriSel.addEventListener('change', () => {
+            display.value = '';
+            hidden.value  = '';
+            dropdown.classList.add('hidden');
+        });
+    }
+}
+initDaerahDropdown();
+</script>
+</body>
+</html>

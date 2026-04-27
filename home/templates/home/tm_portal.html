@@ -1,0 +1,434 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Portal Top Management | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { margin:0; background:#f6f8fc; min-height:100vh; }
+
+        /* ── TOPBAR ── */
+        #topbar {
+            background:#0f172a;
+            border-bottom:1px solid rgba(255,255,255,.06);
+            padding:0 32px; height:70px;
+            display:flex; align-items:center; justify-content:space-between;
+            position:sticky; top:0; z-index:100;
+        }
+
+        /* ── HERO ── */
+        #hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f3460 100%);
+            padding: 52px 40px 80px;
+            position: relative; overflow: hidden;
+        }
+        #hero::before {
+            content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(56,189,248,.08) 0%, transparent 70%),
+                        radial-gradient(ellipse 40% 60% at 10% 80%, rgba(99,102,241,.07) 0%, transparent 70%);
+        }
+        .hero-grid {
+            content:''; position:absolute; inset:0; opacity:.03;
+            background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ── STAT CARD ── */
+        .stat-card {
+            background:rgba(255,255,255,.06);
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:16px; padding:20px 28px;
+            transition: background .2s, transform .2s;
+            cursor:default;
+        }
+        .stat-card:hover { background:rgba(255,255,255,.1); transform:translateY(-2px); }
+
+        /* ── FLOATING CARDS BELOW HERO (overlap) ── */
+        #access-row {
+            display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+            max-width:900px; margin: -44px auto 0; padding:0 24px; position:relative; z-index:10;
+        }
+        .access-card {
+            background:#fff; border-radius:20px;
+            box-shadow: 0 8px 32px rgba(15,23,42,.12), 0 1px 4px rgba(15,23,42,.06);
+            overflow:hidden; text-decoration:none; display:flex; flex-direction:column;
+            transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease;
+            border:1px solid #e8edf5;
+        }
+        .access-card:hover {
+            transform: translateY(-6px) scale(1.015);
+            box-shadow: 0 20px 60px rgba(15,23,42,.16), 0 2px 8px rgba(15,23,42,.08);
+        }
+        .access-card:active { transform:translateY(-2px) scale(.99); }
+        .access-card-accent { height:4px; width:100%; }
+        .access-card-body { padding:24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; flex:1; }
+        .access-icon { width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+        .access-card-title { font-size:.92rem; font-weight:800; color:#1e293b; line-height:1.2; }
+        .access-card-desc { font-size:.68rem; color:#94a3b8; line-height:1.5; }
+        .access-card-cta { margin-top:auto; width:100%; padding:9px 0; border-radius:10px; font-size:.7rem; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; transition:filter .15s; }
+        .access-card:hover .access-card-cta { filter:brightness(1.08); }
+
+        /* ── CONTENT SECTION ── */
+        #content { max-width:1200px; margin:0 auto; padding:48px 24px 60px; }
+
+        /* ── TABLE ── */
+        .tbl-wrap { background:#fff; border-radius:18px; border:1px solid #e8edf5; box-shadow:0 2px 12px rgba(15,23,42,.05); overflow:hidden; }
+        table { width:100%; border-collapse:collapse; }
+        thead th { background:#f8fafc; padding:14px 20px; font-size:.66rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.08em; text-align:left; border-bottom:1px solid #f1f5f9; }
+        tbody tr { border-bottom:1px solid #f8fafc; transition:background .12s; }
+        tbody tr:last-child { border-bottom:none; }
+        tbody tr:hover { background:#fafbff; }
+        tbody td { padding:14px 20px; font-size:.78rem; color:#334155; vertical-align:middle; }
+
+        /* ── BADGE ── */
+        .badge-aktif    { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:.65rem;font-weight:700;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
+        .badge-tutup    { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:.65rem;font-weight:700;background:#fef2f2;color:#dc2626;border:1px solid #fecaca; }
+        .badge-pending  { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:.65rem;font-weight:700;background:#fffbeb;color:#b45309;border:1px solid #fde68a; }
+
+        /* ── SEARCH ── */
+        .search-wrap { position:relative; }
+        .search-wrap i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.7rem; pointer-events:none; }
+        .search-wrap input { padding:9px 14px 9px 34px; border:1px solid #e2e8f0; border-radius:12px; font-size:.78rem; background:#f8fafc; color:#334155; outline:none; transition:border .15s, box-shadow .15s; width:240px; }
+        .search-wrap input:focus { border-color:#38bdf8; box-shadow:0 0 0 3px rgba(56,189,248,.12); background:#fff; }
+
+        /* ── PAGINATION ── */
+        .pg-btn { padding:6px 12px; border-radius:8px; border:1px solid #e2e8f0; font-size:.72rem; font-weight:600; color:#475569; background:#fff; text-decoration:none; transition:background .12s; }
+        .pg-btn:hover { background:#f8fafc; }
+        .pg-btn.active { background:#0f172a; color:#fff; border-color:#0f172a; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+        .fade-up { animation: fadeUp .45s cubic-bezier(.22,1,.36,1) both; }
+
+        /* Logout modal */
+        @keyframes modalIn { from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)} }
+    </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<nav id="topbar">
+    <div class="flex items-center gap-3">
+        <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
+            <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-11 h-11 object-contain">
+        </div>
+        <div>
+            <p class="text-xs font-bold tracking-[.18em] text-sky-400 uppercase leading-none mb-1">KKM · YBTMK</p>
+            <p class="text-lg font-extrabold text-white leading-none">YBTMK Dashboard</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <!-- Role badge -->
+        <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-sky-300 bg-sky-950/60 border border-sky-800/50 px-3.5 py-2 rounded-lg">
+            <i class="fas fa-shield-alt text-[10px]"></i> Top Management
+        </span>
+        <!-- Profile -->
+        <a href="{% url 'home:profil_saya' %}"
+           class="flex items-center gap-2.5 bg-white/8 hover:bg-white/15 border border-white/12 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all">
+            <div class="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white text-xs font-extrabold shrink-0">
+                {{ request.user.username|first|upper }}
+            </div>
+            <span class="hidden sm:inline text-slate-200">{{ request.user.get_full_name|default:request.user.username }}</span>
+        </a>
+        <!-- Logout -->
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="button" onclick="showLogoutModal(this.closest('form'))"
+                    class="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 text-sm font-bold px-4 py-2 rounded-xl transition-all">
+                <i class="fas fa-sign-out-alt text-xs"></i>
+                <span class="hidden sm:inline">Log Keluar</span>
+            </button>
+        </form>
+    </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div id="hero">
+    <div class="hero-grid"></div>
+    <div class="relative z-10 max-w-5xl mx-auto">
+
+        <!-- Messages -->
+        {% for msg in messages %}
+        <div class="mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
+            {% if msg.tags == 'success' %}bg-green-500/15 border border-green-500/30 text-green-300
+            {% else %}bg-red-500/15 border border-red-500/30 text-red-300{% endif %}">
+            <i class="fas {% if msg.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} shrink-0"></i>
+            {{ msg }}
+        </div>
+        {% endfor %}
+
+        <!-- Greeting -->
+        <div class="fade-up mb-8" style="animation-delay:.05s;">
+            <p class="text-sky-400 text-xs font-bold tracking-[.2em] uppercase mb-2 opacity-80">Portal Eksekutif</p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-1">
+                Selamat Datang, {{ request.user.get_full_name|default:request.user.username }}
+            </h1>
+            <p class="text-slate-400 text-sm" id="hero-date"></p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 fade-up" style="animation-delay:.12s;">
+            <div class="stat-card">
+                <p class="text-2xl font-black text-white mb-0.5">{{ total }}</p>
+                <p class="text-xs text-slate-400 font-medium">Jumlah Fasiliti</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-2xl font-black text-emerald-400 mb-0.5">{{ aktif }}</p>
+                <p class="text-xs text-slate-400 font-medium">Aktif</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-2xl font-black text-amber-400 mb-0.5">{{ pending }}</p>
+                <p class="text-xs text-slate-400 font-medium">Perlu Kemaskini</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-2xl font-black text-sky-400 mb-0.5">{{ jumlah_tahun }}</p>
+                <p class="text-xs text-slate-400 font-medium">Rekod {{ tahun }}</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── ACCESS CARDS (float over hero) ── -->
+<div id="access-row" class="fade-up" style="animation-delay:.2s;">
+
+    <!-- Peta -->
+    <a href="{% url 'home:peta_tm' %}" class="access-card">
+        <div class="access-card-accent bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+        <div class="access-card-body">
+            <div class="access-icon bg-emerald-50">
+                <i class="fas fa-map-marked-alt text-emerald-600"></i>
+            </div>
+            <div>
+                <p class="access-card-title">Peta Interaktif</p>
+                <p class="access-card-desc">Lihat taburan lokasi semua fasiliti KKM di seluruh Malaysia</p>
+            </div>
+            <div class="access-card-cta bg-emerald-600 text-white">
+                <i class="fas fa-arrow-right text-[10px]"></i> Buka Peta
+            </div>
+        </div>
+    </a>
+
+    <!-- Dashboard -->
+    <a href="{% url 'home:dashboard_fasiliti' %}" class="access-card">
+        <div class="access-card-accent bg-gradient-to-r from-sky-400 to-blue-600"></div>
+        <div class="access-card-body">
+            <div class="access-icon bg-sky-50">
+                <i class="fas fa-chart-bar text-sky-600"></i>
+            </div>
+            <div>
+                <p class="access-card-title">Dashboard & Analitik</p>
+                <p class="access-card-desc">Statistik KPI, trend dan ringkasan prestasi fasiliti mengikut tahun</p>
+            </div>
+            <div class="access-card-cta bg-sky-600 text-white">
+                <i class="fas fa-arrow-right text-[10px]"></i> Buka Dashboard
+            </div>
+        </div>
+    </a>
+
+    <!-- Laporan -->
+    <a href="#laporan-section" class="access-card" onclick="smoothScroll(event,'laporan-section')">
+        <div class="access-card-accent bg-gradient-to-r from-violet-500 to-purple-600"></div>
+        <div class="access-card-body">
+            <div class="access-icon bg-violet-50">
+                <i class="fas fa-file-medical-alt text-violet-600"></i>
+            </div>
+            <div>
+                <p class="access-card-title">Laporan Fasiliti</p>
+                <p class="access-card-desc">Semak dan cetak laporan profiling lengkap setiap fasiliti kesihatan</p>
+            </div>
+            <div class="access-card-cta bg-violet-600 text-white">
+                <i class="fas fa-arrow-down text-[10px]"></i> Lihat Laporan
+            </div>
+        </div>
+    </a>
+
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<div id="content">
+
+    <!-- Section title + search -->
+    <div id="laporan-section" class="flex flex-wrap items-center justify-between gap-4 mb-5 fade-up" style="animation-delay:.28s;">
+        <div>
+            <p class="text-[10px] font-bold tracking-[.14em] uppercase text-slate-400 mb-1">Senarai Laporan</p>
+            <p class="text-base font-extrabold text-slate-800">Semua Fasiliti — Akses Baca Sahaja</p>
+        </div>
+        <form method="get" action="" class="flex items-center gap-2">
+            <div class="search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" name="carian" value="{{ carian|default:'' }}" placeholder="Cari nama fasiliti...">
+            </div>
+            <button type="submit"
+                    class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition">
+                Cari
+            </button>
+            {% if carian %}
+            <a href="{% url 'home:tm_portal' %}"
+               class="px-3 py-2 rounded-xl border border-slate-200 text-slate-500 text-xs font-semibold hover:bg-slate-50 transition">
+                <i class="fas fa-times"></i>
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="tbl-wrap fade-up" style="animation-delay:.32s;">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nama Fasiliti</th>
+                    <th>Jenis</th>
+                    <th>Negeri</th>
+                    <th>Status</th>
+                    <th>Tahun</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fp in fasiliti %}
+                <tr>
+                    <td class="text-slate-400 font-semibold text-xs w-12">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                    <td>
+                        <p class="font-bold text-slate-800 text-xs">{{ fp.nama_fasiliti }}</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">{{ fp.daerah }}</p>
+                    </td>
+                    <td class="text-slate-500 text-xs">{{ fp.get_jenis_fasiliti_display }}</td>
+                    <td class="text-slate-500 text-xs">{{ fp.get_negeri_display }}</td>
+                    <td>
+                        {% if fp.perlu_kemaskini %}
+                        <span class="badge-pending">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block"></span> Perlu Kemaskini
+                        </span>
+                        {% elif fp.status == 'aktif' %}
+                        <span class="badge-aktif">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Aktif
+                        </span>
+                        {% else %}
+                        <span class="badge-tutup">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span> Tutup
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-100 text-slate-600">
+                            <i class="fas fa-calendar-alt text-[9px]"></i> {{ fp.tahun }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-1.5">
+                            <a href="{% url 'home:detail_fasiliti' fp.pk %}"
+                               class="w-8 h-8 flex items-center justify-center rounded-lg text-sky-500 hover:bg-sky-50 transition" title="Lihat Laporan">
+                                <i class="fas fa-eye text-xs"></i>
+                            </a>
+                            <a href="{% url 'home:detail_fasiliti' fp.pk %}?print=1" target="_blank"
+                               class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition" title="Cetak Laporan">
+                                <i class="fas fa-print text-xs"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="py-16 text-center text-slate-400 text-sm">
+                        <i class="fas fa-search-minus text-2xl mb-3 block text-slate-300"></i>
+                        Tiada fasiliti dijumpai untuk carian "{{ carian }}"
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-between mt-5 fade-up" style="animation-delay:.36s;">
+        <p class="text-xs text-slate-400">
+            Menunjukkan <span class="font-semibold text-slate-600">{{ page_obj.start_index }}–{{ page_obj.end_index }}</span>
+            daripada <span class="font-semibold text-slate-600">{{ page_obj.paginator.count }}</span> fasiliti
+        </p>
+        <div class="flex items-center gap-1">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if carian %}&carian={{ carian }}{% endif %}" class="pg-btn">
+                <i class="fas fa-chevron-left text-[10px] mr-1"></i> Sebelum
+            </a>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="pg-btn active">{{ num }}</span>
+                {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+                <a href="?page={{ num }}{% if carian %}&carian={{ carian }}{% endif %}" class="pg-btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if carian %}&carian={{ carian }}{% endif %}" class="pg-btn">
+                Seterus <i class="fas fa-chevron-right text-[10px] ml-1"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Footer -->
+<footer class="text-center pb-8">
+    <p class="text-xs text-slate-400 font-medium">&copy; 2026 Kementerian Kesihatan Malaysia &middot; YBTMK Dashboard</p>
+</footer>
+
+<!-- ── LOGOUT MODAL ── -->
+<div id="logout-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900 bg-opacity-50 backdrop-blur-sm" onclick="hideLogoutModal()"></div>
+    <div class="relative bg-white rounded-2xl w-full max-w-sm p-8 flex flex-col items-center text-center border border-slate-100"
+         style="animation:modalIn .28s cubic-bezier(.22,1,.36,1) both;box-shadow:0 24px 80px rgba(0,0,0,.2);">
+        <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
+            <i class="fas fa-sign-out-alt text-red-500 text-xl"></i>
+        </div>
+        <h2 class="text-slate-800 font-extrabold text-lg mb-1.5">Log Keluar?</h2>
+        <p class="text-slate-500 text-sm mb-7">Adakah anda pasti mahu log keluar<br>daripada sistem YBTMK Dashboard?</p>
+        <div class="flex gap-3 w-full">
+            <button type="button" onclick="hideLogoutModal()"
+                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition">
+                Batal
+            </button>
+            <button type="button" onclick="confirmLogout()"
+                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white bg-red-500 hover:bg-red-600 transition">
+                <i class="fas fa-sign-out-alt mr-1.5"></i> Ya, Log Keluar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Date
+    (function(){
+        const d = new Date();
+        const days = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+        const months = ['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogos','Sep','Okt','Nov','Dis'];
+        document.getElementById('hero-date').textContent =
+            days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    })();
+
+    // Smooth scroll
+    function smoothScroll(e, id) {
+        e.preventDefault();
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    // Logout modal
+    let _logoutForm = null;
+    function showLogoutModal(form) { _logoutForm = form; const m = document.getElementById('logout-modal'); m.classList.remove('hidden'); m.classList.add('flex'); }
+    function hideLogoutModal() { const m = document.getElementById('logout-modal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+    function confirmLogout() { if (_logoutForm) _logoutForm.submit(); }
+</script>
+
+</body>
+</html>

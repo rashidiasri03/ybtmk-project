@@ -1,0 +1,204 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Profil Saya | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-100 min-h-screen antialiased">
+
+    <!-- TOP NAV -->
+    <nav class="bg-gradient-to-r from-slate-900 to-blue-950 text-white px-8 py-0 flex items-center justify-between shadow-lg" style="min-height:68px">
+        <div class="flex items-center gap-4">
+            <img src="{% static 'home/images/jata negara.png' %}" alt="Logo" class="h-16 w-16 rounded-xl object-cover ring-2 ring-white ring-opacity-20">
+            <div>
+                <p class="text-blue-300 text-[10px] font-semibold tracking-widest uppercase leading-none">KKM</p>
+                <p class="text-white font-bold text-base leading-tight">YBTMK Dashboard</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="javascript:history.back()"
+               class="flex items-center gap-2 bg-white bg-opacity-10 hover:bg-opacity-20 border border-white border-opacity-15 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="button" onclick="showLogoutModal(this.closest('form'))" class="flex items-center gap-2 bg-red-500 bg-opacity-0 hover:bg-opacity-20 border border-white border-opacity-15 hover:border-red-400 text-blue-200 hover:text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition">
+                    <i class="fas fa-sign-out-alt text-xs"></i> Log Keluar
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 py-10">
+
+        <!-- Messages -->
+        {% for msg in messages %}
+        <div class="mb-5 flex items-start gap-3 rounded-2xl px-5 py-4 text-sm bg-green-50 border border-green-200 text-green-700 shadow-sm">
+            <i class="fas fa-check-circle text-green-400 mt-0.5 shrink-0"></i>
+            <span>{{ msg }}</span>
+        </div>
+        {% endfor %}
+
+        <!-- Profile hero card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-5">
+            <div class="bg-gradient-to-r from-slate-800 to-blue-900 px-8 py-8 flex items-center gap-6">
+                <!-- Avatar -->
+                <div class="w-20 h-20 rounded-2xl bg-white bg-opacity-15 flex items-center justify-center text-white font-black text-4xl shrink-0 shadow-inner ring-2 ring-white ring-opacity-20">
+                    {{ request.user.username|first|upper }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-white font-bold text-2xl leading-tight truncate">
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </h1>
+                    <p class="text-blue-300 text-sm mt-0.5">@{{ request.user.username }}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        {% if request.user.is_superuser %}
+                        <span class="inline-flex items-center gap-1 bg-purple-500 bg-opacity-30 text-purple-200 text-xs font-semibold px-2.5 py-1 rounded-lg border border-purple-400 border-opacity-30">
+                            <i class="fas fa-crown text-[10px]"></i> Superadmin
+                        </span>
+                        {% elif request.user.is_staff %}
+                        <span class="inline-flex items-center gap-1 bg-blue-500 bg-opacity-30 text-blue-200 text-xs font-semibold px-2.5 py-1 rounded-lg border border-blue-400 border-opacity-30">
+                            <i class="fas fa-shield-alt text-[10px]"></i> Admin
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 bg-white bg-opacity-10 text-blue-200 text-xs font-semibold px-2.5 py-1 rounded-lg border border-white border-opacity-10">
+                            <i class="fas fa-user text-[10px]"></i> Pengguna
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'home:edit_profil' %}"
+                   class="shrink-0 flex items-center gap-2 bg-white bg-opacity-15 hover:bg-opacity-25 border border-white border-opacity-20 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition">
+                    <i class="fas fa-pen text-xs"></i> Edit Profil
+                </a>
+            </div>
+
+            <!-- Info rows -->
+            <div class="divide-y divide-slate-100">
+                <div class="flex items-center px-8 py-4 gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <i class="fas fa-at text-slate-500 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Nama Pengguna</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ request.user.username }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center px-8 py-4 gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <i class="fas fa-id-card text-slate-500 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Nama Penuh</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ request.user.get_full_name|default:"—" }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center px-8 py-4 gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <i class="fas fa-envelope text-slate-500 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">E-mel</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ request.user.email|default:"—" }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center px-8 py-4 gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <i class="fas fa-calendar text-slate-500 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium uppercase tracking-wider">Tarikh Daftar</p>
+                        <p class="text-sm font-semibold text-slate-800 mt-0.5">{{ request.user.date_joined|date:"j F Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bahagian card -->
+        {% if not request.user.is_superuser %}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+                    <i class="fas fa-building text-green-600 text-sm"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-slate-700">Bahagian Yang Dibenarkan</p>
+                    <p class="text-xs text-slate-400">Bahagian yang boleh anda akses dalam sistem</p>
+                </div>
+                <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-lg">{{ bahagian_names|length }}</span>
+            </div>
+            {% if bahagian_names %}
+            <div class="px-6 py-4 flex flex-wrap gap-2">
+                {% for name in bahagian_names %}
+                <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-100 text-xs font-medium px-3 py-1.5 rounded-xl">
+                    <i class="fas fa-check-circle text-blue-400 text-[10px]"></i> {{ name }}
+                </span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="px-6 py-5 flex items-center gap-3 text-slate-400 text-sm">
+                <i class="fas fa-info-circle"></i>
+                Tiada bahagian ditetapkan. Sila hubungi Superadmin.
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="px-6 py-5 flex items-center gap-3 text-purple-700 text-sm bg-purple-50">
+                <i class="fas fa-crown text-purple-400 text-base"></i>
+                Sebagai Superadmin, anda mempunyai akses ke <strong class="ml-1">semua bahagian</strong> secara automatik.
+            </div>
+        </div>
+        {% endif %}
+
+    </main>
+<!-- Logout Confirmation Modal -->
+<div id="logout-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm" onclick="hideLogoutModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto flex flex-col items-center text-center p-8">
+        <div class="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-5">
+            <i class="fas fa-sign-out-alt text-red-500 text-2xl"></i>
+        </div>
+        <h2 class="text-lg font-bold text-slate-800 mb-2">Log Keluar?</h2>
+        <p class="text-sm text-slate-500 mb-7">Adakah anda pasti mahu log keluar<br>daripada sistem YBTMK Dashboard?</p>
+        <div class="flex gap-3 w-full">
+            <button type="button" onclick="hideLogoutModal()" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                Batal
+            </button>
+            <button type="button" onclick="confirmLogout()" class="flex-1 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition shadow-sm">
+                <i class="fas fa-sign-out-alt mr-1.5"></i> Ya, Log Keluar
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+let _logoutTargetForm = null;
+function showLogoutModal(form) {
+    _logoutTargetForm = form;
+    const m = document.getElementById('logout-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+function hideLogoutModal() {
+    const m = document.getElementById('logout-modal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow = '';
+    _logoutTargetForm = null;
+}
+function confirmLogout() {
+    if (_logoutTargetForm) _logoutTargetForm.submit();
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideLogoutModal();
+});
+</script>
+</body>
+</html>

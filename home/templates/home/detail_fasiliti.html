@@ -1,0 +1,388 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>{{ fp.nama_fasiliti }} | Profil Fasiliti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% if fp.latitud %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    {% endif %}
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            .no-print { display: none !important; }
+            aside { display: none !important; }
+            .ml-64 { margin-left: 0 !important; }
+            body { background: white; }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('print') === '1') { setTimeout(function(){ window.print(); }, 600); }
+        });
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen antialiased">
+<div class="flex min-h-screen">
+    {% include 'home/_sidebar.html' with active_page='senarai_fasiliti' %}
+
+    <div class="ml-64 flex-1 flex flex-col">
+
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm no-print">
+            <div class="flex items-center gap-3">
+                <a href="{% url 'home:senarai_fasiliti' %}" class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 transition">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800">{{ fp.nama_fasiliti }}</h1>
+                    <p class="text-slate-400 text-xs mt-0.5">Laporan Profiling Fasiliti</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    <i class="fas fa-print text-slate-400"></i> Cetak
+                </button>
+                <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <!-- User chip -->
+                <div class="flex items-center gap-1.5 pl-1.5 pr-1.5 py-1.5 rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm">{{ request.user.username|first|upper }}</div>
+                    <div class="pl-1 pr-2 hidden sm:block">
+                        <p class="text-xs font-semibold text-slate-700 leading-tight max-w-[120px] truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p class="text-[11px] text-purple-500 font-semibold leading-tight">{% if request.user.is_superuser %}Superadmin{% elif request.user.is_staff %}Admin{% else %}Pengguna{% endif %}</p>
+                    </div>
+                    <div class="w-px h-6 bg-slate-200 mx-0.5 hidden sm:block"></div>
+                    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+                        <button type="button" title="Log Keluar" onclick="showLogoutModal(this.closest('form'))" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-sign-out-alt text-sm"></i></button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 px-8 py-8 space-y-6">
+
+            <!-- Identity Card -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-2xl bg-white bg-opacity-20 flex items-center justify-center text-white text-2xl shrink-0">
+                                <i class="fas fa-hospital"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">{{ fp.nama_fasiliti }}</h2>
+                                <p class="text-blue-200 mt-1">{{ fp.get_jenis_fasiliti_display }} &bull; {{ fp.get_negeri_display }}, {{ fp.daerah }}</p>
+                                <div class="flex items-center gap-3 mt-2">
+                                    {% if fp.perlu_kemaskini %}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 bg-opacity-20 text-white border border-amber-300 border-opacity-40">
+                                        <i class="fas fa-exclamation-triangle"></i> Perlu Kemaskini
+                                    </span>
+                                    {% elif fp.status == 'aktif' %}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-400 bg-opacity-20 text-white border border-green-300 border-opacity-40">
+                                        <i class="fas fa-check-circle"></i> Aktif
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-400 bg-opacity-20 text-white border border-red-300 border-opacity-40">
+                                        <i class="fas fa-ban"></i> Tutup
+                                    </span>
+                                    {% endif %}
+                                    <span class="text-blue-200 text-xs">Dikemaskini: {{ fp.updated_at|date:"d M Y" }}</span>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                        <i class="fas fa-calendar-alt text-[10px]"></i> {{ fp.tahun }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Skor Gauge -->
+                        <div class="text-center shrink-0">
+                            <div class="w-24 h-24 rounded-full border-4 flex items-center justify-center
+                                {% if fp.skor_kesediaan >= 70 %}border-green-400 bg-green-400 bg-opacity-20{% elif fp.skor_kesediaan >= 40 %}border-amber-400 bg-amber-400 bg-opacity-20{% else %}border-red-400 bg-red-400 bg-opacity-20{% endif %}">
+                                <div>
+                                    <p class="text-3xl font-extrabold text-white">{{ fp.skor_kesediaan }}</p>
+                                    <p class="text-blue-200 text-xs -mt-1">/ 100</p>
+                                </div>
+                            </div>
+                            <p class="text-white text-xs font-semibold mt-2">Skor Kesediaan</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Meta row -->
+                <div class="grid grid-cols-4 divide-x divide-slate-100 border-t border-slate-100">
+                    <div class="px-6 py-4">
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Jenis Fasiliti</p>
+                        <p class="text-slate-800 font-semibold mt-1">{{ fp.get_jenis_fasiliti_display }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Negeri</p>
+                        <p class="text-slate-800 font-semibold mt-1">{{ fp.get_negeri_display }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Daerah / Bandar</p>
+                        <p class="text-slate-800 font-semibold mt-1">{{ fp.daerah|default:"—" }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Diisi Oleh</p>
+                        <p class="text-slate-800 font-semibold mt-1">{% if fp.submitted_by %}{{ fp.submitted_by.get_full_name|default:fp.submitted_by.username }}{% else %}—{% endif %}</p>
+                    </div>
+                </div>
+                <!-- Wilayah / Zon / Parlimen row -->
+                {% if fp.wilayah or fp.zon or fp.parlimen %}
+                <div class="grid grid-cols-3 divide-x divide-slate-100 border-t border-slate-100">
+                    <div class="px-6 py-3">
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Wilayah</p>
+                        <p class="text-slate-700 text-sm font-semibold mt-0.5">{{ fp.wilayah|capfirst|default:"&mdash;" }}</p>
+                    </div>
+                    <div class="px-6 py-3">
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Zon</p>
+                        <p class="text-slate-700 text-sm font-semibold mt-0.5">{{ fp.zon|default:"&mdash;" }}</p>
+                    </div>
+                    <div class="px-6 py-3">
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Parlimen</p>
+                        <p class="text-slate-700 text-sm font-semibold mt-0.5">{{ fp.parlimen|default:"&mdash;" }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if fp.alamat or fp.poskod or fp.latitud %}
+                <!-- Address + map row -->
+                <div class="border-t border-slate-100">
+                    <div class="grid grid-cols-3 divide-x divide-slate-100 bg-slate-50/40">
+                        <div class="px-6 py-3 col-span-2">
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Alamat</p>
+                            <p class="text-slate-700 text-sm mt-0.5">{{ fp.alamat|default:"—" }}</p>
+                        </div>
+                        <div class="px-6 py-3">
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Poskod</p>
+                            <p class="text-slate-700 text-sm mt-0.5">{{ fp.poskod|default:"—" }}</p>
+                            {% if fp.latitud %}
+                            <p class="text-slate-500 text-xs font-mono mt-1">{{ fp.latitud|floatformat:5 }}, {{ fp.longitud|floatformat:5 }}</p>
+                            <a href="https://www.google.com/maps?q={{ fp.latitud }},{{ fp.longitud }}" target="_blank"
+                               class="text-xs text-blue-500 hover:text-blue-700 inline-flex items-center gap-1 mt-1">
+                                <i class="fas fa-external-link-alt text-[10px]"></i> Buka Google Maps
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if fp.latitud %}
+                    <!-- Embedded Leaflet map -->
+                    <div id="facility-map" class="w-full h-56 border-t border-slate-100"></div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Kluster 1: Kejuruteraan -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 text-sm">
+                        <i class="fas fa-hard-hat"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 1 — Kejuruteraan</h3>
+                        <p class="text-xs text-slate-400">Maklumat fizikal bangunan dan infrastruktur</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-50 px-2">
+                    {% include 'home/_detail_row.html' with label="Kod Fasiliti" value=fp.kod_fasiliti type="text" %}
+                    {% include 'home/_detail_row.html' with label="Tahun Dibina" value=fp.tahun_dibina type="text" %}
+                    {% include 'home/_detail_row.html' with label="Jenis Hospital/Klinik" value=fp.jenis_hospital_klinik type="text" %}
+                    {% include 'home/_detail_row.html' with label="Ukuran Tanah & Boleh Extend?" value=fp.ukuran_tanah type="text" %}
+                    {% include 'home/_detail_row.html' with label="Siling Okay?" value=fp.siling_okay type="bool" %}
+                </div>
+            </div>
+
+            <!-- Kluster 2: Sumber Manusia -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-sm">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 2 — Sumber Manusia</h3>
+                        <p class="text-xs text-slate-400">Kakitangan, shift, dan pengurusan tenaga kerja</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Kakitangan Tetap" value=fp.kakitangan_tetap type="text" %}
+                    {% include 'home/_detail_row.html' with label="Kakitangan Kontrak" value=fp.kakitangan_kontrak type="text" %}
+                    {% include 'home/_detail_row.html' with label="Kakitangan MySTeP" value=fp.kakitangan_mystep type="text" %}
+                    {% include 'home/_detail_row.html' with label="Jumlah Kakitangan" value=fp.jumlah_kakitangan type="text" %}
+                    {% include 'home/_detail_row.html' with label="Bilangan Shift Sehari" value=fp.bilangan_shift type="text" %}
+                    {% include 'home/_detail_row.html' with label="Bil. Staff Non-Medical/Admin" value=fp.bilangan_staff_non_medical type="text" %}
+                    {% include 'home/_detail_row.html' with label="Waktu Beroperasi" value=fp.waktu_beroperasi type="text" %}
+                    {% include 'home/_detail_row.html' with label="Cara Minta Cuti & Rotasi" value=fp.cara_minta_cuti type="long" %}
+                    {% include 'home/_detail_row.html' with label="Ada Staff Pinjaman?" value=fp.ada_kakitangan_pinjaman type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada OT/Allowance?" value=fp.ada_ot_allowance type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Isu Penempatan Staff" value=fp.isu_penempatan type="long" %}
+                    {% include 'home/_detail_row.html' with label="In-Charge Fasiliti" value=fp.siapa_manage type="text" %}
+                </div>
+            </div>
+
+            <!-- Kluster 3: Perkhidmatan Kesihatan -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-sm">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 3 — Perkhidmatan Kesihatan & Perubatan</h3>
+                        <p class="text-xs text-slate-400">Jenis perkhidmatan, pelawat, penyakit, ubat, dan kemudahan rawatan</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Jenis Perkhidmatan" value=fp.jenis_perkhidmatan type="long" %}
+                    {% include 'home/_detail_row.html' with label="Jenis Penyakit Kerap" value=fp.jenis_penyakit_kerap type="long" %}
+                    {% include 'home/_detail_row.html' with label="Anggaran Pelawat Harian" value=fp.anggaran_pelawat_harian type="text" %}
+                    {% include 'home/_detail_row.html' with label="Boleh Selesaikan Kes?" value=fp.boleh_selesaikan_kes type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Jika Tidak, Rujuk ke" value=fp.rujukan_ke type="text" %}
+                    {% include 'home/_detail_row.html' with label="Kualiti Makanan" value=fp.kualiti_makanan type="long" %}
+                    {% include 'home/_detail_row.html' with label="Masa Tunggu Rawatan" value=fp.masa_tunggu type="text" %}
+                    {% include 'home/_detail_row.html' with label="Ada OSCA (Kes Dadah)?" value=fp.ada_osca type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Bilangan Unit OSCA" value=fp.bilangan_osca type="text" %}
+                    {% include 'home/_detail_row.html' with label="Bekalan Ubat Mencukupi?" value=fp.bekalan_ubat_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Bilik Mayat/Forensik?" value=fp.ada_bilik_mayat type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Ruang Rehat Pelawat?" value=fp.ada_ruang_rehat type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Keperluan Oksigen" value=fp.keperluan_oksigen type="long" %}
+                    {% include 'home/_detail_row.html' with label="Wad Diasingkan (L/P)?" value=fp.wad_diasingkan type="bool" %}
+                </div>
+            </div>
+
+            <!-- Kluster 4: Aset -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-sm">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 4 — Aset</h3>
+                        <p class="text-xs text-slate-400">Keadaan peralatan, ambulans, dan aset perubatan</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Keadaan Aset (Umur & Fungsi)" value=fp.keadaan_aset type="long" %}
+                    {% include 'home/_detail_row.html' with label="Umur Komputer" value=fp.umur_komputer type="long" %}
+                    {% include 'home/_detail_row.html' with label="Aset Yang Perlu Diganti" value=fp.aset_perlu_diganti type="long" %}
+                    {% include 'home/_detail_row.html' with label="Aset Tidak Ikut Spec KKM" value=fp.aset_tidak_ikut_spec type="long" %}
+                    {% include 'home/_detail_row.html' with label="Disposable Mencukupi?" value=fp.disposable_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Ambulans?" value=fp.ada_ambulans type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Keadaan Ambulans" value=fp.keadaan_ambulans type="long" %}
+                    {% include 'home/_detail_row.html' with label="Ada Hemodialisis?" value=fp.ada_hemodialisis type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Bilangan Unit Hemodialisis" value=fp.unit_hemodialisis type="text" %}
+                    {% include 'home/_detail_row.html' with label="Ada EMR (Sistem Digital)?" value=fp.ada_emr type="bool" %}
+                </div>
+            </div>
+
+            <!-- Kluster 5: Fasiliti -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600 text-sm">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 5 — Fasiliti</h3>
+                        <p class="text-xs text-slate-400">Kemudahan fizikal, quarters, parking, dan keselamatan</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Keadaan Perabot/Infrastruktur" value=fp.keadaan_perabot type="long" %}
+                    {% include 'home/_detail_row.html' with label="Ada Quarters?" value=fp.ada_quarters type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Quarters Mencukupi?" value=fp.quarters_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Isu Parking?" value=fp.ada_isu_parking type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Masalah Aircond/Kipas?" value=fp.masalah_aircond type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ruang Kerja/Treatment Mencukupi?" value=fp.ruang_kerja_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Kawasan Rehat Staff?" value=fp.ada_pantry type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Kantin/Mini Mart?" value=fp.ada_kantin type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ada Security?" value=fp.ada_security type="bool" %}
+                </div>
+            </div>
+
+            <!-- Kluster 6: Perancangan -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 text-sm">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 6 — Perancangan</h3>
+                        <p class="text-xs text-slate-400">Perkhidmatan baharu dan keperluan masa depan</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Perkhidmatan Baru Yang Ingin Diwujudkan" value=fp.perkhidmatan_baru type="long" %}
+                    {% include 'home/_detail_row.html' with label="Fasiliti Yang Sangat Diperlukan" value=fp.fasiliti_diperlukan type="long" %}
+                </div>
+            </div>
+
+            <!-- Kluster 7: Konsesi -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600 text-sm">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 7 — Perkhidmatan Konsesi</h3>
+                        <p class="text-xs text-slate-400">Status penyelenggaraan dan perkhidmatan pihak ketiga</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Maintenance Konsesi OK?" value=fp.maintenance_okay type="bool" %}
+                </div>
+            </div>
+
+            <!-- Kluster 8: Lain-lain -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center text-red-500 text-sm">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800">Kluster 8 — Lain-lain / Isu Utama</h3>
+                        <p class="text-xs text-slate-400">Masalah utama dan cadangan (wishlist)</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1">
+                    {% if fp.masalah_utama %}
+                    <div class="px-6 py-4 border-b border-slate-50">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Masalah Utama</p>
+                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.masalah_utama }}</p>
+                    </div>
+                    {% endif %}
+                    {% if fp.wishlist %}
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Wishlist</p>
+                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.wishlist }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+{% if fp.latitud %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+  (function () {
+    var lat = {{ fp.latitud }};
+    var lng = {{ fp.longitud }};
+    var map = L.map('facility-map').setView([lat, lng], 16);
+    L.tileLayer('https://tile.openfreemap.org/styles/liberty/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | OpenFreeMap',
+      maxZoom: 20
+    }).addTo(map);
+    L.marker([lat, lng]).addTo(map)
+      .bindPopup('<b>{{ fp.nama_fasiliti|escapejs }}</b><br>{{ fp.alamat|escapejs }}<br>{{ fp.poskod|escapejs }}')
+      .openPopup();
+  })();
+</script>
+{% endif %}
+</body>
+</html>

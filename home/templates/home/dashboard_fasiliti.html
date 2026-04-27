@@ -1,0 +1,506 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Dashboard Profiling Fasiliti | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 min-h-screen antialiased">
+<div class="flex min-h-screen">
+    {% include 'home/_sidebar.html' with active_page='dashboard_fasiliti' %}
+
+    <div class="ml-64 flex-1 flex flex-col">
+
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-xl">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800">Dashboard Profiling Fasiliti</h1>
+                    <p class="text-slate-400 text-xs mt-0.5">Analisis data hospital & klinik yang telah diprofil</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                    <i class="fas fa-hospital-alt text-blue-500"></i> Senarai Fasiliti
+                </a>
+                {% if request.user.is_superuser or request.user.is_staff or is_jkn %}
+                <a href="{% url 'home:tambah_fasiliti' %}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
+                    <i class="fas fa-plus"></i> Tambah Profil
+                </a>
+                {% endif %}
+                <!-- User chip -->
+                <div class="flex items-center gap-1.5 pl-1.5 pr-1.5 py-1.5 rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm">{{ request.user.username|first|upper }}</div>
+                    <div class="pl-1 pr-2 hidden sm:block">
+                        <p class="text-xs font-semibold text-slate-700 leading-tight max-w-[120px] truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
+                        <p class="text-[11px] text-purple-500 font-semibold leading-tight">{% if request.user.is_superuser %}Superadmin{% elif request.user.is_staff %}Admin{% else %}Pengguna{% endif %}</p>
+                    </div>
+                    <div class="w-px h-6 bg-slate-200 mx-0.5 hidden sm:block"></div>
+                    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+                        <button type="button" title="Log Keluar" onclick="showLogoutModal(this.closest('form'))" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-sign-out-alt text-sm"></i></button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 px-8 py-8 space-y-7">
+
+            <!-- Filter Bar -->
+            <form method="GET" class="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-4">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <div class="flex items-center gap-2 text-sm font-semibold text-slate-500 shrink-0">
+                        <i class="fas fa-filter text-blue-400"></i> Tapis:
+                    </div>
+                    <!-- Negeri -->
+                    <select name="f_negeri"
+                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 outline-none bg-white min-w-[160px]">
+                        <option value="">-- Semua Negeri --</option>
+                        {% for slug, label in negeri_choices %}
+                        <option value="{{ slug }}" {% if f_negeri == slug %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <!-- Jenis Fasiliti -->
+                    <select name="f_jenis"
+                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 outline-none bg-white min-w-[180px]">
+                        <option value="">-- Semua Jenis --</option>
+                        {% for slug, label in jenis_choices %}
+                        <option value="{{ slug }}" {% if f_jenis == slug %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <!-- Status -->
+                    <select name="f_status"
+                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 outline-none bg-white min-w-[140px]">
+                        <option value="">-- Semua Status --</option>
+                        <option value="aktif"   {% if f_status == 'aktif'   %}selected{% endif %}>Aktif</option>
+                        <option value="tutup"   {% if f_status == 'tutup'   %}selected{% endif %}>Tutup</option>
+                        <option value="pending" {% if f_status == 'pending' %}selected{% endif %}>Perlu Kemaskini</option>
+                    </select>
+                    <!-- Tahun -->
+                    <select name="f_tahun"
+                        class="rounded-xl border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-300 outline-none bg-white min-w-[130px]">
+                        <option value="">-- Semua Tahun --</option>
+                        {% for yr in all_tahun_dashboard %}
+                        <option value="{{ yr }}" {% if f_tahun == yr|stringformat:"s" %}selected{% endif %}>{{ yr }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm shrink-0">
+                        <i class="fas fa-search"></i> Tapis
+                    </button>
+                    {% if is_filtered %}
+                    <a href="{% url 'home:dashboard_fasiliti' %}"
+                        class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-500 hover:bg-slate-50 transition shrink-0">
+                        <i class="fas fa-times"></i> Reset
+                    </a>
+                    <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full">
+                        {{ total }} rekod dijumpai
+                    </span>
+                    {% endif %}
+                </div>
+            </form>
+            <div class="grid grid-cols-4 gap-5">
+                <!-- Total -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl shrink-0">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-extrabold text-slate-800">{{ total }}</p>
+                        <p class="text-xs text-slate-400 font-medium mt-0.5">Jumlah Fasiliti</p>
+                    </div>
+                </div>
+                <!-- Aktif -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 text-2xl shrink-0">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-extrabold text-green-600">{{ aktif }}</p>
+                        <p class="text-xs text-slate-400 font-medium mt-0.5">Fasiliti Aktif</p>
+                    </div>
+                </div>
+                <!-- Tutup -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 text-2xl shrink-0">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-extrabold text-red-500">{{ tutup }}</p>
+                        <p class="text-xs text-slate-400 font-medium mt-0.5">Fasiliti Tutup</p>
+                    </div>
+                </div>
+                <!-- Skor Purata -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 text-2xl shrink-0">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-extrabold text-purple-600">{{ skor_purata }}%</p>
+                        <p class="text-xs text-slate-400 font-medium mt-0.5">Skor Kesediaan Purata</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 1: Donut + Negeri Bar -->
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Jenis Fasiliti Donut -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Jenis Fasiliti</h3>
+                            <p class="text-xs text-slate-400">Pecahan mengikut jenis fasiliti</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-sm">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                    </div>
+                    <div id="chart-jenis"></div>
+                </div>
+
+                <!-- Negeri Bar -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Fasiliti Mengikut Negeri</h3>
+                            <p class="text-xs text-slate-400">Bilangan fasiliti yang telah diprofil</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-sm">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                    </div>
+                    <div id="chart-negeri"></div>
+                </div>
+            </div>
+
+            <!-- Row 2: Issues Stacked Bar (full width) -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Analisis Isu — Ya vs Tidak</h3>
+                        <p class="text-xs text-slate-400">Bilangan fasiliti yang menjawab Ya / Tidak bagi setiap medan</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs font-semibold">
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>Ya</span>
+                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-400 inline-block"></span>Tidak</span>
+                    </div>
+                </div>
+                <div id="chart-issues"></div>
+            </div>
+
+            <!-- Row 2.5: Analitik Perkhidmatan Kesihatan -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
+                <div class="flex items-center gap-3 pb-1 border-b border-slate-100">
+                    <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center text-red-500 text-sm">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Analitik Kluster Perkhidmatan Kesihatan</h3>
+                        <p class="text-xs text-slate-400">Keupayaan klinikal dan perkhidmatan berdasarkan {{ perk_with_data }} fasiliti</p>
+                    </div>
+                </div>
+                <!-- KPI mini-cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shrink-0"><i class="fas fa-laptop-medical text-sm"></i></div>
+                        <div>
+                            <p class="text-xs text-blue-500 font-semibold">Ada EMR</p>
+                            <p class="text-xl font-black text-blue-700">{{ perk_emr }}<span class="text-xs font-normal text-blue-400"> / {{ perk_with_data }}</span></p>
+                        </div>
+                    </div>
+                    <div class="rounded-xl bg-purple-50 border border-purple-100 p-4 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 shrink-0"><i class="fas fa-tint text-sm"></i></div>
+                        <div>
+                            <p class="text-xs text-purple-500 font-semibold">Hemodialisis</p>
+                            <p class="text-xl font-black text-purple-700">{{ perk_hemodial }}<span class="text-xs font-normal text-purple-400"> / {{ perk_with_data }}</span></p>
+                        </div>
+                    </div>
+                    <div class="rounded-xl bg-green-50 border border-green-100 p-4 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-green-100 flex items-center justify-center text-green-600 shrink-0"><i class="fas fa-pills text-sm"></i></div>
+                        <div>
+                            <p class="text-xs text-green-500 font-semibold">Bekalan Ubat OK</p>
+                            <p class="text-xl font-black text-green-700">{{ perk_ubat }}<span class="text-xs font-normal text-green-400"> / {{ perk_with_data }}</span></p>
+                        </div>
+                    </div>
+                    <div class="rounded-xl bg-amber-50 border border-amber-100 p-4 flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 shrink-0"><i class="fas fa-check-double text-sm"></i></div>
+                        <div>
+                            <p class="text-xs text-amber-500 font-semibold">Boleh Selesai Kes</p>
+                            <p class="text-xl font-black text-amber-700">{{ perk_selesai_kes }}<span class="text-xs font-normal text-amber-400"> / {{ perk_with_data }}</span></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Masa Tunggu + Pelawat Harian side by side -->
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 mb-3">Masa Tunggu Purata</p>
+                        <div id="chart-masa-tunggu"></div>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-500 mb-3">Anggaran Pelawat Harian</p>
+                        <div id="chart-pelawat"></div>
+                    </div>
+                </div>
+                <!-- Perk boolean comparison chart -->
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 mb-3">Perbandingan Ya / Tidak — Medan Perkhidmatan</p>
+                    <div id="chart-perk-bool"></div>
+                </div>
+            </div>
+
+            <!-- Row 3: Readiness Scores Bar -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Skor Kesediaan Fasiliti (Top 10)</h3>
+                        <p class="text-xs text-slate-400">Peratus skor kesediaan berdasarkan medan utama</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-sm">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                </div>
+                <div id="chart-skor"></div>
+            </div>
+
+            <!-- Row 4: Recent Table -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Profil Terkini</h3>
+                        <p class="text-xs text-slate-400">5 fasiliti terkini yang telah diisi</p>
+                    </div>
+                    <a href="{% url 'home:senarai_fasiliti' %}" class="text-xs font-semibold text-blue-600 hover:underline">Lihat Semua →</a>
+                </div>
+                {% if fasiliti_list %}
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100">
+                            <th class="text-left px-6 py-3 font-semibold text-slate-400 text-xs uppercase tracking-wider">Nama Fasiliti</th>
+                            <th class="text-left px-6 py-3 font-semibold text-slate-400 text-xs uppercase tracking-wider">Jenis</th>
+                            <th class="text-left px-6 py-3 font-semibold text-slate-400 text-xs uppercase tracking-wider">Negeri</th>
+                            <th class="text-left px-6 py-3 font-semibold text-slate-400 text-xs uppercase tracking-wider">Status</th>
+                            <th class="text-left px-6 py-3 font-semibold text-slate-400 text-xs uppercase tracking-wider">Skor</th>
+                            <th class="px-6 py-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for fp in fasiliti_list %}
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="px-6 py-3.5">
+                                <p class="font-semibold text-slate-800">{{ fp.nama_fasiliti }}</p>
+                                <p class="text-xs text-slate-400">{{ fp.daerah }}</p>
+                            </td>
+                            <td class="px-6 py-3.5 text-slate-600 text-xs">{{ fp.get_jenis_fasiliti_display }}</td>
+                            <td class="px-6 py-3.5 text-slate-600 text-xs">{{ fp.get_negeri_display }}</td>
+                            <td class="px-6 py-3.5">
+                                {% if fp.perlu_kemaskini %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Perlu Kemaskini
+                                </span>
+                                {% elif fp.status == 'aktif' %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Aktif
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Tutup
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-3.5">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-16 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                        <div class="h-full rounded-full {% if fp.skor_kesediaan >= 70 %}bg-green-500{% elif fp.skor_kesediaan >= 40 %}bg-amber-400{% else %}bg-red-400{% endif %}"
+                                             style="width:{{ fp.skor_kesediaan }}%"></div>
+                                    </div>
+                                    <span class="text-xs font-semibold {% if fp.skor_kesediaan >= 70 %}text-green-600{% elif fp.skor_kesediaan >= 40 %}text-amber-600{% else %}text-red-500{% endif %}">{{ fp.skor_kesediaan }}%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-3.5">
+                                <a href="{% url 'home:detail_fasiliti' fp.pk %}" class="text-xs font-semibold text-blue-600 hover:underline">
+                                    Lihat <i class="fas fa-arrow-right text-xs"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="py-16 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300 text-3xl mx-auto mb-4">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <p class="text-slate-400 font-medium">Tiada data fasiliti lagi</p>
+                    {% if request.user.is_superuser or request.user.is_staff or is_jkn %}
+                    <a href="{% url 'home:tambah_fasiliti' %}" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+                        <i class="fas fa-plus"></i> Tambah Profil Sekarang
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<script>
+// ── Chart: Jenis Fasiliti Donut ──────────────────────────────
+const jenisLabels = {{ jenis_labels|safe }};
+const jenisCounts = {{ jenis_counts|safe }};
+
+new ApexCharts(document.querySelector("#chart-jenis"), {
+    chart: { type: 'donut', height: 300, fontFamily: 'Inter, sans-serif' },
+    series: jenisCounts,
+    labels: jenisLabels,
+    colors: ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4'],
+    legend: { position: 'bottom', fontSize: '12px' },
+    plotOptions: { pie: { donut: { size: '60%', labels: {
+        show: true,
+        total: { show: true, label: 'Jumlah', fontSize: '13px', fontWeight: 700, color: '#334155' }
+    }}}},
+    dataLabels: { enabled: true, style: { fontSize: '12px' }, dropShadow: { enabled: false } },
+    tooltip: { y: { formatter: v => v + ' fasiliti' } }
+}).render();
+
+// ── Chart: Negeri Bar ────────────────────────────────────────
+const negeriLabels = {{ negeri_labels|safe }};
+const negeriCounts = {{ negeri_counts|safe }};
+
+new ApexCharts(document.querySelector("#chart-negeri"), {
+    chart: { type: 'bar', height: 300, fontFamily: 'Inter, sans-serif', toolbar: { show: false } },
+    series: [{ name: 'Fasiliti', data: negeriCounts }],
+    xaxis: { categories: negeriLabels, labels: { style: { fontSize: '11px', colors: '#64748b' } } },
+    yaxis: { labels: { style: { colors: '#94a3b8' } } },
+    colors: ['#6366f1'],
+    plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } },
+    dataLabels: { enabled: false },
+    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+    tooltip: { y: { formatter: v => v + ' fasiliti' } }
+}).render();
+
+// ── Chart: Issues Stacked Bar ────────────────────────────────
+const issuesLabels = {{ issues_labels|safe }};
+const issuesYa     = {{ issues_ya|safe }};
+const issuesTidak  = {{ issues_tidak|safe }};
+
+new ApexCharts(document.querySelector("#chart-issues"), {
+    chart: {
+        type: 'bar', height: 380, fontFamily: 'Inter, sans-serif',
+        stacked: true, toolbar: { show: false }
+    },
+    series: [
+        { name: 'Ya',    data: issuesYa    },
+        { name: 'Tidak', data: issuesTidak }
+    ],
+    xaxis: {
+        categories: issuesLabels,
+        labels: { style: { fontSize: '11px', colors: '#64748b' }, rotate: -35 }
+    },
+    yaxis: { labels: { style: { colors: '#94a3b8' } } },
+    colors: ['#22c55e', '#f87171'],
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
+    dataLabels: { enabled: false },
+    legend: { position: 'top', fontSize: '12px' },
+    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+    tooltip: { intersect: false, shared: true }
+}).render();
+
+// ── Chart: Skor Kesediaan Bar ────────────────────────────────
+const skNames  = {{ fasiliti_names|safe }};
+const skScores = {{ fasiliti_scores|safe }};
+
+new ApexCharts(document.querySelector("#chart-skor"), {
+    chart: { type: 'bar', height: 280, fontFamily: 'Inter, sans-serif', toolbar: { show: false } },
+    series: [{ name: 'Skor Kesediaan', data: skScores }],
+    xaxis: {
+        categories: skNames,
+        labels: { style: { fontSize: '11px', colors: '#64748b' }, rotate: -30, trim: true, maxHeight: 80 }
+    },
+    yaxis: { min: 0, max: 100, labels: { formatter: v => v + '%', style: { colors: '#94a3b8' } } },
+    colors: ['#0ea5e9'],
+    plotOptions: { bar: { borderRadius: 6, columnWidth: '55%' } },
+    dataLabels: {
+        enabled: true,
+        formatter: v => v + '%',
+        style: { fontSize: '11px', colors: ['#1e293b'] },
+        offsetY: -5,
+        background: { enabled: false }
+    },
+    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+    annotations: {
+        yaxis: [
+            { y: 70, borderColor: '#22c55e', strokeDashArray: 4, label: { text: 'Baik (70%)', style: { color: '#22c55e', fontSize: '11px', background: 'transparent' } } },
+            { y: 40, borderColor: '#f59e0b', strokeDashArray: 4, label: { text: 'Sederhana (40%)', style: { color: '#f59e0b', fontSize: '11px', background: 'transparent' } } }
+        ]
+    },
+    tooltip: { y: { formatter: v => v + '%' } }
+}).render();
+
+// ── Chart: Masa Tunggu Donut ──────────────────────────────────
+const masaLabels = {{ masa_labels|safe }};
+const masaCounts = {{ masa_counts|safe }};
+if (masaLabels.length) {
+    new ApexCharts(document.querySelector("#chart-masa-tunggu"), {
+        chart: { type: 'donut', height: 260, fontFamily: 'Inter, sans-serif' },
+        series: masaCounts,
+        labels: masaLabels,
+        colors: ['#22c55e','#86efac','#f59e0b','#f87171','#dc2626'],
+        legend: { position: 'bottom', fontSize: '11px' },
+        plotOptions: { pie: { donut: { size: '55%', labels: { show: true, total: { show: true, label: 'Jumlah', fontSize: '12px', fontWeight: 700 } } } } },
+        dataLabels: { enabled: false },
+        tooltip: { y: { formatter: v => v + ' fasiliti' } }
+    }).render();
+} else {
+    document.querySelector("#chart-masa-tunggu").innerHTML = '<p class="text-center text-slate-400 text-xs py-10">Tiada data</p>';
+}
+
+// ── Chart: Pelawat Harian Bar ────────────────────────────────
+const pelawatLabels = {{ pelawat_labels|safe }};
+const pelawatCounts = {{ pelawat_counts|safe }};
+if (pelawatLabels.length) {
+    new ApexCharts(document.querySelector("#chart-pelawat"), {
+        chart: { type: 'bar', height: 260, fontFamily: 'Inter, sans-serif', toolbar: { show: false } },
+        series: [{ name: 'Fasiliti', data: pelawatCounts }],
+        xaxis: { categories: pelawatLabels, labels: { style: { fontSize: '11px', colors: '#64748b' } } },
+        yaxis: { labels: { style: { colors: '#94a3b8' } } },
+        colors: ['#8b5cf6'],
+        plotOptions: { bar: { borderRadius: 5, columnWidth: '55%' } },
+        dataLabels: { enabled: true, style: { fontSize: '11px', colors: ['#1e293b'] }, offsetY: -5, background: { enabled: false } },
+        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+        tooltip: { y: { formatter: v => v + ' fasiliti' } }
+    }).render();
+} else {
+    document.querySelector("#chart-pelawat").innerHTML = '<p class="text-center text-slate-400 text-xs py-10">Tiada data</p>';
+}
+
+// ── Chart: Perkhidmatan Boolean Stacked Bar ──────────────────
+const perkBoolLabels = {{ perk_bool_labels|safe }};
+const perkBoolYa     = {{ perk_bool_ya|safe }};
+const perkBoolTidak  = {{ perk_bool_tidak|safe }};
+new ApexCharts(document.querySelector("#chart-perk-bool"), {
+    chart: { type: 'bar', height: 280, fontFamily: 'Inter, sans-serif', stacked: true, toolbar: { show: false } },
+    series: [
+        { name: 'Ya',    data: perkBoolYa    },
+        { name: 'Tidak', data: perkBoolTidak }
+    ],
+    xaxis: { categories: perkBoolLabels, labels: { style: { fontSize: '11px', colors: '#64748b' } } },
+    yaxis: { labels: { style: { colors: '#94a3b8' } } },
+    colors: ['#22c55e','#f87171'],
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+    dataLabels: { enabled: false },
+    legend: { position: 'top', fontSize: '12px' },
+    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+    tooltip: { intersect: false, shared: true, y: { formatter: v => v + ' fasiliti' } }
+}).render();
+</script>
+</body>
+</html>

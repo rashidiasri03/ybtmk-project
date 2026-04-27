@@ -1,0 +1,245 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Pilih Modul | {{ fp.nama_fasiliti }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body { background: #f0f4fa; min-height: 100vh; }
+
+        /* particles */
+        .particles { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+        .particle { position:absolute; border-radius:50%; background:rgba(37,99,235,.07); animation: floatParticle linear infinite; }
+        @keyframes floatParticle { 0%{transform:translateY(110vh) scale(0);opacity:0;} 10%{opacity:1;} 90%{opacity:.6;} 100%{transform:translateY(-12vh) scale(1.1);opacity:0;} }
+
+        .topbar { background:#fff; border-bottom:1px solid #e5eaf3; box-shadow:0 1px 8px rgba(30,58,138,.07); }
+
+        /* hero */
+        .hero-strip { background:linear-gradient(110deg,#1d4ed8 0%,#2563eb 55%,#3b82f6 100%); position:relative; overflow:hidden; }
+        .hero-strip::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Ccircle cx='20' cy='20' r='1.5'/%3E%3C/g%3E%3C/svg%3E") repeat; }
+        .hero-blob1 { position:absolute; width:320px; height:320px; border-radius:50%; background:rgba(255,255,255,.06); right:-60px; top:-90px; }
+        .hero-blob2 { position:absolute; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.05); right:160px; bottom:-60px; }
+
+        /* mod card */
+        @keyframes fadeUp { from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);} }
+        @keyframes shimmerSweep { 0%{left:-80%;}100%{left:140%;} }
+        @keyframes iconBounce { 0%{transform:scale(1);}30%{transform:scale(1.22);}60%{transform:scale(.95);}80%{transform:scale(1.06);}100%{transform:scale(1);} }
+        @keyframes modalIn { from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);} }
+        @keyframes rippleAnim { to{transform:scale(4);opacity:0;} }
+
+        .fade-in { opacity:0; animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both; }
+
+        .mod-card {
+            background:#fff; border:1.5px solid #e8edf5; border-radius:22px;
+            width:200px; padding:32px 20px 26px;
+            display:flex; flex-direction:column; align-items:center; gap:14px;
+            cursor:pointer; text-decoration:none; position:relative; overflow:hidden;
+            transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, border-color .3s;
+        }
+        .mod-card::after {
+            content:''; position:absolute; top:0; left:-80%; width:60%; height:100%;
+            background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+            transform:skewX(-18deg); pointer-events:none; opacity:0; transition:opacity .1s;
+        }
+        .mod-card:not(.soon):hover::after { opacity:1; animation:shimmerSweep .55s ease-out forwards; }
+        .mod-card:not(.soon):hover {
+            transform:translateY(-10px) scale(1.02);
+            box-shadow:0 24px 52px rgba(30,58,138,.14), 0 0 0 1px var(--accent,#2563eb);
+            border-color:var(--accent,#2563eb);
+        }
+        .mod-card:not(.soon):active { transform:translateY(-4px) scale(.98); transition-duration:.1s; }
+        .mod-card.soon { opacity:.55; cursor:not-allowed; }
+
+        /* active top line */
+        .mod-card:not(.soon)::before {
+            content:''; position:absolute; top:0; left:20px; right:20px;
+            height:3px; border-radius:0 0 6px 6px;
+            background:linear-gradient(90deg,var(--accent,#2563eb),var(--accent2,#3b82f6));
+        }
+
+        .mod-icon-wrap {
+            width:70px; height:70px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.65rem;
+            background:var(--icon-bg,#eff6ff); color:var(--icon-color,#2563eb);
+            transition:box-shadow .3s; flex-shrink:0;
+        }
+        .mod-card:not(.soon):hover .mod-icon-wrap { box-shadow:0 8px 28px var(--icon-shadow,rgba(37,99,235,.25)); }
+        .mod-card:not(.soon):hover .mod-icon-wrap i { animation:iconBounce .5s cubic-bezier(.22,1,.36,1) both; }
+
+        .mod-title { font-size:.975rem; font-weight:800; color:#1e293b; text-align:center; letter-spacing:-.01em; }
+        .mod-desc  { font-size:.72rem; font-weight:500; color:#94a3b8; text-align:center; margin-top:-4px; }
+
+        .ripple-wave { position:absolute; border-radius:50%; background:rgba(37,99,235,.18); transform:scale(0); animation:rippleAnim .55s ease-out forwards; pointer-events:none; }
+
+        .modal-box { animation:modalIn .28s cubic-bezier(.22,1,.36,1) both; }
+        .toast-in  { animation:toastIn .3s cubic-bezier(.22,1,.36,1) both; }
+        .toast-out { animation:toastOut .22s ease-in both; }
+        @keyframes toastIn  { from{opacity:0;transform:translate(-50%,18px);}to{opacity:1;transform:translate(-50%,0);} }
+        @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translate(-50%,10px);} }
+    </style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div class="particles" id="particles"></div>
+
+<!-- TOPBAR -->
+<nav class="topbar sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-7 h-7 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-[.18em] text-blue-500 uppercase leading-none mb-0.5">Kementerian Kesihatan Malaysia</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">YBTMK Dashboard</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            {% if user.is_authenticated %}
+                <a href="{% url 'home:bahagian' %}"
+                   class="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
+                    <i class="fas fa-arrow-left text-[10px]"></i> Kembali
+                </a>
+                <a href="{% url 'home:profil_saya' %}"
+                   class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition-all">
+                    <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px] font-extrabold">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span class="hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
+                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="button" onclick="showLogoutModal(this.closest('form'))"
+                            class="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
+                        <i class="fas fa-sign-out-alt text-[10px]"></i>
+                        <span class="hidden sm:inline">Log Keluar</span>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-strip">
+    <div class="hero-blob1"></div>
+    <div class="hero-blob2"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-6 py-8 sm:py-10 text-center">
+        <p class="text-blue-200 text-xs font-semibold mb-2 opacity-80 uppercase tracking-widest">Pilih Modul</p>
+        <h1 class="text-white text-2xl sm:text-3xl font-extrabold leading-tight mb-2">{{ fp.nama_fasiliti }}</h1>
+        <p class="text-blue-200 text-sm opacity-70">{{ fp.get_jenis_fasiliti_display }} &middot; {{ fp.get_negeri_display }}</p>
+    </div>
+</div>
+
+<!-- MODULE CARDS -->
+<main class="max-w-7xl mx-auto px-6 py-12">
+    <p class="text-[11px] font-bold tracking-[.14em] text-slate-400 uppercase text-center mb-8 fade-in" style="animation-delay:.05s;">
+        Pilih modul untuk dikemaskini
+    </p>
+    <div class="flex flex-wrap justify-center gap-6">
+
+        <!-- FASILITI -->
+        <a href="{% url 'home:edit_fasiliti_ringkas' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#2563eb;--accent2:#3b82f6;--icon-bg:#eff6ff;--icon-color:#2563eb;--icon-shadow:rgba(37,99,235,.28);animation-delay:.1s;">
+            <div class="mod-icon-wrap"><i class="fas fa-hospital-alt"></i></div>
+            <div><p class="mod-title">Fasiliti</p><p class="mod-desc">Hospital, Klinik & Pusat Kesihatan</p></div>
+        </a>
+
+        <!-- SUMBER MANUSIA -->
+        <a href="{% url 'home:edit_sumber_manusia' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#7c3aed;--accent2:#8b5cf6;--icon-bg:#f5f3ff;--icon-color:#7c3aed;--icon-shadow:rgba(124,58,237,.28);animation-delay:.17s;">
+            <div class="mod-icon-wrap"><i class="fas fa-users"></i></div>
+            <div><p class="mod-title">Sumber Manusia</p><p class="mod-desc">HR, Perjawatan & Tenaga Kerja</p></div>
+        </a>
+
+        <!-- ASET -->
+        <a href="{% url 'home:edit_aset' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#0d9488;--accent2:#14b8a6;--icon-bg:#f0fdfa;--icon-color:#0d9488;--icon-shadow:rgba(13,148,136,.28);animation-delay:.24s;">
+            <div class="mod-icon-wrap"><i class="fas fa-boxes"></i></div>
+            <div><p class="mod-title">Aset</p><p class="mod-desc">Peralatan, Jentera & Inventori</p></div>
+        </a>
+
+        <!-- SERVIS -->
+        <a href="{% url 'home:edit_servis' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#0369a1;--accent2:#0ea5e9;--icon-bg:#f0f9ff;--icon-color:#0369a1;--icon-shadow:rgba(3,105,161,.28);animation-delay:.31s;">
+            <div class="mod-icon-wrap"><i class="fas fa-cogs"></i></div>
+            <div><p class="mod-title">Servis</p><p class="mod-desc">Penyelenggaraan & Perkhidmatan</p></div>
+        </a>
+
+        <!-- UBAT -->
+        <a href="{% url 'home:edit_ubat' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#16a34a;--accent2:#22c55e;--icon-bg:#f0fdf4;--icon-color:#16a34a;--icon-shadow:rgba(22,163,74,.28);animation-delay:.38s;">
+            <div class="mod-icon-wrap"><i class="fas fa-pills"></i></div>
+            <div><p class="mod-title">Ubat</p><p class="mod-desc">Farmasi, Stok & Bekalan</p></div>
+        </a>
+
+        <!-- PESAKIT -->
+        <a href="{% url 'home:edit_pesakit' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#be123c;--accent2:#f43f5e;--icon-bg:#fff1f2;--icon-color:#be123c;--icon-shadow:rgba(190,18,60,.28);animation-delay:.45s;">
+            <div class="mod-icon-wrap"><i class="fas fa-procedures"></i></div>
+            <div><p class="mod-title">Pesakit</p><p class="mod-desc">Data Klinikal & Rekod Rawatan</p></div>
+        </a>
+
+    </div>
+</main>
+
+<footer class="text-center pb-8">
+    <p class="text-xs text-slate-400 font-medium">&copy; 2026 Kementerian Kesihatan Malaysia &middot; YBTMK Dashboard</p>
+</footer>
+
+<!-- LOGOUT MODAL -->
+<div id="logout-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900 bg-opacity-40 backdrop-blur-sm" onclick="hideLogoutModal()"></div>
+    <div class="modal-box relative bg-white rounded-2xl w-full max-w-sm mx-auto p-8 flex flex-col items-center text-center border border-slate-100"
+         style="box-shadow:0 24px 80px rgba(30,58,138,.18);">
+        <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
+            <i class="fas fa-sign-out-alt text-red-500 text-xl"></i>
+        </div>
+        <h2 class="text-slate-800 font-extrabold text-lg mb-1.5">Log Keluar?</h2>
+        <p class="text-slate-500 text-sm mb-7">Adakah anda pasti mahu log keluar<br>daripada sistem YBTMK Dashboard?</p>
+        <div class="flex gap-3 w-full">
+            <button type="button" onclick="hideLogoutModal()"
+                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+            <button type="button" onclick="confirmLogout()"
+                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white bg-red-500 hover:bg-red-600 transition">
+                <i class="fas fa-sign-out-alt mr-1.5"></i> Ya, Log Keluar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* particles */
+    (function(){
+        const c = document.getElementById('particles');
+        const data = [[14,5,14,0],[20,12,18,1.2],[28,22,12,2.5],[18,32,20,0.7],[24,45,16,3.1],[16,55,22,1.8],[22,65,11,4],[30,75,17,0.4],[12,85,13,2.9],[26,93,19,1.5]];
+        data.forEach(([s,l,d,dl])=>{ const p=document.createElement('div'); p.className='particle'; p.style.cssText=`width:${s}px;height:${s}px;left:${l}%;animation-duration:${d}s;animation-delay:${dl}s;`; c.appendChild(p); });
+    })();
+
+    /* ripple on clickable cards */
+    document.querySelectorAll('.mod-card:not(.soon)').forEach(card=>{
+        card.addEventListener('click', function(e){
+            const r=document.createElement('span'); r.className='ripple-wave';
+            const rect=this.getBoundingClientRect(), size=Math.max(rect.width,rect.height);
+            r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
+            this.appendChild(r); setTimeout(()=>r.remove(),600);
+        });
+    });
+
+    /* logout modal */
+    let _lf=null;
+    function showLogoutModal(f){_lf=f;const m=document.getElementById('logout-modal');m.classList.remove('hidden');m.classList.add('flex');document.body.style.overflow='hidden';}
+    function hideLogoutModal(){const m=document.getElementById('logout-modal');m.classList.add('hidden');m.classList.remove('flex');document.body.style.overflow='';_lf=null;}
+    function confirmLogout(){if(_lf)_lf.submit();}
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')hideLogoutModal();});
+</script>
+</body>
+</html>

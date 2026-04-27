@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Log Masuk | YBTMK Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatA {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50%       { transform: translateY(-12px) rotate(2deg); }
+        }
+        @keyframes floatB {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50%       { transform: translateY(-8px) rotate(-2deg); }
+        }
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.25); }
+            70%  { box-shadow: 0 0 0 14px rgba(255,255,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+        }
+        .fade-up-1 { animation: fadeUp 0.55s 0.05s cubic-bezier(0.22,1,0.36,1) both; }
+        .fade-up-2 { animation: fadeUp 0.55s 0.15s cubic-bezier(0.22,1,0.36,1) both; }
+        .fade-up-3 { animation: fadeUp 0.55s 0.25s cubic-bezier(0.22,1,0.36,1) both; }
+        .float-a   { animation: floatA 5s ease-in-out infinite; }
+        .float-b   { animation: floatB 7s ease-in-out infinite; }
+        .logo-pulse { animation: pulse-ring 2.5s ease-in-out infinite; }
+        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 50px #f8faff inset !important; }
+        .input-field {
+            width: 100%; padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1.5px solid #e2e8f0; border-radius: 12px;
+            font-size: 0.875rem; color: #1e293b; background: #f8faff;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; outline: none;
+        }
+        .input-field:focus { border-color: #2563eb; background: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+        .input-field::placeholder { color: #94a3b8; }
+        .btn-login {
+            width: 100%; padding: 0.85rem; border: none; border-radius: 12px; cursor: pointer;
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+            color: #fff; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.02em;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.35); transition: all 0.2s;
+        }
+        .btn-login:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(37,99,235,0.45); filter: brightness(1.05); }
+        .btn-login:active { transform: translateY(0); }
+    </style>
+</head>
+<body class="min-h-screen antialiased overflow-hidden">
+<div class="flex min-h-screen">
+
+    <!-- ══════════ LEFT PANEL ══════════ -->
+    <div class="hidden lg:flex lg:w-[44%] xl:w-[40%] flex-col justify-between relative overflow-hidden"
+         style="background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);">
+
+        <!-- Blobs -->
+        <div class="absolute -top-24 -left-24 w-80 h-80 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(147,197,253,0.12),transparent 70%);"></div>
+        <div class="absolute bottom-0 -right-20 w-96 h-96 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(96,165,250,0.1),transparent 70%);"></div>
+        <!-- Grid -->
+        <div class="absolute inset-0 opacity-[0.025]" style="background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:44px 44px;"></div>
+
+        <!-- Brand -->
+        <div class="relative z-10 p-10 pt-12">
+            <div class="flex items-center gap-4 mb-14">
+                <div class="logo-pulse w-14 h-14 rounded-2xl overflow-hidden border border-white border-opacity-20 bg-white bg-opacity-10 flex items-center justify-center shrink-0">
+                    <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-10 h-10 object-contain">
+                </div>
+                <div>
+                    <p class="text-blue-300 text-[10px] font-bold tracking-[0.2em] uppercase">Kementerian Kesihatan Malaysia</p>
+                    <h1 class="text-white font-bold text-[17px] leading-tight">YBTMK Dashboard</h1>
+                </div>
+            </div>
+
+            <h2 class="text-white font-extrabold text-[2rem] leading-tight tracking-tight mb-3">
+                Sistem Profiling<br>
+                <span style="background:linear-gradient(90deg,#93c5fd,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Fasiliti Kesihatan</span>
+            </h2>
+            <p class="text-blue-200 text-sm leading-relaxed max-w-xs opacity-80 mb-10">
+                Platform pengurusan dan analisis data hospital &amp; klinik seluruh Malaysia secara berpusat.
+            </p>
+
+            <!-- Feature cards -->
+            <div class="space-y-3">
+                <div class="float-a flex items-center gap-3 rounded-2xl px-4 py-3 border border-white border-opacity-10" style="background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(59,130,246,0.3);">
+                        <i class="fas fa-hospital-alt text-blue-300 text-xs"></i>
+                    </div>
+                    <p class="text-white text-sm font-medium">Profiling fasiliti yang komprehensif</p>
+                </div>
+                <div class="float-b flex items-center gap-3 rounded-2xl px-4 py-3 border border-white border-opacity-10" style="background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(99,102,241,0.3);">
+                        <i class="fas fa-chart-line text-indigo-300 text-xs"></i>
+                    </div>
+                    <p class="text-white text-sm font-medium">Dashboard analitik data masa nyata</p>
+                </div>
+                <div class="flex items-center gap-3 rounded-2xl px-4 py-3 border border-white border-opacity-10" style="background:rgba(255,255,255,0.06);backdrop-filter:blur(8px);">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(20,184,166,0.3);">
+                        <i class="fas fa-shield-alt text-teal-300 text-xs"></i>
+                    </div>
+                    <p class="text-white text-sm font-medium">Kawalan akses berdasarkan peranan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="relative z-10 px-10 pb-8">
+            <div class="border-t border-white border-opacity-10 pt-5">
+                <p class="text-blue-400 text-xs opacity-60">&copy; 2026 Kementerian Kesihatan Malaysia. Hak Cipta Terpelihara.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════ RIGHT PANEL ══════════ -->
+    <div class="flex-1 flex flex-col items-center justify-center relative overflow-auto px-6 py-12"
+         style="background: linear-gradient(160deg, #f0f4ff 0%, #f8faff 50%, #eff6ff 100%);">
+
+        <!-- Subtle bg circle -->
+        <div class="absolute top-0 right-0 w-80 h-80 pointer-events-none" style="background:radial-gradient(circle at 80% 10%,rgba(37,99,235,0.05),transparent 70%);"></div>
+        <div class="absolute bottom-0 left-0 w-72 h-72 pointer-events-none" style="background:radial-gradient(circle at 20% 90%,rgba(99,102,241,0.05),transparent 70%);"></div>
+
+        <div class="relative w-full max-w-md">
+
+            <!-- Mobile logo -->
+            <div class="lg:hidden flex items-center justify-center gap-3 mb-10 fade-up-1">
+                <div class="w-11 h-11 rounded-xl overflow-hidden bg-blue-100 flex items-center justify-center">
+                    <img src="{% static 'home/images/jata negara.png' %}" alt="Logo" class="w-8 h-8 object-contain">
+                </div>
+                <div>
+                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">KKM</p>
+                    <p class="text-slate-800 font-bold text-base">YBTMK Dashboard</p>
+                </div>
+            </div>
+
+            <!-- Heading -->
+            <div class="fade-up-1 mb-8">
+                <h2 class="text-[1.75rem] font-extrabold text-slate-800 tracking-tight mb-1.5">Selamat Kembali 👋</h2>
+                <p class="text-slate-500 text-sm">Log masuk ke akaun anda untuk meneruskan.</p>
+            </div>
+
+            <!-- Error alert -->
+            {% if form.errors %}
+            <div class="fade-up-1 mb-6 flex items-start gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-4">
+                <div class="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-xs"></i>
+                </div>
+                <div>
+                    <p class="text-red-700 text-sm font-bold">Log masuk gagal</p>
+                    <p class="text-red-500 text-xs mt-0.5">Nama pengguna atau kata laluan tidak sah.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Next alert -->
+            {% if request.GET.next %}
+            <div class="fade-up-1 mb-6 flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-4">
+                <div class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-lock text-amber-500 text-xs"></i>
+                </div>
+                <div>
+                    <p class="text-amber-700 text-sm font-bold">Akses Terhad</p>
+                    <p class="text-amber-600 text-xs mt-0.5">Anda perlu log masuk untuk mengakses halaman tersebut.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Form -->
+            <form method="post" novalidate class="fade-up-2">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+
+                <!-- Username -->
+                <div class="mb-5">
+                    <label for="id_username" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Nama Pengguna</label>
+                    <div class="relative">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center pointer-events-none">
+                            <i class="fas fa-user text-blue-500 text-xs"></i>
+                        </div>
+                        <input type="text" name="username" id="id_username" autofocus autocomplete="username"
+                               placeholder="Masukkan nama pengguna" class="input-field">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-8">
+                    <label for="id_password" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Kata Laluan</label>
+                    <div class="relative">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center pointer-events-none">
+                            <i class="fas fa-lock text-blue-500 text-xs"></i>
+                        </div>
+                        <input type="password" name="password" id="id_password" autocomplete="current-password"
+                               placeholder="Masukkan kata laluan"
+                               class="input-field" style="padding-right: 3rem;">
+                        <button type="button" id="togglePwBtn"
+                                class="absolute right-3.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-slate-100 hover:bg-blue-100 flex items-center justify-center transition">
+                            <i id="eyeIcon" class="fas fa-eye text-slate-400 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login flex items-center justify-center gap-2.5 mb-3">
+                    <i class="fas fa-sign-in-alt text-sm"></i>
+                    Log Masuk ke Sistem
+                </button>
+
+                <a href="{% url 'home:landing' %}"
+                   class="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 text-sm font-semibold transition-all duration-200">
+                    <i class="fas fa-arrow-left text-xs text-slate-400"></i>
+                    Kembali ke Halaman Utama
+                </a>
+            </form>
+
+            <p class="fade-up-3 text-center text-slate-400 text-xs mt-10 lg:hidden">&copy; 2026 Kementerian Kesihatan Malaysia</p>
+        </div>
+    </div>
+
+</div>
+<script>
+    const pwInput = document.getElementById('id_password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    document.getElementById('togglePwBtn').addEventListener('click', function() {
+        const isPass = pwInput.type === 'password';
+        pwInput.type = isPass ? 'text' : 'password';
+        eyeIcon.className = isPass ? 'fas fa-eye-slash text-blue-500 text-xs' : 'fas fa-eye text-slate-400 text-xs';
+    });
+</script>
+</body>
+</html>

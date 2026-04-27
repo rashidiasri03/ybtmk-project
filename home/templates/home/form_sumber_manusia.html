@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>{% if mode == 'edit' %}Kemaskini{% else %}Tambah{% endif %} Sumber Manusia | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:9px 22px; border-radius:99px;
+            border:2px solid #e2e8f0; cursor:pointer;
+            font-size:.8rem; font-weight:700; color:#64748b; background:#fff;
+            transition:all .15s ease; user-select:none;
+        }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya    { border-color:#22c55e; background:#f0fdf4; color:#16a34a; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+
+        .q-card {
+            background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px;
+            padding:16px 18px; transition:box-shadow .2s, border-color .2s, background .2s;
+        }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(37,99,235,.08); border-color:#bfdbfe; }
+
+        .sec-group {
+            background:#fff; border:1.5px solid #e4eaf5; border-radius:20px;
+            padding:20px 20px 18px; box-shadow:0 2px 16px rgba(30,58,138,.05);
+        }
+        .sec-title {
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:14px; padding-bottom:13px;
+            border-bottom:1.5px solid #f0f4fb;
+        }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; }
+
+        .f-input {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-input:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+        .f-textarea {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            resize:vertical; min-height:78px;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-textarea:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .45s cubic-bezier(.22,1,.36,1) both; }
+
+        .btn-submit {
+            background:linear-gradient(110deg,#7c3aed,#6d28d9); color:#fff;
+            border:none; border-radius:14px; padding:13px 36px;
+            font-size:.9rem; font-weight:800; cursor:pointer;
+            transition:opacity .2s, transform .15s;
+            box-shadow:0 4px 20px rgba(109,40,217,.3);
+        }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        .btn-submit:active { transform:translateY(0); opacity:1; }
+        .jump-bar::-webkit-scrollbar { display:none; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP BAR -->
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-widest text-purple-500 uppercase leading-none">KKM</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">Sumber Manusia</p>
+            </div>
+        </div>
+        <a href="{% url 'home:bahagian' %}"
+           class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali
+        </a>
+    </div>
+</nav>
+
+<!-- HERO STRIP -->
+<div class="bg-gradient-to-r from-purple-700 via-purple-600 to-violet-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <div class="flex items-center gap-2 mb-3 text-purple-200 text-xs">
+            <a href="{% url 'home:bahagian' %}" class="hover:text-white transition"><i class="fas fa-home text-[10px] mr-1"></i>Utama</a>
+            <i class="fas fa-chevron-right text-[9px] opacity-50"></i>
+            <span class="text-white font-semibold">{% if mode == 'edit' %}Kemaskini Data Sumber Manusia{% else %}Tambah Data Sumber Manusia{% endif %}</span>
+        </div>
+        <h1 class="text-white text-xl font-extrabold mb-1">
+            {% if mode == 'edit' %}Kemaskini Data Sumber Manusia{% else %}Borang Sumber Manusia Fasiliti KKM{% endif %}
+        </h1>
+        <p class="text-purple-200 text-xs opacity-80">Maklumat kakitangan dan pengurusan SDM fasiliti</p>
+    </div>
+</div>
+
+<!-- QUICK JUMP BAR -->
+<div class="bg-white border-b border-slate-100 sticky top-[57px] z-30">
+    <div class="px-8 py-2 flex items-center gap-2 overflow-x-auto jump-bar">
+        <a href="#sec-asas"      class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition"><span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>Identiti</a>
+        <a href="#sec-kakitangan" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 transition"><span class="w-2 h-2 rounded-full bg-purple-400 inline-block"></span>Kakitangan</a>
+        <a href="#sec-operasi"   class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-violet-50 hover:border-violet-300 hover:text-violet-700 transition"><span class="w-2 h-2 rounded-full bg-violet-400 inline-block"></span>Operasi</a>
+        <a href="#sec-isu"       class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition"><span class="w-2 h-2 rounded-full bg-rose-400 inline-block"></span>Isu</a>
+    </div>
+</div>
+
+<!-- MESSAGES -->
+{% if messages %}
+<div class="px-8 pt-4">
+    {% for msg in messages %}
+    <div class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold mb-3
+        {% if msg.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-red-50 border border-red-200 text-red-700{% endif %}">
+        <i class="fas {% if msg.tags == 'success' %}fa-check-circle text-green-500{% else %}fa-exclamation-circle text-red-400{% endif %}"></i>
+        {{ msg }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- FORM -->
+<main class="px-8 pb-16 pt-5">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<!-- ═══ KAKITANGAN (Q3) ═══ -->
+<div id="sec-kakitangan" class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-purple-50 text-purple-500"><i class="fas fa-users"></i></div>
+        <span class="sec-label">Kakitangan</span>
+    </div>
+    <div class="space-y-3">
+
+        <div class="grid grid-cols-3 gap-3">
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kakitangan Tetap</label>
+                <input type="number" name="kakitangan_tetap" class="f-input" min="0"
+                       placeholder="0"
+                       value="{{ kakitangan_tetap|default:'' }}">
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kakitangan Kontrak</label>
+                <input type="number" name="kakitangan_kontrak" class="f-input" min="0"
+                       placeholder="0"
+                       value="{{ kakitangan_kontrak|default:'' }}">
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kakitangan MySTeP</label>
+                <input type="number" name="kakitangan_mystep" class="f-input" min="0"
+                       placeholder="0"
+                       value="{{ kakitangan_mystep|default:'' }}">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Staff Non-Medical / Admin</label>
+                <input type="number" name="bilangan_staff_non_medical" class="f-input" min="0"
+                       placeholder="0"
+                       value="{{ bilangan_staff_non_medical|default:'' }}">
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ada Kakitangan Pinjaman?</label>
+                <div class="flex gap-2 flex-wrap">
+                    <div class="pill-item">
+                        <input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_ya" value="1" {% if ada_kakitangan_pinjaman == True %}checked{% endif %}>
+                        <label for="pinjam_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label>
+                    </div>
+                    <div class="pill-item">
+                        <input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_tidak" value="0" {% if ada_kakitangan_pinjaman == False %}checked{% endif %}>
+                        <label for="pinjam_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══ C. OPERASI (Q21, Q38, Q39, Q42) ═══ -->
+<div id="sec-operasi" class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-violet-50 text-violet-500"><i class="fas fa-clock"></i></div>
+        <span class="sec-label">Operasi &amp; Pengurusan</span>
+    </div>
+    <div class="space-y-3">
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Bilangan Shift Sehari</label>
+                <input type="number" name="bilangan_shift" class="f-input" min="1" max="10"
+                       placeholder="cth. 3"
+                       value="{{ bilangan_shift|default:'' }}">
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ada OT / Elaun Lebih Masa?</label>
+                <div class="flex gap-2 flex-wrap">
+                    <div class="pill-item">
+                        <input type="radio" name="ada_ot_allowance" id="ot_ya" value="1" {% if ada_ot_allowance == True %}checked{% endif %}>
+                        <label for="ot_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label>
+                    </div>
+                    <div class="pill-item">
+                        <input type="radio" name="ada_ot_allowance" id="ot_tidak" value="0" {% if ada_ot_allowance == False %}checked{% endif %}>
+                        <label for="ot_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Cara Permohonan Cuti &amp; Rotasi Kakitangan</label>
+            <textarea name="cara_minta_cuti" class="f-textarea"
+                      placeholder="Huraikan prosedur permohonan cuti, rotasi, atau penempatan semula kakitangan...">{{ cara_minta_cuti|default:'' }}</textarea>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══ D. ISU (Q36, Q37) ═══ -->
+<div id="sec-isu" class="sec-group fade-in" style="animation-delay:.2s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-rose-50 text-rose-500"><i class="fas fa-exclamation-circle"></i></div>
+        <span class="sec-label">Isu &amp; Penempatan</span>
+    </div>
+    <div class="space-y-3">
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Isu Penempatan Kakitangan</label>
+            <textarea name="isu_penempatan" class="f-textarea"
+                      placeholder="Nyatakan sebarang isu berkaitan penempatan, kekurangan kakitangan, atau keperluan tambahan...">{{ isu_penempatan|default:'' }}</textarea>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Siapa Yang Bertanggungjawab (In-Charge)</label>
+            <input type="text" name="siapa_manage" class="f-input"
+                   placeholder="cth. Dr. Ahmad bin Hassan (Ketua Jabatan)"
+                   value="{{ siapa_manage|default:'' }}">
+        </div>
+
+    </div>
+</div>
+
+
+<!-- SUBMIT -->
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.25s;">
+    <a href="{% url 'home:bahagian' %}"
+       class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+        <i class="fas fa-times text-xs"></i> Batal
+    </a>
+    <button type="submit" class="btn-submit">
+        <i class="fas fa-save mr-2"></i>
+        {% if mode == 'edit' %}Kemaskini Data{% else %}Simpan Data{% endif %}
+    </button>
+</div>
+
+</form>
+</main>
+
+<script>
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+});
+</script>
+</body>
+</html>

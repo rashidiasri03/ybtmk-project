@@ -1,0 +1,548 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>{% if mode == 'edit' %}Kemaskini{% else %}Tambah{% endif %} Profil Fasiliti | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+
+        /* ── Yes/No Pills ── */
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:9px 22px; border-radius:99px;
+            border:2px solid #e2e8f0; cursor:pointer;
+            font-size:.8rem; font-weight:700; color:#64748b; background:#fff;
+            transition:all .15s ease; user-select:none;
+        }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya     { border-color:#22c55e; background:#f0fdf4; color:#16a34a; }
+        .pill-item input:checked + label.tidak  { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+
+        /* ── Cards ── */
+        .q-card {
+            background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px;
+            padding:16px 18px; transition:box-shadow .2s, border-color .2s, background .2s;
+        }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(37,99,235,.08); border-color:#bfdbfe; }
+
+        /* ── Section group ── */
+        .sec-group {
+            background:#fff; border:1.5px solid #e4eaf5; border-radius:20px;
+            padding:20px 20px 18px; box-shadow:0 2px 16px rgba(30,58,138,.05);
+        }
+        .sec-title {
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:14px; padding-bottom:13px;
+            border-bottom:1.5px solid #f0f4fb;
+        }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; }
+
+        /* ── Inputs ── */
+        .f-input {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-input:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+        .f-textarea {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            resize:vertical; min-height:80px;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-textarea:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .45s cubic-bezier(.22,1,.36,1) both; }
+
+        .btn-submit {
+            background:linear-gradient(110deg,#1d4ed8,#2563eb); color:#fff;
+            border:none; border-radius:14px; padding:13px 36px;
+            font-size:.9rem; font-weight:800; cursor:pointer;
+            transition:opacity .2s, transform .15s;
+            box-shadow:0 4px 20px rgba(37,99,235,.3);
+        }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        .btn-submit:active { transform:translateY(0); opacity:1; }
+
+        /* sticky jump bar */
+        .jump-bar::-webkit-scrollbar { display:none; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP BAR -->
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-widest text-blue-500 uppercase leading-none">KKM</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">Profiling Fasiliti</p>
+            </div>
+        </div>
+        <a href="{% url 'home:bahagian' %}"
+           class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali
+        </a>
+    </div>
+</nav>
+
+<!-- HERO STRIP -->
+<div class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-8">
+        <!-- breadcrumb -->
+        <div class="flex items-center gap-2 mb-4 text-blue-200 text-xs">
+            <a href="{% url 'home:bahagian' %}" class="hover:text-white transition"><i class="fas fa-home text-[10px] mr-1"></i>Utama</a>
+            <i class="fas fa-chevron-right text-[9px] opacity-50"></i>
+            <span class="text-white font-semibold">{% if mode == 'edit' %}Kemaskini Profil{% else %}Tambah Profil Fasiliti{% endif %}</span>
+        </div>
+        <h1 class="text-white text-2xl font-extrabold mb-1">
+            {% if mode == 'edit' %}Kemaskini Profil Fasiliti{% else %}Borang Profiling Fasiliti KKM{% endif %}
+        </h1>
+        <p class="text-blue-200 text-xs opacity-80">Isikan maklumat berdasarkan soalan profiling hospital &amp; klinik KKM</p>
+    </div>
+</div>
+
+<!-- QUICK JUMP BAR -->
+<div class="bg-white border-b border-slate-100 sticky top-[57px] z-30">
+    <div class="px-8 py-2 flex items-center gap-2 overflow-x-auto jump-bar">
+        <a href="#sec-asas"         class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition"><span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span>Identiti</a>
+        <a href="#sec-bangunan"     class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700 transition"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>Bangunan</a>
+        <a href="#sec-fasiliti"     class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition"><span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>Fizikal</a>
+        <a href="#sec-perkhidmatan" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 transition"><span class="w-2 h-2 rounded-full bg-purple-400 inline-block"></span>Perkhidmatan</a>
+        <a href="#sec-aset"         class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 transition"><span class="w-2 h-2 rounded-full bg-orange-400 inline-block"></span>Aset</a>
+        <a href="#sec-perancangan"  class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-500 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition"><span class="w-2 h-2 rounded-full bg-indigo-400 inline-block"></span>Perancangan</a>
+    </div>
+</div>
+
+<!-- MESSAGES -->
+{% if messages %}
+<div class="px-8 pt-4">
+    {% for msg in messages %}
+    <div class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold mb-3
+        {% if msg.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-red-50 border border-red-200 text-red-700{% endif %}">
+        <i class="fas {% if msg.tags == 'success' %}fa-check-circle text-green-500{% else %}fa-exclamation-circle text-red-400{% endif %}"></i>
+        {{ msg }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- FORM -->
+<main class="px-8 pb-16 pt-5 space-y-5">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<!-- ═══ A. MAKLUMAT ASAS ═══ -->
+<div id="sec-asas" class="sec-group fade-in" style="animation-delay:.05s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-blue-50 text-blue-500"><i class="fas fa-hospital"></i></div>
+        <span class="sec-label">Maklumat Asas</span>
+    </div>
+    <div class="space-y-3">
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Nama Fasiliti <span class="text-red-400 normal-case">*</span></label>
+            <input type="text" name="nama_fasiliti" class="f-input"
+                   placeholder="cth. Hospital Sultanah Bahiyah"
+                   value="{{ nama_fasiliti|default:'' }}" required>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Jenis Fasiliti <span class="text-red-400 normal-case">*</span></label>
+            <select name="jenis_fasiliti" class="f-input bg-white" required>
+                <option value="">-- Pilih Jenis --</option>
+                <option value="hospital"                  {% if jenis_fasiliti == 'hospital' %}selected{% endif %}>Hospital</option>
+                <option value="hospital_pakar"            {% if jenis_fasiliti == 'hospital_pakar' %}selected{% endif %}>Hospital Pakar</option>
+                <option value="klinik_kesihatan"          {% if jenis_fasiliti == 'klinik_kesihatan' %}selected{% endif %}>Klinik Kesihatan</option>
+                <option value="klinik_desa"               {% if jenis_fasiliti == 'klinik_desa' %}selected{% endif %}>Klinik Desa</option>
+                <option value="klinik_komuniti"           {% if jenis_fasiliti == 'klinik_komuniti' %}selected{% endif %}>Klinik Komuniti</option>
+                <option value="institusi_perubatan_khas"  {% if jenis_fasiliti == 'institusi_perubatan_khas' %}selected{% endif %}>Institusi Perubatan Khas</option>
+                <option value="institusi_latihan"         {% if jenis_fasiliti == 'institusi_latihan' %}selected{% endif %}>Institusi Latihan</option>
+                <option value="jabatan_kes_negeri"        {% if jenis_fasiliti == 'jabatan_kes_negeri' %}selected{% endif %}>Jabatan Kesihatan Negeri</option>
+                <option value="klinik_pergigian_hosp"     {% if jenis_fasiliti == 'klinik_pergigian_hosp' %}selected{% endif %}>Klinik Pergigian di Hospital</option>
+                <option value="kk_ibu_anak"               {% if jenis_fasiliti == 'kk_ibu_anak' %}selected{% endif %}>Klinik Kesihatan Ibu dan Anak</option>
+                <option value="klinik_kesihatan_utc"      {% if jenis_fasiliti == 'klinik_kesihatan_utc' %}selected{% endif %}>Klinik Kesihatan UTC</option>
+                <option value="klinik_pergigian"          {% if jenis_fasiliti == 'klinik_pergigian' %}selected{% endif %}>Klinik Pergigian</option>
+                <option value="klinik_pergigian_utc"      {% if jenis_fasiliti == 'klinik_pergigian_utc' %}selected{% endif %}>Klinik Pergigian UTC</option>
+                <option value="klinik_pergigian_rtc"      {% if jenis_fasiliti == 'klinik_pergigian_rtc' %}selected{% endif %}>Klinik Pergigian RTC</option>
+                <option value="klinik_pergigian_sekolah"  {% if jenis_fasiliti == 'klinik_pergigian_sekolah' %}selected{% endif %}>Klinik Pergigian di Sekolah</option>
+                <option value="kp_kk_utc"                 {% if jenis_fasiliti == 'kp_kk_utc' %}selected{% endif %}>Klinik Pergigian di Klinik Kesihatan UTC</option>
+                <option value="kp_kk_ibu_anak"            {% if jenis_fasiliti == 'kp_kk_ibu_anak' %}selected{% endif %}>Klinik Pergigian di Klinik Kesihatan Ibu dan Anak</option>
+                <option value="pkp_bahagian"              {% if jenis_fasiliti == 'pkp_bahagian' %}selected{% endif %}>Pejabat Kesihatan Pergigian Bahagian</option>
+                <option value="pkp"                       {% if jenis_fasiliti == 'pkp' %}selected{% endif %}>Pejabat Kesihatan Pergigian</option>
+                <option value="pkp_daerah"                {% if jenis_fasiliti == 'pkp_daerah' %}selected{% endif %}>Pejabat Kesihatan Pergigian Daerah</option>
+                <option value="pkp_kawasan"               {% if jenis_fasiliti == 'pkp_kawasan' %}selected{% endif %}>Pejabat Kesihatan Pergigian Kawasan</option>
+                <option value="lain"                      {% if jenis_fasiliti == 'lain' %}selected{% endif %}>Lain-lain</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Negeri <span class="text-red-400 normal-case">*</span></label>
+                <select name="negeri" class="f-input bg-white" required>
+                    <option value="">-- Pilih --</option>
+                    <option value="johor"           {% if negeri == 'johor' %}selected{% endif %}>Johor</option>
+                    <option value="kedah"           {% if negeri == 'kedah' %}selected{% endif %}>Kedah</option>
+                    <option value="kelantan"        {% if negeri == 'kelantan' %}selected{% endif %}>Kelantan</option>
+                    <option value="melaka"          {% if negeri == 'melaka' %}selected{% endif %}>Melaka</option>
+                    <option value="negeri_sembilan" {% if negeri == 'negeri_sembilan' %}selected{% endif %}>Negeri Sembilan</option>
+                    <option value="pahang"          {% if negeri == 'pahang' %}selected{% endif %}>Pahang</option>
+                    <option value="perak"           {% if negeri == 'perak' %}selected{% endif %}>Perak</option>
+                    <option value="perlis"          {% if negeri == 'perlis' %}selected{% endif %}>Perlis</option>
+                    <option value="pulau_pinang"    {% if negeri == 'pulau_pinang' %}selected{% endif %}>Pulau Pinang</option>
+                    <option value="sabah"           {% if negeri == 'sabah' %}selected{% endif %}>Sabah</option>
+                    <option value="sarawak"         {% if negeri == 'sarawak' %}selected{% endif %}>Sarawak</option>
+                    <option value="selangor"        {% if negeri == 'selangor' %}selected{% endif %}>Selangor</option>
+                    <option value="terengganu"      {% if negeri == 'terengganu' %}selected{% endif %}>Terengganu</option>
+                    <option value="wp_kl"           {% if negeri == 'wp_kl' %}selected{% endif %}>W.P. Kuala Lumpur</option>
+                    <option value="wp_putrajaya"    {% if negeri == 'wp_putrajaya' %}selected{% endif %}>W.P. Putrajaya</option>
+                    <option value="wp_labuan"       {% if negeri == 'wp_labuan' %}selected{% endif %}>W.P. Labuan</option>
+                </select>
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Daerah / Bandar <span class="text-red-400 normal-case">*</span></label>
+                <input type="text" name="daerah" class="f-input" placeholder="cth. Alor Setar"
+                       value="{{ daerah|default:'' }}" required>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Wilayah</label>
+                <select name="wilayah" class="f-input bg-white">
+                    <option value="">-- Pilih --</option>
+                    <option value="utara"   {% if wilayah == 'utara' %}selected{% endif %}>Utara</option>
+                    <option value="tengah"  {% if wilayah == 'tengah' %}selected{% endif %}>Tengah</option>
+                    <option value="selatan" {% if wilayah == 'selatan' %}selected{% endif %}>Selatan</option>
+                    <option value="timur"   {% if wilayah == 'timur' %}selected{% endif %}>Timur</option>
+                    <option value="sabah"   {% if wilayah == 'sabah' %}selected{% endif %}>Sabah</option>
+                    <option value="sarawak" {% if wilayah == 'sarawak' %}selected{% endif %}>Sarawak</option>
+                    <option value="labuan"  {% if wilayah == 'labuan' %}selected{% endif %}>W.P. Labuan</option>
+                </select>
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Zon</label>
+                <input type="text" name="zon" class="f-input" placeholder="cth. Zon A"
+                       value="{{ zon|default:'' }}">
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Parlimen</label>
+            <input type="text" name="parlimen" class="f-input" placeholder="cth. P141 Alor Gajah"
+                   value="{{ parlimen|default:'' }}">
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Alamat</label>
+            <textarea name="alamat" class="f-textarea" placeholder="cth. Pejabat Hospital, Jalan Hospital...">{{ alamat|default:'' }}</textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Poskod</label>
+                <input type="text" name="poskod" class="f-input" placeholder="cth. 78000"
+                       value="{{ poskod|default:'' }}">
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Koordinat (Latitud, Longitud)</label>
+                <input type="text" inputmode="decimal" name="koordinat" class="f-input font-mono" placeholder="cth. 2.3961, 102.2017"
+                       value="{{ koordinat|default:'' }}">
+                <p class="text-xs text-slate-400 mt-1">Paste dari Google Maps — format: lat, lng</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══ B. BANGUNAN ═══ -->
+<div id="sec-bangunan" class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-amber-50 text-amber-500"><i class="fas fa-hard-hat"></i></div>
+        <span class="sec-label">Bangunan</span>
+    </div>
+    <div class="space-y-3">
+
+        <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kod Fasiliti</label>
+                <input type="text" name="kod_fasiliti" class="f-input font-mono"
+                       placeholder="cth. KKM-MEL-001"
+                       value="{{ kod_fasiliti|default:'' }}">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Tahun Dibina</label>
+                <input type="number" name="tahun_dibina" class="f-input"
+                       placeholder="cth. 1998" min="1900" max="2030"
+                       value="{{ tahun_dibina|default:'' }}">
+            </div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kategori / Jenis</label>
+                <input type="text" name="jenis_hospital_klinik" class="f-input"
+                       placeholder="cth. Hospital Daerah..."
+                       value="{{ jenis_hospital_klinik|default:'' }}">
+            </div>
+        </div>
+
+        <!-- Q29 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Ukuran Tanah &amp; Boleh Diperluas?</label>
+            <textarea name="ukuran_tanah" class="f-textarea"
+                      placeholder="cth. 2 ekar, boleh extend ke belakang...">{{ ukuran_tanah|default:'' }}</textarea>
+        </div>
+
+        <!-- Q32 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Siling Dalam Keadaan Baik?</label>
+            <div class="flex gap-3 flex-wrap">
+                <div class="pill-item">
+                    <input type="radio" name="siling_okay" id="siling_ya" value="1" {% if siling_okay == True %}checked{% endif %}>
+                    <label for="siling_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ya</label>
+                </div>
+                <div class="pill-item">
+                    <input type="radio" name="siling_okay" id="siling_tidak" value="0" {% if siling_okay == False %}checked{% endif %}>
+                    <label for="siling_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tidak</label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══ C. FASILITI FIZIKAL ═══ -->
+<div id="sec-fasiliti" class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-green-50 text-green-500"><i class="fas fa-building"></i></div>
+        <span class="sec-label">Fasiliti Fizikal</span>
+    </div>
+    <div class="space-y-3">
+
+        <!-- Q13 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Keadaan Perabot &amp; Infrastruktur</label>
+            <textarea name="keadaan_perabot" class="f-textarea"
+                      placeholder="Huraikan keadaan perabot, dinding, lantai, dll...">{{ keadaan_perabot|default:'' }}</textarea>
+        </div>
+
+        <!-- Yes/No quick grid -->
+        <div class="grid grid-cols-2 gap-3">
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ada Isu Parking?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ada_isu_parking" id="park_ya" value="1" {% if ada_isu_parking == True %}checked{% endif %}><label for="park_ya" class="tidak"><i class="fas fa-exclamation-triangle text-[10px]"></i> Ada</label></div>
+                <div class="pill-item"><input type="radio" name="ada_isu_parking" id="park_tidak" value="0" {% if ada_isu_parking == False %}checked{% endif %}><label for="park_tidak" class="ya"><i class="fas fa-check text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Masalah Aircond?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="masalah_aircond" id="ac_ya" value="1" {% if masalah_aircond == True %}checked{% endif %}><label for="ac_ya" class="tidak"><i class="fas fa-exclamation-triangle text-[10px]"></i> Ada</label></div>
+                <div class="pill-item"><input type="radio" name="masalah_aircond" id="ac_tidak" value="0" {% if masalah_aircond == False %}checked{% endif %}><label for="ac_tidak" class="ya"><i class="fas fa-check text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ruang Kerja Mencukupi?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ruang_kerja_mencukupi" id="rk_ya" value="1" {% if ruang_kerja_mencukupi == True %}checked{% endif %}><label for="rk_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ruang_kerja_mencukupi" id="rk_tidak" value="0" {% if ruang_kerja_mencukupi == False %}checked{% endif %}><label for="rk_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tidak</label></div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ada Pantry Kakitangan?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ada_pantry" id="pantry_ya" value="1" {% if ada_pantry == True %}checked{% endif %}><label for="pantry_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label></div>
+                <div class="pill-item"><input type="radio" name="ada_pantry" id="pantry_tidak" value="0" {% if ada_pantry == False %}checked{% endif %}><label for="pantry_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ada Kantin / Mini Mart?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ada_kantin" id="kantin_ya" value="1" {% if ada_kantin == True %}checked{% endif %}><label for="kantin_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kantin" id="kantin_tidak" value="0" {% if ada_kantin == False %}checked{% endif %}><label for="kantin_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ada Security?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ada_security" id="sec_ya" value="1" {% if ada_security == True %}checked{% endif %}><label for="sec_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label></div>
+                <div class="pill-item"><input type="radio" name="ada_security" id="sec_tidak" value="0" {% if ada_security == False %}checked{% endif %}><label for="sec_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label></div>
+            </div>
+        </div>
+
+        </div><!-- end Yes/No grid -->
+
+        <!-- Q14 Quarters -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ada Quarters Kakitangan?</label>
+            <div class="flex gap-3 flex-wrap mb-3">
+                <div class="pill-item">
+                    <input type="radio" name="ada_quarters" id="aq_ya" value="1" {% if ada_quarters == True %}checked{% endif %}>
+                    <label for="aq_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label>
+                </div>
+                <div class="pill-item">
+                    <input type="radio" name="ada_quarters" id="aq_tidak" value="0" {% if ada_quarters == False %}checked{% endif %}>
+                    <label for="aq_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label>
+                </div>
+            </div>
+            <div id="quarters-sub" class="{% if ada_quarters != True %}hidden{% endif %} border-t border-slate-100 pt-3">
+                <p class="text-xs font-bold text-slate-500 mb-2">Jika ada — adakah quarters mencukupi?</p>
+                <div class="flex gap-3 flex-wrap">
+                    <div class="pill-item">
+                        <input type="radio" name="quarters_mencukupi" id="qm_ya" value="1" {% if quarters_mencukupi == True %}checked{% endif %}>
+                        <label for="qm_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Mencukupi</label>
+                    </div>
+                    <div class="pill-item">
+                        <input type="radio" name="quarters_mencukupi" id="qm_tidak" value="0" {% if quarters_mencukupi == False %}checked{% endif %}>
+                        <label for="qm_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tidak mencukupi</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══ D. PERKHIDMATAN ═══ -->
+<div id="sec-perkhidmatan" class="sec-group fade-in" style="animation-delay:.2s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-purple-50 text-purple-500"><i class="fas fa-stethoscope"></i></div>
+        <span class="sec-label">Perkhidmatan</span>
+    </div>
+    <div class="space-y-3">
+
+        <div class="grid grid-cols-2 gap-3">
+        <!-- Q8 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Ruang Rehat Pelawat / Pesakit?</label>
+            <div class="flex gap-3 flex-wrap">
+                <div class="pill-item">
+                    <input type="radio" name="ada_ruang_rehat" id="rr_ya" value="1" {% if ada_ruang_rehat == True %}checked{% endif %}>
+                    <label for="rr_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ada</label>
+                </div>
+                <div class="pill-item">
+                    <input type="radio" name="ada_ruang_rehat" id="rr_tidak" value="0" {% if ada_ruang_rehat == False %}checked{% endif %}>
+                    <label for="rr_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tiada</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Q34 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Wad Diasingkan Mengikut Jantina?</label>
+            <div class="flex gap-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="wad_diasingkan" id="wad_ya" value="1" {% if wad_diasingkan == True %}checked{% endif %}><label for="wad_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="wad_diasingkan" id="wad_tidak" value="0" {% if wad_diasingkan == False %}checked{% endif %}><label for="wad_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tidak</label></div>
+            </div>
+        </div>
+        </div><!-- end grid -->
+
+        <!-- Q27 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Keperluan &amp; Bekalan Oksigen</label>
+            <textarea name="keperluan_oksigen" class="f-textarea"
+                      placeholder="Huraikan jenis bekalan oksigen, kapasiti, isu bekalan, dll...">{{ keperluan_oksigen|default:'' }}</textarea>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══ E. ASET ═══ -->
+<div id="sec-aset" class="sec-group fade-in" style="animation-delay:.25s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-orange-50 text-orange-500"><i class="fas fa-tools"></i></div>
+        <span class="sec-label">Aset</span>
+    </div>
+    <div class="space-y-3">
+
+        <!-- Q24 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Aset / Peralatan Perlu Diganti</label>
+            <textarea name="aset_perlu_diganti" class="f-textarea"
+                      placeholder="Senaraikan peralatan atau aset yang uzur atau perlu diganti...">{{ aset_perlu_diganti|default:'' }}</textarea>
+        </div>
+
+        <!-- Q25 -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Aset Tidak Mengikut Spesifikasi KKM</label>
+            <textarea name="aset_tidak_ikut_spec" class="f-textarea"
+                      placeholder="Senaraikan aset yang tidak mengikut spek yang ditetapkan KKM...">{{ aset_tidak_ikut_spec|default:'' }}</textarea>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- ═══ F. PERANCANGAN ═══ -->
+<div id="sec-perancangan" class="sec-group fade-in" style="animation-delay:.3s;">
+    <div class="sec-title">
+        <div class="sec-dot bg-indigo-50 text-indigo-500"><i class="fas fa-chart-line"></i></div>
+        <span class="sec-label">Perancangan</span>
+    </div>
+    <!-- Q19 -->
+    <div class="q-card">
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Fasiliti / Kemudahan yang Sangat Diperlukan</label>
+        <textarea name="fasiliti_diperlukan" class="f-textarea" style="min-height:100px;"
+                  placeholder="Apakah fasiliti atau kemudahan yang paling diperlukan oleh fasiliti ini?...">{{ fasiliti_diperlukan|default:'' }}</textarea>
+    </div>
+</div>
+
+
+<!-- SUBMIT -->
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.35s;">
+    <a href="{% url 'home:bahagian' %}"
+       class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+        <i class="fas fa-times text-xs"></i> Batal
+    </a>
+    <button type="submit" class="btn-submit">
+        <i class="fas fa-save mr-2"></i>
+        {% if mode == 'edit' %}Kemaskini Profil{% else %}Simpan Profil{% endif %}
+    </button>
+</div>
+
+</form>
+</main>
+
+<script>
+/* Quarters sub toggle */
+document.querySelectorAll('input[name="ada_quarters"]').forEach(r => {
+    r.addEventListener('change', () => {
+        const sub = document.getElementById('quarters-sub');
+        sub.classList.toggle('hidden', r.value !== '1');
+    });
+});
+/* Smooth anchor scroll */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(a.getAttribute('href'))?.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,758 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Peta Fasiliti — Top Management | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MapLibre GL JS — WebGL GPU, 3D, tiada lag -->
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+    <style>
+        * { font-family:'Plus Jakarta Sans',sans-serif; box-sizing:border-box; }
+        body { margin:0; overflow:hidden; }
+        #map { position:fixed; inset:0; z-index:0; }
+
+        /* topbar */
+        #topbar {
+            position:fixed; top:0; left:0; right:0; z-index:1000;
+            background:rgba(255,255,255,.96); backdrop-filter:blur(10px);
+            border-bottom:1px solid #e2e8f0; box-shadow:0 1px 8px rgba(0,0,0,.07);
+            padding:10px 20px; display:flex; align-items:center; justify-content:space-between;
+        }
+
+        /* side panel */
+        #sidepanel {
+            position:fixed; top:61px; left:0; bottom:0; z-index:900;
+            width:290px; background:rgba(255,255,255,.96); backdrop-filter:blur(10px);
+            border-right:1px solid #e2e8f0; box-shadow:2px 0 12px rgba(0,0,0,.05);
+            display:flex; flex-direction:column; transition:transform .3s ease;
+        }
+        #sidepanel.collapsed { transform:translateX(-290px); }
+
+        #panel-list { flex:1; overflow-y:auto; padding:8px; }
+        #panel-list::-webkit-scrollbar { width:4px; }
+        #panel-list::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:9px; }
+
+        .fac-row {
+            padding:10px 12px; border-radius:10px; cursor:pointer;
+            border:1px solid #f1f5f9; margin-bottom:4px;
+            transition:background .12s;
+        }
+        .fac-row:hover { background:#f8fafc; border-color:#cbd5e1; }
+        .fac-row.fac-selected { background:#eff6ff; border-color:#2563eb; border-left:3px solid #2563eb; }
+        .fac-row .nama { font-size:.75rem; font-weight:700; color:#1e293b; line-height:1.3; }
+        .fac-row .sub  { font-size:.65rem; color:#94a3b8; margin-top:2px; }
+
+        /* MapLibre popup */
+        .maplibregl-popup-content {
+            border-radius:14px !important; box-shadow:0 10px 40px rgba(0,0,0,.13) !important;
+            padding:14px 16px !important; border:1px solid #e2e8f0 !important;
+        }
+        .maplibregl-popup-close-button { font-size:18px !important; color:#94a3b8 !important; padding:6px 10px !important; }
+        .maplibregl-popup-close-button:hover { color:#334155 !important; }
+
+        /* detail modal */
+        #modal-overlay {
+            position:fixed; inset:0; z-index:1200;
+            background:rgba(15,23,42,.5); backdrop-filter:blur(4px);
+            display:none; align-items:center; justify-content:center; padding:16px;
+        }
+        #modal-overlay.open { display:flex; }
+        #modal-box {
+            background:#fff; border-radius:20px; width:100%; max-width:580px;
+            max-height:calc(100vh - 60px); display:flex; flex-direction:column;
+            box-shadow:0 32px 100px rgba(0,0,0,.28); overflow:hidden;
+        }
+        #modal-body { flex:1; overflow-y:auto; padding:0 0 20px; }
+        #modal-body::-webkit-scrollbar { width:4px; }
+        #modal-body::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:9px; }
+
+        /* Section */
+        .drawer-section { padding:0 0 4px; border-bottom:1px solid #f1f5f9; margin-bottom:2px; }
+        .drawer-section-title {
+            display:flex; align-items:center; gap:8px;
+            padding:10px 20px 8px;
+            font-size:.65rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+        }
+        .drawer-section-title i { font-size:.7rem; }
+        .drawer-grid {
+            display:grid; grid-template-columns:1fr 1fr;
+            gap:0; padding:0 12px 8px;
+        }
+        .drawer-cell {
+            padding:5px 8px; border-radius:8px;
+        }
+        .drawer-cell-label {
+            font-size:.6rem; font-weight:700; text-transform:uppercase;
+            letter-spacing:.06em; color:#94a3b8; margin-bottom:2px;
+        }
+        .drawer-cell-val {
+            font-size:.78rem; font-weight:600; color:#1e293b; line-height:1.4; word-break:break-word;
+        }
+        .drawer-cell-val.yn-ya   { color:#16a34a; }
+        .drawer-cell-val.yn-tidak{ color:#dc2626; }
+        .drawer-cell-val.empty   { color:#cbd5e1; font-weight:400; }
+        .drawer-cell-val .badge-ya   { display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:99px;padding:1px 8px;font-size:.68rem;font-weight:700; }
+        .drawer-cell-val .badge-tidak{ display:inline-flex;align-items:center;gap:4px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:99px;padding:1px 8px;font-size:.68rem;font-weight:700; }
+        .drawer-cell-full { grid-column:1/-1; }
+        #modal-loading { display:none; padding:48px; text-align:center; color:#94a3b8; font-size:.85rem; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- DETAIL MODAL -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div id="modal-box">
+        <!-- Header -->
+        <div style="padding:18px 20px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+            <div style="min-width:0;">
+                <p id="drawer-nama" style="font-size:1rem;font-weight:800;color:#0f172a;margin:0 0 3px;line-height:1.3;"></p>
+                <p id="drawer-jenis" style="font-size:.72rem;color:#64748b;margin:0 0 8px;"></p>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span id="drawer-status-badge"></span>
+                    <span style="color:#cbd5e1;font-size:.6rem;">•</span>
+                    <span id="drawer-lokasi" style="font-size:.7rem;color:#64748b;font-weight:500;"></span>
+                    <span id="drawer-tahun" style="font-size:.7rem;color:#94a3b8;"></span>
+                </div>
+            </div>
+            <button onclick="closeDrawer()" style="flex-shrink:0;width:32px;height:32px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'" title="Tutup">&times;</button>
+        </div>
+        <!-- Action buttons -->
+        <div style="padding:12px 20px;border-bottom:1px solid #f1f5f9;display:flex;gap:8px;">
+            <a id="drawer-detail-btn" href="#" style="display:flex;align-items:center;justify-content:center;gap:6px;flex:1;padding:9px 0;background:#2563eb;color:#fff;border-radius:10px;font-size:.73rem;font-weight:700;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'"><i class="fas fa-file-alt" style="font-size:.6rem;"></i> Laporan Penuh</a>
+        </div>
+        <!-- Content -->
+        <div id="modal-loading"><i class="fas fa-circle-notch fa-spin" style="font-size:1.2rem;margin-bottom:8px;"></i><br>Memuatkan data...</div>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+    <div class="flex items-center gap-3">
+        <button onclick="togglePanel()"
+                class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition">
+            <i class="fas fa-bars text-xs"></i>
+        </button>
+        <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden">
+            <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain">
+        </div>
+        <div>
+            <p class="text-[9px] font-bold tracking-widest text-blue-500 uppercase leading-none">KKM · YBTMK</p>
+            <p class="text-sm font-extrabold text-slate-800 leading-tight">Peta Fasiliti Malaysia</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100">
+            <i class="fas fa-map-pin text-blue-500 text-xs"></i>
+            <span class="text-blue-700 text-xs font-bold">{{ jumlah }} fasiliti</span>
+        </div>
+        <button id="btn-3d" onclick="toggle3D()"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition">
+            <i class="fas fa-cube text-xs"></i> 3D
+        </button>
+        <a href="{% url 'home:tm_portal' %}"
+           class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+            <i class="fas fa-arrow-left text-[10px]"></i> Kembali
+        </a>
+    </div>
+</div>
+
+<!-- SIDE PANEL -->
+<div id="sidepanel">
+    <div class="px-3 pt-3 pb-2 border-b border-slate-100">
+        <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input id="search-input" type="text" placeholder="Cari fasiliti..."
+                   oninput="filterList(this.value)"
+                   class="w-full pl-8 pr-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs placeholder-slate-400 outline-none focus:border-blue-400 transition">
+        </div>
+        <div class="flex gap-1.5 mt-2 flex-wrap">
+            <button onclick="filterStatus('')"       id="btn-all"   class="status-btn px-3 py-1 rounded-lg text-[10px] font-bold bg-blue-600 text-white transition">Semua</button>
+            <button onclick="filterStatus('aktif')"  id="btn-aktif" class="status-btn px-3 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition">Aktif</button>
+            <button onclick="filterStatus('tutup')"  id="btn-tutup" class="status-btn px-3 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition">Tutup</button>
+        </div>
+    </div>
+    <div id="panel-list"></div>
+    <div class="px-3 py-2.5 border-t border-slate-100 text-[10px] text-slate-400 font-semibold" id="count-label">
+        Menunjukkan {{ jumlah }} fasiliti
+    </div>
+</div>
+
+<!-- Legend -->
+<div id="legend" style="position:fixed;bottom:20px;left:calc(290px + 14px);z-index:1000;transition:left .3s;"
+     class="bg-white/95 border border-slate-200 rounded-xl px-4 py-3 shadow-md text-xs font-semibold text-slate-700 flex gap-4 items-center">
+    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-green-600 inline-block"></span>Aktif</span>
+    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>Tutup</span>
+</div>
+
+<!-- MapLibre GL JS -->
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+
+<script>
+// ── Data dari Django ──
+const FASILITI_DATA = {{ fasiliti_json|safe }};
+
+// PENTING: MapLibre guna [lng, lat]
+const COORDS = {
+    // JOHOR
+    'johor bahru':[103.7414,1.4927],'kluang':[103.3173,2.0257],'muar':[102.5689,2.0442],
+    'batu pahat':[102.9334,1.8536],'kota tinggi':[103.9003,1.7371],'mersing':[103.8351,2.4312],
+    'segamat':[102.8148,2.5145],'pontian':[103.3884,1.4886],'kulai':[103.5975,1.6636],
+    'johor':[103.3587,1.9344],
+    // KEDAH
+    'alor setar':[100.3669,6.1256],'sungai petani':[100.4880,5.6494],'kulim':[100.5560,5.3649],
+    'baling':[100.9213,5.6770],'langkawi':[99.8000,6.3500],'pendang':[100.4880,5.9975],
+    'kubang pasu':[100.5726,6.2179],'padang terap':[100.7210,6.0450],'kedah':[100.3669,6.1256],
+    // KELANTAN
+    'kota bharu':[102.2389,6.1248],'tanah merah':[102.1481,5.8159],'kuala krai':[102.1965,5.5296],
+    'gua musang':[101.9682,4.8823],'jeli':[101.8438,5.7061],'machang':[102.2195,5.7707],
+    'tumpat':[102.1725,6.1975],'bachok':[102.3942,6.0648],'pasir mas':[102.1380,6.0450],
+    'pasir puteh':[102.4085,5.8388],'kelantan':[102.1645,5.7413],
+    // MELAKA
+    'melaka':[102.2501,2.1896],'alor gajah':[102.2019,2.3773],'jasin':[102.4323,2.3042],
+    'melaka tengah':[102.2501,2.1978],
+    // NEGERI SEMBILAN
+    'seremban':[101.9381,2.7297],'port dickson':[101.7986,2.5234],'rembau':[102.0904,2.5868],
+    'tampin':[102.2282,2.4715],'kuala pilah':[102.2476,2.7407],'jempol':[102.5821,3.0604],
+    'nilai':[101.7977,2.8122],'negeri sembilan':[101.9381,2.7297],
+    // PAHANG
+    'kuantan':[103.3260,3.8077],'temerloh':[102.4180,3.4518],'bentong':[101.9115,3.5197],
+    'jerantut':[102.3599,3.9356],'raub':[101.8569,3.7888],'maran':[102.7586,3.5890],
+    'rompin':[103.5010,2.7913],'cameron highlands':[101.3786,4.4712],'lipis':[102.0450,4.1735],
+    'pekan':[103.3869,3.4877],'pahang':[103.3256,3.8126],
+    // PERAK
+    'ipoh':[101.0901,4.5975],'taiping':[100.7347,4.8549],'teluk intan':[101.0253,4.0234],
+    'manjung':[100.6492,4.2163],'kuala kangsar':[100.9359,4.7685],'grik':[101.1284,5.4260],
+    'gerik':[101.1284,5.4260],'bagan datuk':[100.7942,3.9815],'tanjung malim':[101.5166,3.6860],
+    'perak':[101.0901,4.5975],
+    // PERLIS
+    'kangar':[100.1986,6.4414],'padang besar':[100.3210,6.6494],'arau':[100.2750,6.4336],
+    'perlis':[100.1986,6.4414],
+    // PULAU PINANG
+    'george town':[100.3288,5.4141],'butterworth':[100.3637,5.3996],'bayan lepas':[100.2593,5.2970],
+    'seberang perai':[100.3637,5.3996],'seberang perai utara':[100.4897,5.6153],
+    'seberang perai tengah':[100.3637,5.3996],'seberang perai selatan':[100.4547,5.2141],
+    'timur laut':[100.3288,5.4141],'barat daya':[100.2593,5.2970],'pulau pinang':[100.3288,5.4141],
+    // SABAH
+    'kota kinabalu':[116.0735,5.9804],'sandakan':[118.1179,5.8402],'tawau':[117.8910,4.2449],
+    'lahad datu':[118.3284,5.0236],'keningau':[116.1626,5.3370],'papar':[115.9398,5.7419],
+    'kota belud':[116.4388,6.3573],'tuaran':[116.2295,6.1779],'beaufort':[115.7537,5.3611],
+    'kudat':[116.8361,6.8877],'ranau':[116.6694,5.9570],'semporna':[118.6140,4.4801],
+    'sabah':[116.0735,5.9804],
+    // SARAWAK
+    'kuching':[110.3592,1.5497],'miri':[113.9914,4.3995],'sibu':[111.8257,2.2985],
+    'bintulu':[113.0447,3.1716],'limbang':[115.0088,4.7552],'sarikei':[111.5188,2.1247],
+    'sri aman':[111.4632,1.2351],'kapit':[112.9340,2.0108],'mukah':[112.0901,2.8951],
+    'lawas':[115.4031,4.8510],'sarawak':[110.3592,1.5497],
+    // SELANGOR
+    'shah alam':[101.5183,3.0738],'petaling jaya':[101.6067,3.1073],'klang':[101.4457,3.0449],
+    'subang jaya':[101.5858,3.0503],'hulu langat':[101.8476,3.2093],'gombak':[101.6967,3.2316],
+    'hulu selangor':[101.5022,3.6827],'sepang':[101.6919,2.7282],'kuala selangor':[101.2561,3.3331],
+    'sabak bernam':[100.9712,3.7677],'kuala langat':[101.5041,2.8975],'rawang':[101.5765,3.3182],
+    'ampang':[101.7601,3.1488],'kajang':[101.7877,2.9926],'serdang':[101.7088,3.0166],
+    'selayang':[101.6483,3.2634],'sungai buloh':[101.5763,3.2066],'selangor':[101.5183,3.1073],
+    // TERENGGANU
+    'kuala terengganu':[103.1408,5.3302],'kemaman':[103.4180,4.2302],'dungun':[103.4180,4.7580],
+    'besut':[102.5694,5.7077],'setiu':[102.7022,5.5426],'hulu terengganu':[103.0038,5.0298],
+    'marang':[103.2133,5.2023],'terengganu':[103.1408,5.3302],
+    // WP
+    'kuala lumpur':[101.6869,3.1390],'putrajaya':[101.6964,2.9264],'labuan':[115.2308,5.2831],
+    'w.p. kuala lumpur':[101.6869,3.1390],'w.p. putrajaya':[101.6964,2.9264],'w.p. labuan':[115.2308,5.2831],
+};
+
+const NEGERI_FALLBACK = {
+    'johor':[103.3587,1.9344],'kedah':[100.3669,6.1256],'kelantan':[102.1645,5.7413],
+    'melaka':[102.2501,2.1896],'negeri sembilan':[101.9381,2.7297],'pahang':[103.3256,3.8126],
+    'perak':[101.0901,4.5975],'perlis':[100.1986,6.4414],'pulau pinang':[100.3288,5.4141],
+    'sabah':[116.0735,5.9804],'sarawak':[110.3592,1.5497],'selangor':[101.5183,3.1073],
+    'terengganu':[103.1408,5.3302],'w.p. kuala lumpur':[101.6869,3.1390],
+    'w.p. putrajaya':[101.6964,2.9264],'w.p. labuan':[115.2308,5.2831],
+};
+
+// Pre-compute coords SEKALI sahaja — tak perlu loop setiap filter
+const COORD_KEYS = Object.keys(COORDS);
+function getCoords(negeri, daerah) {
+    const dl = daerah.toLowerCase().trim();
+    if (COORDS[dl]) return COORDS[dl];
+    for (let i = 0; i < COORD_KEYS.length; i++) {
+        const k = COORD_KEYS[i];
+        if (dl.includes(k) || k.includes(dl)) return COORDS[k];
+    }
+    return NEGERI_FALLBACK[negeri.toLowerCase().trim()] || [109.5,4.0];
+}
+
+// Parallel array (same index as FASILITI_DATA) — null jika tiada GPS
+const ALL_FEATURES = FASILITI_DATA.map(f => {
+    if (!f.lat || !f.lng) return null;
+    return {
+        type:'Feature',
+        geometry:{ type:'Point', coordinates:[f.lng, f.lat] },
+        properties:{
+            pk:f.pk, nama:f.nama, jenis:f.jenis, negeri:f.negeri, daerah:f.daerah,
+            alamat:f.alamat, poskod:f.poskod, tahun:f.tahun, status:f.status,
+            color: f.status==='tutup' ? '#ef4444' : '#16a34a',
+            glow:  f.status==='tutup' ? '#f87171' : '#22c55e',
+        }
+    };
+});
+
+function buildGeoJSON(features) {
+    return { type:'FeatureCollection', features };
+}
+
+// ── Init MapLibre ──
+const map = new maplibregl.Map({
+    container:'map',
+    style:'https://tiles.openfreemap.org/styles/bright',
+    center:[109.5,4.0],
+    zoom:5.5,
+    pitch:45,
+    bearing:0,
+    antialias:true,
+});
+
+map.addControl(new maplibregl.NavigationControl({ visualizePitch:true }), 'bottom-right');
+map.addControl(new maplibregl.ScaleControl(), 'bottom-right');
+
+let currentPopup = null;
+
+// Map juga guna ALL_FEATURES terus (sudah pre-built)
+map.on('load', () => {
+    try {
+        map.addLayer({
+            id:'3d-buildings', type:'fill-extrusion',
+            source:'openmaptiles', 'source-layer':'building', minzoom:14,
+            paint:{
+                'fill-extrusion-color':'#c8dae8',
+                'fill-extrusion-height':['coalesce',['get','render_height'],10],
+                'fill-extrusion-base':['coalesce',['get','render_min_height'],0],
+                'fill-extrusion-opacity':0.7,
+            }
+        });
+    } catch(e) {}
+
+    map.addSource('fasiliti', {
+        type:'geojson', data:buildGeoJSON(ALL_FEATURES.filter(Boolean)),
+        cluster:true, clusterMaxZoom:11, clusterRadius:50,
+    });
+
+    // Cluster bulatan
+    map.addLayer({
+        id:'clusters', type:'circle', source:'fasiliti',
+        filter:['has','point_count'],
+        paint:{
+            'circle-color':'#2563eb',
+            'circle-radius':['step',['get','point_count'],18,10,24,50,30],
+            'circle-stroke-width':3, 'circle-stroke-color':'#fff', 'circle-opacity':0.85,
+        }
+    });
+
+    // Cluster teks
+    map.addLayer({
+        id:'cluster-count', type:'symbol', source:'fasiliti',
+        filter:['has','point_count'],
+        layout:{ 'text-field':'{point_count_abbreviated}', 'text-size':13 },
+        paint:{ 'text-color':'#fff' }
+    });
+
+    // Glow (pin tunggal)
+    map.addLayer({
+        id:'fasiliti-glow', type:'circle', source:'fasiliti',
+        filter:['!',['has','point_count']],
+        paint:{
+            'circle-radius':16, 'circle-color':['get','glow'],
+            'circle-opacity':0.18, 'circle-blur':0.8,
+        }
+    });
+
+    // Pin utama (tunggal)
+    map.addLayer({
+        id:'fasiliti-dot', type:'circle', source:'fasiliti',
+        filter:['!',['has','point_count']],
+        paint:{
+            'circle-radius':['interpolate',['linear'],['zoom'],5,6,10,9,14,13],
+            'circle-color':['get','color'],
+            'circle-stroke-width':2.5, 'circle-stroke-color':'#fff', 'circle-opacity':0.95,
+        }
+    });
+
+    // Highlight fasiliti yang dipilih dari sidebar
+    map.addSource('selected-fasiliti', {
+        type:'geojson', data:{ type:'FeatureCollection', features:[] }
+    });
+    map.addLayer({
+        id:'selected-glow', type:'circle', source:'selected-fasiliti',
+        paint:{
+            'circle-radius':['interpolate',['linear'],['zoom'],5,20,10,26,14,34],
+            'circle-color':'#facc15', 'circle-opacity':0.25,
+        }
+    });
+    map.addLayer({
+        id:'selected-ring', type:'circle', source:'selected-fasiliti',
+        paint:{
+            'circle-radius':['interpolate',['linear'],['zoom'],5,14,10,18,14,24],
+            'circle-color':'rgba(0,0,0,0)',
+            'circle-stroke-width':3, 'circle-stroke-color':'#facc15',
+        }
+    });
+
+    // Klik pin → buka drawer detail
+    map.on('click','fasiliti-dot',(e) => {
+        if (currentPopup) { currentPopup.remove(); currentPopup = null; }
+        const pk = e.features[0].properties.pk;
+        openDrawer(pk);
+        map.getSource('selected-fasiliti').setData({ type:'FeatureCollection', features:[e.features[0]] });
+        const idx = FASILITI_DATA.findIndex(f => f.pk === pk);
+        if (idx >= 0) {
+            document.querySelectorAll('.fac-row').forEach(r => r.classList.remove('fac-selected'));
+            const selRow = document.querySelector(`.fac-row[data-idx="${idx}"]`);
+            if (selRow) { selRow.classList.add('fac-selected'); selRow.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+        }
+    });
+
+    // Klik cluster → zoom masuk
+    map.on('click','clusters',(e) => {
+        const feat = map.queryRenderedFeatures(e.point,{layers:['clusters']});
+        map.getSource('fasiliti').getClusterExpansionZoom(feat[0].properties.cluster_id,(err,zoom) => {
+            if (!err) map.easeTo({ center:feat[0].geometry.coordinates, zoom, duration:500 });
+        });
+    });
+
+    map.on('mouseenter','fasiliti-dot',() => { map.getCanvas().style.cursor='pointer'; });
+    map.on('mouseleave','fasiliti-dot',() => { map.getCanvas().style.cursor=''; });
+    map.on('mouseenter','clusters',()    => { map.getCanvas().style.cursor='pointer'; });
+    map.on('mouseleave','clusters',()    => { map.getCanvas().style.cursor=''; });
+});
+
+// ── Panel sisi ──
+let currentStatus = '';
+const panelList  = document.getElementById('panel-list');
+const countLabel = document.getElementById('count-label');
+
+// Pre-compute koordinat untuk flyTo (dah di-cache dalam ALL_FEATURES)
+function getCoordsFromFeature(idx) {
+    return ALL_FEATURES[idx].geometry.coordinates;
+}
+
+function renderPanel(indices) {
+    // Guna innerHTML batch — lebih laju dari createElement berulang kali
+    let html = '';
+    for (const i of indices) {
+        const f = FASILITI_DATA[i];
+        const hasGps = !!(f.lat && f.lng);
+        const dot = f.status==='tutup' ? '#ef4444' : '#16a34a';
+        const gpsBadge = hasGps ? '' : `<span style="font-size:.55rem;padding:1px 5px;border-radius:99px;background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;margin-left:4px;flex-shrink:0;">tiada GPS</span>`;
+        html += `<div class="fac-row" data-idx="${i}" data-pk="${f.pk}" data-hasgps="${hasGps ? 1 : 0}">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;">
+                <div style="display:flex;align-items:flex-start;gap:6px;min-width:0;flex-wrap:wrap;">
+                    <span style="width:7px;height:7px;border-radius:50%;background:${hasGps ? dot : '#cbd5e1'};flex-shrink:0;margin-top:3px;"></span>
+                    <p class="nama" style="color:${hasGps ? '#1e293b' : '#94a3b8'}">${f.nama}</p>${gpsBadge}
+                </div>
+                <a href="/profiling/${f.pk}/detail/" onclick="event.stopPropagation()" title="Lihat laporan"
+                   style="flex-shrink:0;padding:3px 7px;border-radius:6px;background:#eff6ff;color:#2563eb;font-size:.6rem;font-weight:700;text-decoration:none;border:1px solid #bfdbfe;transition:background .12s;white-space:nowrap;"
+                   onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                    Laporan
+                </a>
+            </div>
+            <p class="sub" style="padding-left:13px;">${f.daerah} · ${f.negeri}</p>
+        </div>`;
+    }
+    panelList.innerHTML = html;
+    countLabel.textContent = `Menunjukkan ${indices.length} fasiliti`;
+
+    // Satu event listener pada parent (event delegation) — bukan satu per row
+    panelList.onclick = (e) => {
+        const row = e.target.closest('.fac-row');
+        if (!row) return;
+        const idx = +row.dataset.idx;
+        const f = FASILITI_DATA[idx];
+        const feat = ALL_FEATURES[idx];
+        if (!feat) {
+            showNoGpsPopup(f.nama);
+            return;
+        }
+        // Highlight baris yang dipilih
+        document.querySelectorAll('.fac-row').forEach(r => r.classList.remove('fac-selected'));
+        row.classList.add('fac-selected');
+        // Highlight pin di peta
+        map.getSource('selected-fasiliti').setData({ type:'FeatureCollection', features:[feat] });
+        map.flyTo({ center:feat.geometry.coordinates, zoom:13, pitch:55, speed:1.4, curve:1.2 });
+        setTimeout(() => openDrawer(f.pk), 600);
+    };
+}
+
+// Debounce supaya map setData tak trigger setiap huruf
+let _debounceTimer = null;
+function applyFilter() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const indices = [];
+    const filteredFeatures = [];
+    for (let i = 0; i < FASILITI_DATA.length; i++) {
+        const f = FASILITI_DATA[i];
+        if ((currentStatus==='' || f.status===currentStatus) &&
+            (f.nama.toLowerCase().includes(q) || f.daerah.toLowerCase().includes(q) || f.negeri.toLowerCase().includes(q))) {
+            indices.push(i);
+            if (ALL_FEATURES[i]) filteredFeatures.push(ALL_FEATURES[i]); // hanya GPS
+        }
+    }
+    // Panel render segera
+    renderPanel(indices);
+    // Map setData debounce 250ms — elak GPU redraw setiap keystroke
+    clearTimeout(_debounceTimer);
+    _debounceTimer = setTimeout(() => {
+        if (map.getSource('fasiliti')) {
+            map.getSource('fasiliti').setData(buildGeoJSON(filteredFeatures));
+        }
+    }, 250);
+}
+
+function filterList() { applyFilter(); }
+
+function filterStatus(s) {
+    currentStatus = s;
+    document.querySelectorAll('.status-btn').forEach(b => {
+        b.classList.remove('bg-blue-600','text-white');
+        b.classList.add('bg-slate-100','text-slate-500');
+    });
+    const id = s==='' ? 'btn-all' : (s==='aktif' ? 'btn-aktif' : 'btn-tutup');
+    document.getElementById(id).classList.replace('bg-slate-100','bg-blue-600');
+    document.getElementById(id).classList.replace('text-slate-500','text-white');
+    applyFilter();
+}
+
+let panelOpen = true;
+function togglePanel() {
+    panelOpen = !panelOpen;
+    document.getElementById('sidepanel').classList.toggle('collapsed',!panelOpen);
+    document.getElementById('legend').style.left = panelOpen ? 'calc(290px + 14px)' : '14px';
+}
+
+let is3D = true;
+function toggle3D() {
+    is3D = !is3D;
+    map.easeTo({ pitch:is3D ? 45 : 0, duration:600 });
+    const btn = document.getElementById('btn-3d');
+    btn.innerHTML = is3D ? '<i class="fas fa-cube text-xs"></i> 3D' : '<i class="fas fa-map text-xs"></i> 2D';
+    btn.className = is3D
+        ? 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition'
+        : 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-200 transition';
+}
+
+// Render panel awal dengan semua indeks
+renderPanel(FASILITI_DATA.map((_,i) => i));
+
+// ── No GPS Popup ───────────────────────────────────
+function showNoGpsPopup(nama) {
+    document.getElementById('no-gps-nama').textContent = nama;
+    document.getElementById('no-gps-modal').style.display = 'flex';
+}
+function closeNoGpsPopup() {
+    document.getElementById('no-gps-modal').style.display = 'none';
+}
+
+// ── Detail Modal ─────────────────────────────────────────────────
+const overlay    = document.getElementById('modal-overlay');
+const drawerBody = document.getElementById('modal-body');
+const drawerLoad = document.getElementById('modal-loading');
+
+function openDrawer(pk) {
+    drawerBody.innerHTML = '';
+    drawerLoad.style.display = 'block';
+    document.getElementById('drawer-nama').textContent = 'Memuatkan...';
+    document.getElementById('drawer-jenis').textContent = '';
+    document.getElementById('drawer-status-badge').innerHTML = '';
+    document.getElementById('drawer-lokasi').textContent = '';
+    document.getElementById('drawer-tahun').textContent = '';
+    overlay.classList.add('open');
+
+    fetch(`/profiling/${pk}/api/`)
+        .then(r => r.json())
+        .then(d => renderDrawer(d))
+        .catch(() => {
+            drawerLoad.style.display = 'none';
+            drawerBody.innerHTML = '<p style="padding:20px;color:#ef4444;font-size:.75rem;">Gagal memuatkan data.</p>';
+        });
+}
+
+function closeDrawer() {
+    overlay.classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+    if (e.target === overlay) closeDrawer();
+}
+
+function cell(label, val, full) {
+    const isEmpty = (!val || val === '\u2014');
+    let display;
+    if (val === 'Ya')     display = `<span class="badge-ya"><i class="fas fa-check" style="font-size:.5rem;"></i> Ya</span>`;
+    else if (val === 'Tidak') display = `<span class="badge-tidak"><i class="fas fa-times" style="font-size:.5rem;"></i> Tidak</span>`;
+    else if (isEmpty)    display = `<span class="empty">\u2014</span>`;
+    else                 display = val;
+    const fullCls = full ? ' drawer-cell-full' : '';
+    return `<div class="drawer-cell${fullCls}">
+        <div class="drawer-cell-label">${label}</div>
+        <div class="drawer-cell-val">${display}</div>
+    </div>`;
+}
+
+// Keep row() as alias for backward compat (maps to full-width cell)
+function row(label, val) { return cell(label, val, true); }
+
+function section(icon, color, title, html) {
+    const bg = color + '12';
+    return `<div class="drawer-section">
+        <div class="drawer-section-title" style="color:${color};background:${bg}">
+            <i class="${icon}"></i> ${title}
+        </div>
+        <div class="drawer-grid">${html}</div>
+    </div>`;
+}
+
+function renderDrawer(d) {
+    drawerLoad.style.display = 'none';
+
+    // Header
+    document.getElementById('drawer-nama').textContent  = d.k0.nama;
+    document.getElementById('drawer-jenis').textContent = d.k0.jenis;
+    const sc = d.status==='tutup' ? '#ef4444' : '#16a34a';
+    const sb = d.status==='tutup' ? '#fef2f2' : '#f0fdf4';
+    const sl = d.status==='tutup' ? '&#10005; Tutup' : '&#10003; Aktif';
+    document.getElementById('drawer-status-badge').innerHTML =
+        `<span style="font-size:.62rem;padding:2px 10px;border-radius:99px;background:${sb};color:${sc};font-weight:700;border:1px solid ${sc}44;">${sl}</span>`;
+    const lokasi = [d.k0.daerah !== '\u2014' ? d.k0.daerah : '', d.k0.negeri].filter(Boolean).join(', ');
+    document.getElementById('drawer-lokasi').textContent = lokasi;
+    document.getElementById('drawer-tahun').textContent  = d.tahun ? 'Tahun ' + d.tahun : '';
+    document.getElementById('drawer-detail-btn').href = d.detail_url;
+
+    let html = '';
+
+    // K0 – Maklumat Asas
+    let k0html = cell('Alamat', d.k0.alamat, true) + cell('Poskod', d.k0.poskod);
+    if (d.k0.lat && d.k0.lng) {
+        const gpsUrl = `https://www.google.com/maps?q=${d.k0.lat},${d.k0.lng}`;
+        k0html += `<div class="drawer-cell">
+            <div class="drawer-cell-label">GPS</div>
+            <div class="drawer-cell-val"><a href="${gpsUrl}" target="_blank" style="color:#2563eb;font-family:monospace;font-size:.72rem;font-weight:600;">${d.k0.lat.toFixed(5)}, ${d.k0.lng.toFixed(5)} <i class="fas fa-external-link-alt" style="font-size:.55rem;"></i></a></div>
+        </div>`;
+    }
+    html += section('fas fa-info-circle','#3b82f6','Maklumat Asas', k0html);
+
+    // K1 – Kejuruteraan
+    if (d.k1) {
+        html += section('fas fa-hard-hat','#d97706','K1 \u2014 Kejuruteraan',
+            cell('Tahun Dibina', d.k1.tahun_dibina) +
+            cell('Jenis Hospital/Klinik', d.k1.jenis_hospital_klinik) +
+            cell('Siling OK?', d.k1.siling_okay) +
+            cell('Keluasan Tanah', d.k1.ukuran_tanah));
+    }
+
+    // K2 – Sumber Manusia
+    if (d.k2) {
+        html += section('fas fa-users','#8b5cf6','K2 \u2014 Sumber Manusia',
+            cell('Kakitangan Tetap', d.k2.kakitangan_tetap) +
+            cell('Kakitangan Kontrak', d.k2.kakitangan_kontrak) +
+            cell('Kakitangan MySTeP', d.k2.kakitangan_mystep) +
+            cell('Staff Pinjaman?', d.k2.ada_kakitangan_pinjaman) +
+            cell('Staff Non-Medical/Admin', d.k2.bilangan_staff_non_medical) +
+            cell('Bilangan Shift Sehari', d.k2.bilangan_shift) +
+            cell('OT/Elaun?', d.k2.ada_ot_allowance) +
+            cell('Waktu Beroperasi', d.k2.waktu_beroperasi) +
+            cell('Cara Mohon Cuti', d.k2.cara_minta_cuti) +
+            cell('Isu Penempatan', d.k2.isu_penempatan, true));
+    }
+
+    // K3 – Perkhidmatan
+    if (d.k3) {
+        html += section('fas fa-stethoscope','#ef4444','K3 \u2014 Perkhidmatan Kesihatan',
+            cell('Jenis Perkhidmatan', d.k3.jenis_perkhidmatan, true) +
+            cell('Anggaran Pelawat Harian', d.k3.anggaran_pelawat_harian) +
+            cell('Penyakit Kerap', d.k3.jenis_penyakit_kerap) +
+            cell('Boleh Selesaikan Kes?', d.k3.boleh_selesaikan_kes) +
+            cell('Rujukan ke', d.k3.rujukan_ke) +
+            cell('Ruang Rehat?', d.k3.ada_ruang_rehat) +
+            cell('Hemodialisis?', d.k3.ada_hemodialisis) +
+            cell('Unit Hemodialisis', d.k3.unit_hemodialisis) +
+            cell('Bekalan Ubat Cukup?', d.k3.bekalan_ubat_mencukupi) +
+            cell('Keperluan Oksigen', d.k3.keperluan_oksigen) +
+            cell('EMR?', d.k3.ada_emr) +
+            cell('Wad Diasingkan?', d.k3.wad_diasingkan) +
+            cell('Kualiti Makanan', d.k3.kualiti_makanan) +
+            cell('In-Charge', d.k3.siapa_manage) +
+            cell('Masa Tunggu', d.k3.masa_tunggu) +
+            cell('OSCA?', d.k3.ada_osca));
+    }
+
+    // K4 – Aset
+    if (d.k4) {
+        html += section('fas fa-boxes','#f97316','K4 \u2014 Aset',
+            cell('Disposable Cukup?', d.k4.disposable_mencukupi) +
+            cell('Keadaan Aset', d.k4.keadaan_aset) +
+            cell('Ambulans?', d.k4.ada_ambulans) +
+            cell('Keadaan Ambulans', d.k4.keadaan_ambulans) +
+            cell('Aset Perlu Diganti', d.k4.aset_perlu_diganti, true) +
+            cell('Aset Tak Ikut Spec', d.k4.aset_tidak_ikut_spec, true) +
+            cell('Umur Komputer', d.k4.umur_komputer));
+    }
+
+    // K5 – Fasiliti
+    if (d.k5) {
+        html += section('fas fa-building','#22c55e','K5 \u2014 Fasiliti Fizikal',
+            cell('Keadaan Perabot', d.k5.keadaan_perabot) +
+            cell('Quarters?', d.k5.ada_quarters) +
+            cell('Quarters Mencukupi?', d.k5.quarters_mencukupi) +
+            cell('Isu Parking?', d.k5.ada_isu_parking) +
+            cell('Masalah Aircond?', d.k5.masalah_aircond) +
+            cell('Ruang Kerja Cukup?', d.k5.ruang_kerja_mencukupi) +
+            cell('Bilik Mayat?', d.k5.ada_bilik_mayat) +
+            cell('Kawasan Rehat Staff?', d.k5.ada_pantry) +
+            cell('Kantin/Mini Mart?', d.k5.ada_kantin) +
+            cell('Security?', d.k5.ada_security));
+    }
+
+    // K6 – Perancangan
+    if (d.k6) {
+        html += section('fas fa-chart-line','#6366f1','K6 \u2014 Perancangan',
+            cell('Perkhidmatan Baru', d.k6.perkhidmatan_baru, true) +
+            cell('Fasiliti Diperlukan', d.k6.fasiliti_diperlukan, true));
+    }
+
+    // K7 – Konsesi
+    if (d.k7) {
+        html += section('fas fa-wrench','#64748b','K7 \u2014 Konsesi & Lain-lain',
+            cell('Maintenance Konsesi OK?', d.k7.maintenance_okay) +
+            cell('Masalah Utama', d.k7.masalah_utama, true) +
+            cell('Wishlist', d.k7.wishlist, true));
+    }
+
+    drawerBody.innerHTML = html;
+}
+</script>
+
+<!-- No GPS Modal -->
+<div id="no-gps-modal" onclick="closeNoGpsPopup()"
+     style="display:none;position:fixed;inset:0;z-index:1500;background:rgba(15,23,42,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;">
+    <div onclick="event.stopPropagation()"
+         style="background:#fff;border-radius:20px;max-width:380px;width:100%;padding:28px 24px;box-shadow:0 32px 80px rgba(0,0,0,.25);text-align:center;">
+        <div style="width:56px;height:56px;border-radius:16px;background:#fef3c7;border:1px solid #fde68a;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <i class="fas fa-map-marker-alt" style="font-size:1.4rem;color:#d97706;"></i>
+        </div>
+        <p style="font-size:.95rem;font-weight:800;color:#0f172a;margin:0 0 6px;">Tiada Lokasi GPS</p>
+        <p id="no-gps-nama" style="font-size:.8rem;font-weight:600;color:#2563eb;margin:0 0 10px;"></p>
+        <p style="font-size:.78rem;color:#64748b;margin:0 0 20px;line-height:1.6;">Fasiliti ini tiada koordinat GPS dalam sistem.<br>Sila isi maklumat latitud &amp; longitud dalam borang profil fasiliti.</p>
+        <button onclick="closeNoGpsPopup()"
+                style="width:100%;padding:10px;border-radius:12px;background:#2563eb;color:#fff;font-size:.82rem;font-weight:700;border:none;cursor:pointer;transition:background .15s;"
+                onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+            Faham
+        </button>
+    </div>
+</div>
+
+</body>
+</html>
