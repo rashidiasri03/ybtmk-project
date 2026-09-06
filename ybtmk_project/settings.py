@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -28,6 +28,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -56,21 +57,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ybtmk_project.wsgi.application'
 
-# Database – MySQL via XAMPP
+# Database – TiDB Serverless Cloud
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ybmk_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'NAME': 'test',
+        'USER': '2CwNRpLuETQ92Zu.root',
+        'PASSWORD': 's27Rm9mBo1KWq1jE',
+        'HOST': 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+        'PORT': '4000',
+        'OPTIONS': {
+            'ssl': {'ssl_mode': 'REQUIRED'},
+        }
     }
 }
 
 # Auth redirects
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/bahagian/'
+LOGIN_REDIRECT_URL = '/profiling/peta/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 # Password validation

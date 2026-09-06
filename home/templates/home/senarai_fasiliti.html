@@ -4,265 +4,531 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Senarai Fasiliti | YBTMK</title>
+    <title>Senarai Fasiliti — YBTMK Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>body{font-family:'Inter',sans-serif;}</style>
+    <style>
+        * { font-family:'Plus Jakarta Sans',sans-serif; box-sizing:border-box; }
+        body { margin:0; padding:0; background:#f6f8fc; }
+        
+        /* NAVBAR */
+        .navbar {
+            position:fixed;
+            top:0;
+            left:0;
+            right:0;
+            height:70px;
+            z-index:100;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom:1px solid rgba(255,255,255,.06);
+            display:flex;
+            align-items:center;
+            padding:0 32px;
+            gap:32px;
+        }
+        
+        .navbar-brand {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            flex-shrink:0;
+        }
+        
+        .navbar-brand-img {
+            width:42px;
+            height:42px;
+            border-radius:12px;
+            object-fit:cover;
+            border:2px solid rgba(255,255,255,.15);
+        }
+        
+        .navbar-brand-text .role {
+            font-size:.6rem;
+            font-weight:800;
+            color:#38bdf8;
+            letter-spacing:.12em;
+            text-transform:uppercase;
+        }
+        
+        .navbar-brand-text .name {
+            font-size:.95rem;
+            font-weight:900;
+            color:white;
+            line-height:1.2;
+        }
+        
+        .nav-links {
+            display:flex;
+            align-items:center;
+            gap:6px;
+            background:rgba(255,255,255,.05);
+            border-radius:12px;
+            padding:4px;
+        }
+        
+        .nav-link {
+            padding:10px 18px;
+            border-radius:10px;
+            font-size:.78rem;
+            font-weight:700;
+            color:#94a3b8;
+            text-decoration:none;
+            transition:all .2s;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            white-space:nowrap;
+        }
+        
+        .nav-link:hover {
+            background:rgba(255,255,255,.08);
+            color:#e2e8f0;
+        }
+        
+        .nav-link.active {
+            background:#2563eb;
+            color:white;
+            box-shadow:0 2px 8px rgba(37,99,235,.3);
+        }
+        
+        .nav-link i { font-size:.7rem; }
+        
+        .tm-badge {
+            padding:8px 14px;
+            border-radius:10px;
+            background:rgba(56,189,248,.1);
+            border:1px solid rgba(56,189,248,.25);
+            color:#38bdf8;
+            font-size:.72rem;
+            font-weight:800;
+            display:flex;
+            align-items:center;
+            gap:6px;
+        }
+        
+        .tm-badge i { font-size:.75rem; }
+        
+        .user-section {
+            margin-left:auto;
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        
+        .user-card {
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:6px 12px 6px 6px;
+            border-radius:12px;
+            background:rgba(37,99,235,.15);
+            border:1px solid rgba(37,99,235,.25);
+        }
+        
+        .user-avatar {
+            width:32px;
+            height:32px;
+            border-radius:10px;
+            background:#2563eb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-size:.8rem;
+            font-weight:800;
+        }
+        
+        .user-name {
+            font-size:.75rem;
+            font-weight:700;
+            color:white;
+            line-height:1.2;
+        }
+        
+        .user-role {
+            font-size:.6rem;
+            color:#94a3b8;
+        }
+        
+        .logout-btn {
+            padding:10px 16px;
+            border-radius:10px;
+            background:rgba(239,68,68,.1);
+            border:1px solid rgba(239,68,68,.25);
+            color:#f87171;
+            font-size:.75rem;
+            font-weight:700;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            gap:6px;
+            transition:all .2s;
+            text-decoration:none;
+        }
+        
+        .logout-btn:hover {
+            background:rgba(239,68,68,.2);
+            color:#fca5a5;
+        }
+        
+        .main-content {
+            margin-top:70px;
+            padding:24px 32px;
+            min-height:calc(100vh - 70px);
+        }
+        
+        .page-header {
+            margin-bottom:24px;
+        }
+        
+        .page-title {
+            font-size:1.25rem;
+            font-weight:800;
+            color:#0f172a;
+            margin:0 0 4px;
+        }
+        
+        .page-subtitle {
+            font-size:.8rem;
+            color:#64748b;
+            margin:0;
+        }
+        
+        .filter-bar {
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            padding:16px 20px;
+            display:flex;
+            align-items:center;
+            gap:16px;
+            margin-bottom:24px;
+            box-shadow:0 1px 3px rgba(0,0,0,.05);
+        }
+        
+        .search-wrap { position:relative; flex:1; max-width:400px; }
+        .search-wrap i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:.8rem; }
+        .search-wrap input { 
+            padding:12px 14px 12px 40px; 
+            border:1px solid #e2e8f0; 
+            border-radius:12px; 
+            font-size:.85rem; 
+            background:#f8fafc; 
+            width:100%;
+            outline:none;
+        }
+        .search-wrap input:focus {
+            border-color:#38bdf8;
+            box-shadow:0 0 0 3px rgba(56,189,248,.12);
+            background:white;
+        }
+        
+        .filter-select {
+            padding:12px 16px; 
+            border:1px solid #e2e8f0; 
+            border-radius:12px;
+            font-size:.85rem; 
+            background:#f8fafc;
+            outline:none;
+            min-width:160px;
+        }
+        
+        .filter-btn {
+            padding:12px 20px; 
+            border-radius:12px; 
+            background:#2563eb; 
+            color:white; 
+            font-size:.85rem; 
+            font-weight:700;
+            border:none;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            text-decoration:none;
+        }
+        .filter-btn:hover { background:#1d4ed8; }
+        
+        .ml-auto { margin-left:auto; }
+        
+        .table-container {
+            background:white;
+            border:1px solid #e2e8f0;
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 1px 3px rgba(0,0,0,.05);
+        }
+        
+        table {
+            width:100%;
+            border-collapse:collapse;
+        }
+        
+        th {
+            background:#f8fafc;
+            padding:14px 16px;
+            text-align:left;
+            font-size:.7rem;
+            font-weight:700;
+            color:#64748b;
+            text-transform:uppercase;
+            letter-spacing:.05em;
+            border-bottom:1px solid #e2e8f0;
+        }
+        
+        td {
+            padding:14px 16px;
+            font-size:.82rem;
+            color:#334155;
+            border-bottom:1px solid #f1f5f9;
+        }
+        
+        tr:hover { background:#f8fafc; }
+        tr:last-child td { border-bottom:none; }
+        
+        .status-badge {
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:4px 12px;
+            border-radius:99px;
+            font-size:.7rem;
+            font-weight:700;
+        }
+        
+        .status-aktif {
+            background:#f0fdf4;
+            color:#16a34a;
+            border:1px solid #bbf7d0;
+        }
+        
+        .status-tutup {
+            background:#fef2f2;
+            color:#dc2626;
+            border:1px solid #fecaca;
+        }
+        
+        .action-btn {
+            padding:6px 10px;
+            border-radius:8px;
+            font-size:.7rem;
+            font-weight:600;
+            cursor:pointer;
+            border:none;
+            transition:all .15s;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:4px;
+        }
+        
+        .btn-view {
+            background:#eff6ff;
+            color:#2563eb;
+        }
+        
+        .btn-view:hover { background:#dbeafe; }
+        
+        .pagination {
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding:16px;
+            background:#f8fafc;
+            border-top:1px solid #e2e8f0;
+        }
+        
+        .pagination a, .pagination span {
+            padding:8px 14px;
+            border-radius:8px;
+            font-size:.82rem;
+            font-weight:600;
+            text-decoration:none;
+            transition:all .15s;
+        }
+        
+        .pagination a {
+            background:white;
+            color:#334155;
+            border:1px solid #e2e8f0;
+        }
+        
+        .pagination a:hover {
+            background:#f1f5f9;
+            border-color:#cbd5e1;
+        }
+        
+        .pagination .current {
+            background:#2563eb;
+            color:white;
+            border:1px solid #2563eb;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen antialiased">
-<div class="flex min-h-screen">
-    {% include 'home/_sidebar.html' with active_page='senarai_fasiliti' %}
-    <div class="ml-64 flex-1 flex flex-col">
-        <!-- Header -->
-        <header class="bg-white border-b border-slate-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-            <div>
-                <h1 class="text-xl font-bold text-slate-800">Senarai Profil Fasiliti</h1>
-                <p class="text-slate-400 text-xs mt-0.5">Hospital & Klinik yang telah diisi maklumat profiling</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="{% url 'home:dashboard_fasiliti' %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                    <i class="fas fa-chart-bar text-blue-500"></i> Dashboard
-                </a>
-                {% if request.user.is_superuser or request.user.is_staff or is_jkn %}
-                <a href="{% url 'home:tambah_fasiliti' %}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-                    <i class="fas fa-plus"></i> Tambah Profil
-                </a>
-                {% endif %}
-                <div class="flex items-center gap-1.5 pl-1.5 pr-1.5 py-1.5 rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm">{{ request.user.username|first|upper }}</div>
-                    <div class="pl-1 pr-2 hidden sm:block">
-                        <p class="text-xs font-semibold text-slate-700 leading-tight max-w-[120px] truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
-                        <p class="text-[11px] text-purple-500 font-semibold leading-tight">{% if request.user.is_superuser %}Superadmin{% elif request.user.is_staff %}Admin{% elif is_tm %}Top Management{% elif is_jkn %}JKN{% else %}Pengguna{% endif %}</p>
-                    </div>
-                    <div class="w-px h-6 bg-slate-200 mx-0.5 hidden sm:block"></div>
-                    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
-                        <button type="button" title="Log Keluar" onclick="showLogoutModal(this.closest('form'))" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-sign-out-alt text-sm"></i></button>
-                    </form>
-                </div>
-            </div>
-        </header>
+<body>
 
-        <main class="flex-1 px-8 py-8">
-            {% for msg in messages %}
-            <div class="mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
-                {% if msg.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% else %}bg-red-50 border border-red-200 text-red-700{% endif %}">
-                <i class="fas {% if msg.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i> {{ msg }}
-            </div>
-            {% endfor %}
-
-            <!-- ── Notifikasi Tahun Baru ──────────────────────── -->
-            {% if pending_fps %}
-            <div class="mb-5 rounded-2xl border border-amber-200 bg-amber-50 overflow-hidden">
-                <div class="flex items-start gap-4 px-6 py-4">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
-                        <i class="fas fa-bell text-amber-500"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-bold text-amber-800">
-                            {{ pending_fps|length }} fasiliti belum dikemaskini untuk tahun {{ current_year }}
-                        </p>
-                        <p class="text-xs text-amber-700 mt-0.5 mb-3">
-                            Fasiliti berikut ada rekod {{ prev_year }} tetapi belum ada data {{ current_year }}. Klik untuk isi maklumat terkini — Maklumat Asas akan diisi semula secara automatik.
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                            {% for fp in pending_fps %}
-                            {% if request.user.is_superuser or request.user.is_staff or is_jkn %}
-                            <a href="{% url 'home:tambah_fasiliti' %}?copy_from={{ fp.pk }}"
-                               class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-amber-200 text-xs font-semibold text-amber-800 hover:bg-amber-100 hover:border-amber-400 transition shadow-sm">
-                                <i class="fas fa-calendar-plus text-amber-500"></i>
-                                {{ fp.nama_fasiliti }}
-                            </a>
-                            {% else %}
-                            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-amber-200 text-xs font-semibold text-amber-800">
-                                <i class="fas fa-calendar text-amber-400"></i>
-                                {{ fp.nama_fasiliti }}
-                            </span>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Search & Filter -->
-            <form method="get" class="mb-5 flex flex-wrap items-center gap-3">
-                <div class="relative flex-1 min-w-[220px]">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" name="carian" value="{{ carian }}"
-                           placeholder="Cari nama fasiliti..."
-                           class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition">
-                </div>
-                <select name="negeri" class="px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition">
-                    <option value="">Semua Negeri</option>
-                    {% for n in all_negeri %}
-                    <option value="{{ n }}" {% if negeri_filter == n %}selected{% endif %}>{{ n }}</option>
-                    {% endfor %}
-                </select>
-                <select name="status" class="px-3 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition">
-                    <option value="">Semua Status</option>
-                    <option value="aktif"   {% if status_filter == 'aktif'   %}selected{% endif %}>Aktif</option>
-                    <option value="tutup"   {% if status_filter == 'tutup'   %}selected{% endif %}>Tutup</option>
-                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Perlu Kemaskini</option>
-                </select>
-                <button type="submit" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-                    <i class="fas fa-filter mr-1"></i> Tapis
-                </button>
-                {% if carian or negeri_filter or status_filter %}
-                <a href="{% url 'home:senarai_fasiliti' %}" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition">
-                    <i class="fas fa-times mr-1"></i> Kosongkan
-                </a>
-                {% endif %}
-            </form>
-
-            {% if fasiliti %}
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-100">
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">#</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Nama Fasiliti</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Kod Fasiliti</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Jenis</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Negeri</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Alamat</th>
-                            <th class="text-left px-4 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Poskod</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Parlimen</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Status</th>
-                            <th class="text-left px-6 py-4 font-semibold text-slate-500 text-xs uppercase tracking-wider">Dikemaskini</th>
-                            <th class="px-6 py-4"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        {% for fp in fasiliti %}
-                        <tr class="hover:bg-slate-50 transition group">
-                            <td class="px-6 py-4 text-slate-400 font-medium">{{ forloop.counter }}</td>
-                            <td class="px-6 py-4">
-                                <p class="font-semibold text-slate-800">{{ fp.nama_fasiliti }}</p>
-                                <p class="text-xs text-slate-400">{{ fp.daerah }}{% if fp.parlimen %} &bull; {{ fp.parlimen }}{% endif %}</p>
-                            </td>
-                            <td class="px-6 py-4 text-slate-500 text-xs font-mono">{{ fp.kod_fasiliti|default:"-" }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ fp.get_jenis_fasiliti_display }}</td>
-                            <td class="px-6 py-4 text-slate-600">{{ fp.get_negeri_display }}</td>
-                            <td class="px-6 py-4 text-slate-600 text-xs">{{ fp.alamat|default:"-" }}</td>
-                            <td class="px-4 py-4 text-slate-600 text-xs font-mono">{{ fp.poskod|default:"-" }}</td>
-                            <td class="px-6 py-4 text-slate-600 text-xs">{{ fp.parlimen|default:"-" }}</td>
-                            <td class="px-6 py-4">
-                                {% if fp.perlu_kemaskini %}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Perlu Kemaskini
-                                </span>
-                                {% elif fp.status == 'aktif' %}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Aktif
-                                </span>
-                                {% else %}
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Tutup
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 text-slate-400 text-xs">{{ fp.updated_at|date:"d M Y" }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
-                                    {% if request.user.is_superuser or request.user.is_staff or is_jkn %}
-                                    {% if fp.tahun != current_year %}
-                                    <a href="{% url 'home:tambah_fasiliti' %}?copy_from={{ fp.pk }}"
-                                       class="w-8 h-8 flex items-center justify-center rounded-lg text-purple-500 hover:bg-purple-50 transition"
-                                       title="Isi Semula untuk Tahun {{ current_year }}">
-                                        <i class="fas fa-calendar-plus text-xs"></i>
-                                    </a>
-                                    {% endif %}
-                                    {% endif %}
-                                    <a href="{% url 'home:detail_fasiliti' fp.pk %}" class="w-8 h-8 flex items-center justify-center rounded-lg text-emerald-500 hover:bg-emerald-50 transition" title="Lihat Laporan"><i class="fas fa-eye text-xs"></i></a>
-                                    <a href="{% url 'home:detail_fasiliti' fp.pk %}?print=1" target="_blank" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition" title="Cetak Laporan"><i class="fas fa-print text-xs"></i></a>
-                                    {% if not is_tm %}
-                                    {% if request.user.is_superuser or request.user.is_staff or fp.nama_fasiliti in user_assigned_names %}
-                                    <a href="{% url 'home:pilih_modul' fp.pk %}" class="w-8 h-8 flex items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 transition" title="Edit Modul"><i class="fas fa-pen text-xs"></i></a>
-                                    {% if request.user.is_superuser %}
-                                    <form method="post" action="{% url 'home:tukar_status_fasiliti' fp.pk %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                                        {% if fp.status == 'aktif' %}
-                                        <button type="submit" name="status" value="tutup"
-                                            class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-red-500 bg-red-50 hover:bg-red-100 border border-red-200 transition whitespace-nowrap"
-                                            onclick="return confirm('Tandakan &quot;{{ fp.nama_fasiliti }}&quot; sebagai TUTUP?')">
-                                            <i class="fas fa-ban text-[9px]"></i> Tandakan Tutup
-                                        </button>
-                                        {% else %}
-                                        <button type="submit" name="status" value="aktif"
-                                            class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold text-green-600 bg-green-50 hover:bg-green-100 border border-green-200 transition whitespace-nowrap"
-                                            onclick="return confirm('Aktifkan semula &quot;{{ fp.nama_fasiliti }}&quot;?')">
-                                            <i class="fas fa-check-circle text-[9px]"></i> Aktifkan Semula
-                                        </button>
-                                        {% endif %}
-                                    </form>
-                                    {% endif %}
-                                    <form method="post" action="{% url 'home:padam_fasiliti' fp.pk %}" onsubmit="return confirm('Padam profil {{ fp.nama_fasiliti }}?')">
-                                        {% csrf_token %}
-                                        <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 transition" title="Padam"><i class="fas fa-trash text-xs"></i></button>
-                                    </form>
-                                    {% endif %}
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <!-- Pagination -->
-            {% if fasiliti.has_other_pages %}
-            <div class="mt-5 flex items-center justify-between">
-                <p class="text-sm text-slate-400">Rekod {{ fasiliti.start_index }}-{{ fasiliti.end_index }} daripada {{ jumlah_total }}</p>
-                <div class="flex items-center gap-1.5">
-                    {% if fasiliti.has_previous %}
-                    <a href="?{% if carian %}carian={{ carian }}&{% endif %}{% if negeri_filter %}negeri={{ negeri_filter }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if tahun_filter %}tahun={{ tahun_filter }}&{% endif %}page={{ fasiliti.previous_page_number }}"
-                       class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition"><i class="fas fa-chevron-left text-xs"></i></a>
-                    {% endif %}
-                    {% for num in fasiliti.paginator.page_range %}
-                        {% if fasiliti.number == num %}
-                        <span class="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-600 text-white font-semibold text-sm">{{ num }}</span>
-                        {% elif num >= fasiliti.number|add:"-3" and num <= fasiliti.number|add:"3" %}
-                        <a href="?{% if carian %}carian={{ carian }}&{% endif %}{% if negeri_filter %}negeri={{ negeri_filter }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if tahun_filter %}tahun={{ tahun_filter }}&{% endif %}page={{ num }}"
-                           class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition text-sm">{{ num }}</a>
-                        {% endif %}
-                    {% endfor %}
-                    {% if fasiliti.has_next %}
-                    <a href="?{% if carian %}carian={{ carian }}&{% endif %}{% if negeri_filter %}negeri={{ negeri_filter }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if tahun_filter %}tahun={{ tahun_filter }}&{% endif %}page={{ fasiliti.next_page_number }}"
-                       class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 transition"><i class="fas fa-chevron-right text-xs"></i></a>
-                    {% endif %}
-                </div>
-            </div>
-            {% else %}
-            <p class="mt-4 text-xs text-slate-400 text-right">{{ jumlah_total }} profil dijumpai</p>
-            {% endif %}
-            {% else %}
-            <!-- Empty state -->
-            <div class="flex flex-col items-center justify-center py-24 text-center">
-                <div class="w-20 h-20 rounded-2xl bg-blue-50 flex items-center justify-center mb-5">
-                    <i class="fas fa-hospital-alt text-3xl text-blue-300"></i>
-                </div>
-                {% if carian or negeri_filter or status_filter or tahun_filter %}
-                <h3 class="text-lg font-bold text-slate-700 mb-2">Tiada profil dijumpai</h3>
-                <p class="text-slate-400 text-sm mb-6">Cuba ubah kata carian atau buang penapis.</p>
-                <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition">
-                    <i class="fas fa-times"></i> Buang Penapis
-                </a>
-                {% else %}
-                <h3 class="text-lg font-bold text-slate-700 mb-2">Tiada profil fasiliti lagi</h3>
-                <p class="text-slate-400 text-sm mb-6">Mulakan dengan menambah profil hospital atau klinik pertama.</p>
-                {% if request.user.is_superuser or request.user.is_staff or is_jkn %}
-                <a href="{% url 'home:tambah_fasiliti' %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-                    <i class="fas fa-plus"></i> Tambah Profil Pertama
-                </a>
-                {% endif %}
-                {% endif %}
-            </div>
-            {% endif %}
-        </main>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="navbar-brand">
+        <img src="{% static 'home/images/jata negara.png' %}" alt="Logo" class="navbar-brand-img">
+        <div class="navbar-brand-text">
+            <div class="role">KKM • YBTMK</div>
+            <div class="name">YBTMK Dashboard</div>
+        </div>
     </div>
+    
+    <div class="nav-links">
+        <a href="{% url 'home:tm_portal' %}" class="nav-link">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="{% url 'home:peta_tm' %}" class="nav-link">
+            <i class="fas fa-map-marked-alt"></i> Peta Fasiliti
+        </a>
+        <a href="{% url 'home:senarai_fasiliti' %}" class="nav-link active">
+            <i class="fas fa-list"></i> Senarai Fasiliti
+        </a>
+        <a href="{% url 'home:profil_saya' %}" class="nav-link">
+            <i class="fas fa-user"></i> Profil
+        </a>
+    </div>
+    
+    <div class="tm-badge">
+        <i class="fas fa-shield-alt"></i>
+        Top Management
+    </div>
+    
+    <div class="user-section">
+        <div class="user-card">
+            <div class="user-avatar">{{ request.user.username|make_list|first|upper }}</div>
+            <div>
+                <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                <div class="user-role">Top Management</div>
+            </div>
+        </div>
+        
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Log Keluar
+            </button>
+        </form>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+    <div class="page-header">
+        <h1 class="page-title">Senarai Profil Fasiliti</h1>
+        <p class="page-subtitle">Hospital & Klinik yang telah diisikan maklumat profiling</p>
+    </div>
+    
+    <!-- Filter Bar -->
+    <form method="get" class="filter-bar">
+        <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" name="carian" placeholder="Cari nama fasiliti..." value="{{ carian }}">
+        </div>
+        
+        <select name="negeri" class="filter-select" onchange="this.form.submit()">
+            <option value="">Semua Negeri</option>
+            {% for negeri in all_negeri %}
+            <option value="{{ negeri }}" {% if negeri_filter == negeri %}selected{% endif %}>{{ negeri }}</option>
+            {% endfor %}
+        </select>
+        
+        <select name="status" class="filter-select" onchange="this.form.submit()">
+            <option value="">Semua Status</option>
+            <option value="aktif" {% if status_filter == 'aktif' %}selected{% endif %}>Aktif</option>
+            <option value="tutup" {% if status_filter == 'tutup' %}selected{% endif %}>Tutup</option>
+        </select>
+        
+        <button type="submit" class="filter-btn">
+            <i class="fas fa-filter"></i> Tapis
+        </button>
+        
+        <div class="ml-auto">
+            <span style="font-size:.8rem; color:#64748b;">{{ jumlah_total }} fasiliti</span>
+        </div>
+    </form>
+    
+    <!-- Table -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nama Fasiliti</th>
+                    <th>Kod</th>
+                    <th>Jenis</th>
+                    <th>Negeri</th>
+                    <th>Status</th>
+                    <th>Tindakan</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fp in fasiliti %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>{{ fp.maklumat_asas.nama_fasiliti }}</strong></td>
+                    <td style="font-family:monospace;">{{ fp.k_kejuruteraan.kod_fasiliti|default:"-" }}</td>
+                    <td>{{ fp.maklumat_asas.get_jenis_fasiliti_display|default:"-" }}</td>
+                    <td>{{ fp.maklumat_asas.get_negeri_display|default:"-" }}</td>
+                    <td>
+                        {% if fp.status == 'aktif' %}
+                        <span class="status-badge status-aktif">
+                            <i class="fas fa-check-circle"></i> Aktif
+                        </span>
+                        {% else %}
+                        <span class="status-badge status-tutup">
+                            <i class="fas fa-times-circle"></i> Tutup
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'home:detail_fasiliti' fp.pk %}" class="action-btn btn-view">
+                            <i class="fas fa-eye"></i> Lihat
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align:center; padding:40px; color:#94a3b8;">
+                        <i class="fas fa-search" style="font-size:2rem; margin-bottom:8px; display:block;"></i>
+                        Tiada fasiliti yang dijumpai
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if fasiliti.has_other_pages %}
+    <div class="pagination">
+        {% if fasiliti.has_previous %}
+            <a href="?page=1{% if carian %}&carian={{ carian }}{% endif %}{% if negeri_filter %}&negeri={{ negeri_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+            <a href="?page={{ fasiliti.previous_page_number }}{% if carian %}&carian={{ carian }}{% endif %}{% if negeri_filter %}&negeri={{ negeri_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                <i class="fas fa-angle-left"></i>
+            </a>
+        {% endif %}
+        
+        <span class="current">Halaman {{ fasiliti.number }} daripada {{ fasiliti.paginator.num_pages }}</span>
+        
+        {% if fasiliti.has_next %}
+            <a href="?page={{ fasiliti.next_page_number }}{% if carian %}&carian={{ carian }}{% endif %}{% if negeri_filter %}&negeri={{ negeri_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{ fasiliti.paginator.num_pages }}{% if carian %}&carian={{ carian }}{% endif %}{% if negeri_filter %}&negeri={{ negeri_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
+
 </body>
 </html>

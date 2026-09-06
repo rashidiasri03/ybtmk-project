@@ -34,34 +34,67 @@
     <div class="ml-64 flex-1 flex flex-col">
 
         <!-- Header -->
-        <header class="bg-white border-b border-slate-100 px-8 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm no-print">
-            <div class="flex items-center gap-3">
-                <a href="{% url 'home:senarai_fasiliti' %}" class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 transition">
-                    <i class="fas fa-arrow-left text-sm"></i>
-                </a>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-800">{{ fp.nama_fasiliti }}</h1>
-                    <p class="text-slate-400 text-xs mt-0.5">Laporan Profiling Fasiliti</p>
-                </div>
+        <header class="no-print relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-white/10">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-5">
+                <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                    <i class="fas fa-print text-slate-400"></i> Cetak
-                </button>
-                <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-sm">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-                <!-- User chip -->
-                <div class="flex items-center gap-1.5 pl-1.5 pr-1.5 py-1.5 rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm">{{ request.user.username|first|upper }}</div>
-                    <div class="pl-1 pr-2 hidden sm:block">
-                        <p class="text-xs font-semibold text-slate-700 leading-tight max-w-[120px] truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
-                        <p class="text-[11px] text-purple-500 font-semibold leading-tight">{% if request.user.is_superuser %}Superadmin{% elif request.user.is_staff %}Admin{% else %}Pengguna{% endif %}</p>
+            
+            <!-- Top Navigation Bar -->
+            <div class="relative px-8 py-4 flex items-center justify-between border-b border-white/5">
+                <!-- Left: Back & Title -->
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'home:senarai_fasiliti' %}" class="group flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fas fa-arrow-left text-white text-sm"></i>
+                        </div>
+                        <span class="text-white/90 font-semibold text-sm">Kembali</span>
+                    </a>
+                    
+                    <div class="flex items-center gap-2">
+                        <div class="h-6 w-px bg-white/20"></div>
+                        <div>
+                            <h1 class="text-xl font-bold text-white tracking-tight">{{ fp.nama_fasiliti }}</h1>
+                            <p class="text-blue-200/70 text-xs mt-0.5">Laporan Profiling Fasiliti</p>
+                        </div>
                     </div>
-                    <div class="w-px h-6 bg-slate-200 mx-0.5 hidden sm:block"></div>
-                    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
-                        <button type="button" title="Log Keluar" onclick="showLogoutModal(this.closest('form'))" class="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition"><i class="fas fa-sign-out-alt text-sm"></i></button>
-                    </form>
+                </div>
+                
+                <!-- Right: Actions & User -->
+                <div class="flex items-center gap-3">
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.print()" class="group flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                            <i class="fas fa-print text-blue-300 group-hover:text-white transition-colors"></i>
+                            <span class="text-white/90 text-sm font-semibold">Cetak</span>
+                        </button>
+                        
+                        <button onclick="window.location.href='{% url 'home:pilih_modul' fp.pk %}'" class="group flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white text-sm font-semibold transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40" type="button">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit</span>
+                        </button>
+                    </div>
+                    
+                    <!-- User Profile -->
+                    <div class="flex items-center gap-3 pl-4 border-l border-white/10">
+                        <div class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                                {{ request.user.username|first|upper }}
+                            </div>
+                            <div class="hidden lg:block">
+                                <p class="text-sm font-semibold text-white leading-tight max-w-[140px] truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
+                                <p class="text-[11px] text-blue-300/80 font-medium leading-tight">
+                                    {% if request.user.is_superuser %}Superadmin{% elif request.user.is_staff %}Admin{% else %}Pengguna{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <form method="post" action="{% url 'logout' %}" class="inline">{% csrf_token %}
+                            <button type="button" onclick="showLogoutModal(this.closest('form'))" class="group w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-red-400/80 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/30 transition-all duration-300" title="Log Keluar">
+                                <i class="fas fa-sign-out-alt text-sm group-hover:scale-110 transition-transform"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </header>
@@ -371,15 +404,17 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
   (function () {
-    var lat = {{ fp.latitud }};
-    var lng = {{ fp.longitud }};
+    var lat = parseFloat('{{ fp.latitud|floatformat:5 }}');
+    var lng = parseFloat('{{ fp.longitud|floatformat:5 }}');
     var map = L.map('facility-map').setView([lat, lng], 16);
     L.tileLayer('https://tile.openfreemap.org/styles/liberty/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | OpenFreeMap',
       maxZoom: 20
     }).addTo(map);
+    
+    var popupContent = "<b>{{ fp.nama_fasiliti|default:''|escapejs }}</b><br>{{ fp.alamat|default:''|escapejs }}<br>{{ fp.poskod|default:''|escapejs }}";
     L.marker([lat, lng]).addTo(map)
-      .bindPopup('<b>{{ fp.nama_fasiliti|escapejs }}</b><br>{{ fp.alamat|escapejs }}<br>{{ fp.poskod|escapejs }}')
+      .bindPopup(popupContent)
       .openPopup();
   })();
 </script>

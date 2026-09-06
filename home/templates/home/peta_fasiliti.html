@@ -148,6 +148,28 @@
             <p class="text-sm font-extrabold text-slate-800 leading-tight">Peta Fasiliti Malaysia</p>
         </div>
     </div>
+    
+    <!-- NAVIGATION LINKS -->
+    <div class="hidden md:flex items-center gap-1">
+        <a href="{% url 'home:peta_fasiliti' %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold transition">
+            <i class="fas fa-map-marked-alt text-[10px]"></i> Peta
+        </a>
+        <a href="{% url 'home:bahagian' %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+            <i class="fas fa-chart-bar text-[10px]"></i> Dashboard
+        </a>
+        <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+            <i class="fas fa-list text-[10px]"></i> Senarai
+        </a>
+        {% if request.user.is_superuser %}
+        <a href="{% url 'home:superadmin' %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+            <i class="fas fa-cog text-[10px]"></i> Admin
+        </a>
+        {% endif %}
+        <a href="{% url 'home:profil_saya' %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
+            <i class="fas fa-user text-[10px]"></i> Profil
+        </a>
+    </div>
+    
     <div class="flex items-center gap-2">
         <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-100">
             <i class="fas fa-map-pin text-blue-500 text-xs"></i>
@@ -157,10 +179,22 @@
                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition">
             <i class="fas fa-cube text-xs"></i> 3D
         </button>
-        <a href="{% if request.user.is_superuser %}{% url 'home:superadmin' %}{% else %}{% url 'home:bahagian' %}{% endif %}"
-           class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
-            <i class="fas fa-arrow-left text-[10px]"></i> Kembali
-        </a>
+        <div class="relative group">
+            <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs font-bold hover:bg-red-100 transition">
+                <i class="fas fa-sign-out-alt text-[10px]"></i>
+            </button>
+            <!-- Dropdown -->
+            <div class="absolute right-0 top-full mt-1 w-36 bg-white rounded-xl shadow-lg border border-slate-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="px-3 py-2 border-b border-slate-100">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{{
+                    request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="text-[9px] text-slate-400">{{ request.user.email }}</p>
+                </div>
+                <a href="{% url 'logout' %}" class="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 text-xs font-semibold transition">
+                    <i class="fas fa-power-off text-[10px]"></i> Log Keluar
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -195,9 +229,12 @@
 <!-- MapLibre GL JS -->
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 
+<!-- Django data (hidden) -->
+<script id="fasiliti-data" type="application/json">{{ fasiliti_json|safe }}</script>
+
 <script>
 // ── Data dari Django ──
-const FASILITI_DATA = {{ fasiliti_json|safe }};
+const FASILITI_DATA = JSON.parse(document.getElementById('fasiliti-data').textContent);
 
 // PENTING: MapLibre guna [lng, lat]
 const COORDS = {

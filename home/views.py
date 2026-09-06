@@ -15,7 +15,7 @@ def custom_login(request):
     if request.user.is_authenticated:
         if request.user.is_superuser:
             return redirect('home:superadmin')
-        return redirect('home:bahagian')
+        return redirect('home:peta_fasiliti')
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -23,7 +23,7 @@ def custom_login(request):
             auth.login(request, user)
             if user.is_superuser:
                 return redirect('home:superadmin')
-            return redirect('home:bahagian')
+            return redirect('home:peta_fasiliti')
     else:
         form = AuthenticationForm(request)
     return render(request, 'home/login.html', {'form': form})
