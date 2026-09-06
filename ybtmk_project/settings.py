@@ -57,6 +57,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ybtmk_project.wsgi.application'
 
+import certifi
 # Database – TiDB Serverless Cloud
 DATABASES = {
     'default': {
@@ -68,9 +69,9 @@ DATABASES = {
         'PORT': '4000',
         'OPTIONS': {
             'ssl': {
-                'ca': '/etc/ssl/certs/ca-certificates.crt',
+                'ca': certifi.where(),
             },
-        }
+        },
     }
 }
 
