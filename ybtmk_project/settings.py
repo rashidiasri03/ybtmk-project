@@ -69,9 +69,8 @@ DATABASES = {
         'PORT': '4000',
         'OPTIONS': {
             'ssl': {
-                'ca': certifi.where(),
+                'ca': '/etc/ssl/certs/ca-certificates.crt',
             },
-            'ssl_mode': 'VERIFY_IDENTITY',
         },
     }
 }
