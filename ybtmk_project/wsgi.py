@@ -3,6 +3,9 @@ WSGI config for ybtmk_project project.
 """
 
 import os
+import pymysql
+
+pymysql.install_as_MySQLdb()
 
 from django.core.wsgi import get_wsgi_application
 

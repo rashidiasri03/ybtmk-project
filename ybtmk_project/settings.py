@@ -3,6 +3,7 @@ Django settings for ybtmk_project project.
 """
 
 from pathlib import Path
+import certifi
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,7 +58,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ybtmk_project.wsgi.application'
 
-import certifi
 # Database – TiDB Serverless Cloud
 DATABASES = {
     'default': {
@@ -71,6 +71,7 @@ DATABASES = {
             'ssl': {
                 'ca': certifi.where(),
             },
+            'ssl_mode': 'VERIFY_IDENTITY',
         },
     }
 }
