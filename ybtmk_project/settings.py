@@ -2,8 +2,15 @@
 Django settings for ybtmk_project project.
 """
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
+# Tambah 2 baris ini untuk mengabaikan semakan versi MySQL bagi TiDB
+from django.db.backends.mysql.base import DatabaseWrapper
+DatabaseWrapper.check_database_version_supported = lambda self: None
+
 from pathlib import Path
-import certifi
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -68,13 +75,15 @@ DATABASES = {
         'HOST': 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
         'PORT': '4000',
         'OPTIONS': {
-            'ssl_mode': 'VERIFY_IDENTITY',
-            'ssl': {
-                'ca': '/etc/ssl/certs/ca-certificates.crt',
-            },
+            # PyMySQL hanya perlukan dict 'ssl' untuk mengaktifkan penyulitan
+            'ssl': {},
         }
     }
 }
+
+# Jika berjalan di pelayan Render (Linux), tambah laluan fail sijil
+if os.environ.get('RENDER'):
+    DATABASES['default']['OPTIONS']['ssl']['ca'] = '/etc/ssl/certs/ca-certificates.crt'
 
 # Auth redirects
 LOGIN_URL = '/login/'

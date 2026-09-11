@@ -281,140 +281,23 @@
         
         #count-label { font-size:.75rem; color:#64748b; font-weight:600; }
         
-        /* Facility list panel */
-        .facility-panel {
-            position:fixed;
-            top:120px;
-            left:16px;
-            bottom:24px;
-            width:300px;
-            max-width:calc(100vw - 32px);
-            z-index:200;
-            background:white;
-            border-radius:16px;
-            box-shadow:0 8px 32px rgba(0,0,0,.15);
-            display:flex;
-            flex-direction:column;
-            overflow:hidden;
-        }
-        
-        .facility-panel-header {
-            padding:16px;
-            border-bottom:1px solid #e2e8f0;
-            background:#f8fafc;
-        }
-        
-        .facility-panel-title {
-            font-size:.85rem;
-            font-weight:700;
-            color:#0f172a;
-            margin:0 0 4px;
-        }
-        
-        .facility-panel-count {
-            font-size:.75rem;
-            color:#64748b;
-        }
-        
-        .facility-list {
-            flex:1;
-            overflow-y:auto;
-            padding:8px;
-        }
-        
-        .facility-list::-webkit-scrollbar { width:4px; }
-        .facility-list::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:9px; }
-        
-        .facility-item {
-            padding:12px;
-            border-radius:12px;
-            border:1px solid #f1f5f9;
-            margin-bottom:8px;
-            cursor:pointer;
-            transition:all .15s;
-        }
-        
-        .facility-item:hover {
-            background:#f8fafc;
-            border-color:#cbd5e1;
-        }
-        
-        .facility-item.selected {
-            background:#eff6ff;
-            border-color:#2563eb;
-            border-left:3px solid #2563eb;
-        }
-        
-        .facility-item-header {
-            display:flex;
-            justify-content:space-between;
-            align-items:flex-start;
-            margin-bottom:8px;
-        }
-        
-        .facility-item-name {
-            font-size:.82rem;
-            font-weight:700;
-            color:#0f172a;
-            margin:0;
-            flex:1;
-        }
-        
-        .facility-item-info {
-            font-size:.72rem;
-            color:#64748b;
-            display:flex;
-            flex-direction:column;
-            gap:4px;
-        }
-        
-        .facility-item-row {
-            display:flex;
-            align-items:center;
-            gap:6px;
-        }
-        
-        .facility-item-row i {
-            width:12px;
-            color:#94a3b8;
-        }
-        
-        .facility-status {
-            display:inline-flex;
-            align-items:center;
-            gap:4px;
-            padding:2px 8px;
-            border-radius:99px;
-            font-size:.65rem;
-            font-weight:700;
-        }
-        
-        .facility-status.aktif {
-            background:#f0fdf4;
-            color:#16a34a;
-        }
-        
-        .facility-status.tutup {
-            background:#fef2f2;
-            color:#dc2626;
-        }
-        
         /* Legend */
         #legend {
             position:fixed;
             bottom:20px;
-            right:20px;
+            left:20px;
             z-index:300;
             background:white;
             border:1px solid #e2e8f0;
             border-radius:12px;
             padding:12px 16px;
-            font-size:.75rem;
-            font-weight:600;
+            font-size:.72rem;
+            font-weight:700;
             color:#334155;
             display:flex;
-            gap:16px;
+            gap:14px;
             box-shadow:0 4px 12px rgba(0,0,0,.1);
+            flex-wrap: wrap;
         }
         
         /* Searchable dropdown */
@@ -581,17 +464,28 @@
     </div>
 </div>
 
+<!-- Dropdown Filter Lawatan (Tengah Peta) -->
+<div style="position:fixed; top:135px; left:50%; transform:translateX(-50%); z-index:1000; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); padding:8px 16px; border-radius:30px; box-shadow:0 4px 15px rgba(0,0,0,0.1); border:1px solid #e2e8f0; display:flex; align-items:center; gap:10px;">
+    <span style="font-size:0.75rem; font-weight:700; color:#475569;">Peta Lawatan:</span>
+    <select id="filter-lawatan" onchange="applyFilter()" style="font-size:0.75rem; font-weight:700; color:#0f172a; border:none; background:transparent; outline:none; cursor:pointer;">
+        <option value="semua">Keseluruhan</option>
+        <option value="merah">🔴 Belum Dilawati</option>
+        <option value="kuning">🟡 Dalam Proses</option>
+        <option value="biru">🔵 Sudah Dilawati</option>
+        <option value="hijau">🟢 Selesai Dilaksanakan</option>
+    </select>
+</div>
+
 <!-- MAP -->
 <div id="map"></div>
 
 <!-- LEGEND -->
 <div id="legend">
-    <span class="flex items-center gap-2">
-        <span style="width:12px;height:12px;border-radius:50%;background:#16a34a;display:inline-block;"></span>Aktif
-    </span>
-    <span class="flex items-center gap-2">
-        <span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block;"></span>Tutup
-    </span>
+    <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block;"></span>Belum Dilawati</span>
+    <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:50%;background:#facc15;display:inline-block;"></span>Proses</span>
+    <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:50%;background:#3b82f6;display:inline-block;"></span>Dilawati</span>
+    <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:50%;background:#22c55e;display:inline-block;"></span>Selesai</span>
+    <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:50%;background:#94a3b8;display:inline-block;"></span>Tutup/Kelabu</span>
 </div>
 
 <!-- Django data -->
@@ -694,13 +588,15 @@ function applyFilter() {
     const selectedDaerah = document.getElementById('daerah-filter').value;
     const selectedJenis = document.getElementById('jenis-filter').value;
     const selectedFasiliti = document.getElementById('fasiliti-input').dataset.pk || '';
+    const selectedLawatan = document.getElementById('filter-lawatan') ? document.getElementById('filter-lawatan').value : 'semua';
     
     FILTERED_FASILITI = ALL_FASILITI.filter(f => {
         const matchNegeri = !selectedNegeri || f.negeri === selectedNegeri;
         const matchDaerah = !selectedDaerah || f.daerah === selectedDaerah;
         const matchJenis = !selectedJenis || f.jenis === selectedJenis;
         const matchFasiliti = !selectedFasiliti || f.pk == selectedFasiliti;
-        return matchNegeri && matchDaerah && matchJenis && matchFasiliti;
+        const matchLawatan = selectedLawatan === 'semua' || (f.status_lawatan || 'merah') === selectedLawatan;
+        return matchNegeri && matchDaerah && matchJenis && matchFasiliti && matchLawatan;
     });
     
     // Update map markers
@@ -773,6 +669,9 @@ function resetFilter() {
     document.getElementById('fasiliti-input').value = '';
     document.getElementById('fasiliti-input').dataset.pk = '';
     document.getElementById('fasiliti-dropdown').style.display = 'none';
+    if(document.getElementById('filter-lawatan')) {
+        document.getElementById('filter-lawatan').value = 'semua';
+    }
     FILTERED_FASILITI = [...ALL_FASILITI];
     
     if (window.mapInstance) {
@@ -971,39 +870,20 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Select facility
-function selectFacility(f, itemElement) {
-    // Remove previous selection
-    document.querySelectorAll('.facility-item').forEach(el => el.classList.remove('selected'));
-    
-    // Add selection
-    itemElement.classList.add('selected');
-    CURRENT_SELECTED = f;
-    
-    // Fly to location
-    if (window.mapInstance && f.lat && f.lng) {
-        // Small delay to ensure map is ready
-        setTimeout(function() {
-            window.mapInstance.flyTo({
-                center: [f.lng, f.lat],
-                zoom: 16,
-                pitch: 45,
-                duration: 1500
-            });
-            
-            // Show popup after fly animation
-            setTimeout(function() {
-                showFacilityPopup(f);
-            }, 1600);
-        }, 100);
-    }
-}
-
 // Show popup
 function showFacilityPopup(f) {
     if (window.currentPopup) {
         window.currentPopup.remove();
     }
+    
+    // Warna Badge Lawatan
+    let badgeColor = f.status_lawatan === 'kuning' ? '#facc15' : 
+                     f.status_lawatan === 'biru' ? '#3b82f6' : 
+                     f.status_lawatan === 'hijau' ? '#22c55e' : '#ef4444';
+                     
+    let badgeText = f.status_lawatan === 'kuning' ? 'Dalam Proses' : 
+                    f.status_lawatan === 'biru' ? 'Sudah Dilawati' : 
+                    f.status_lawatan === 'hijau' ? 'Selesai Dilaksanakan' : 'Belum Dilawati';
     
     const popup = new maplibregl.Popup({
         maxWidth: '300px',
@@ -1014,13 +894,22 @@ function showFacilityPopup(f) {
         .setHTML(`
             <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 4px;">
                 <!-- Header -->
-                <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 12px;">
-                    <h3 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 800; color: #0f172a; line-height: 1.3;">
+                <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 800; color: #0f172a; line-height: 1.3;">
                         ${f.nama}
                     </h3>
-                    <div style="display: inline-block; padding: 4px 10px; border-radius: 20px; background: ${f.status === 'tutup' ? '#fef2f2' : '#f0fdf4'}; color: ${f.status === 'tutup' ? '#dc2626' : '#16a34a'}; font-size: 11px; font-weight: 700;">
-                        <i class="fas fa-${f.status === 'tutup' ? 'times-circle' : 'check-circle'}" style="margin-right: 4px;"></i>
-                        ${f.status === 'tutup' ? 'TUTUP' : 'AKTIF'}
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                        <!-- Lencana Status Operasi -->
+                        <span style="display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; background: ${f.status === 'tutup' ? '#fef2f2' : '#f0fdf4'}; color: ${f.status === 'tutup' ? '#dc2626' : '#16a34a'}; border: 1px solid ${f.status === 'tutup' ? '#fecaca' : '#bbf7d0'}; font-size: 10px; font-weight: 800;">
+                            <i class="fas fa-${f.status === 'tutup' ? 'times-circle' : 'check-circle'}" style="margin-right: 4px;"></i>
+                            ${f.status === 'tutup' ? 'TUTUP' : 'AKTIF'}
+                        </span>
+                        
+                        <!-- Lencana Status Lawatan -->
+                        <span style="display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; background: ${badgeColor}15; color: ${badgeColor}; border: 1px solid ${badgeColor}55; font-size: 10px; font-weight: 800;">
+                            <i class="fas fa-flag" style="margin-right: 4px;"></i>
+                            ${badgeText}
+                        </span>
                     </div>
                 </div>
                 
@@ -1059,19 +948,6 @@ function showFacilityPopup(f) {
                         <div>
                             <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Kod Fasiliti</div>
                             <div style="font-size: 13px; color: #0f172a; font-weight: 600;">${f.kod_fasiliti}</div>
-                        </div>
-                    </div>
-                    ` : ''}
-                    
-                    <!-- Parlimen (if available) -->
-                    ${f.parlimen ? `
-                    <div style="display: flex; align-items: flex-start; gap: 10px;">
-                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #fce7f3; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="fas fa-landmark" style="color: #ec4899; font-size: 14px;"></i>
-                        </div>
-                        <div>
-                            <div style="font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Parlimen</div>
-                            <div style="font-size: 13px; color: #0f172a; font-weight: 600;">${f.parlimen}</div>
                         </div>
                     </div>
                     ` : ''}
@@ -1115,19 +991,6 @@ function initMap() {
     mapInstance.on('load', function() {
         updateMapMarkers();
     });
-    
-    // Click on map to deselect
-    mapInstance.on('click', function(e) {
-        const features = mapInstance.queryRenderedFeatures(e.point);
-        if (features.length === 0) {
-            // Clicked on empty area - deselect
-            document.querySelectorAll('.facility-item').forEach(el => el.classList.remove('selected'));
-            if (window.currentPopup) {
-                window.currentPopup.remove();
-                window.currentPopup = null;
-            }
-        }
-    });
 }
 
 // Update map markers
@@ -1136,8 +999,6 @@ function updateMapMarkers() {
     
     // Remove existing source and layers
     if (mapInstance.getSource('fasiliti')) {
-        if (mapInstance.getLayer('clusters')) mapInstance.removeLayer('clusters');
-        if (mapInstance.getLayer('cluster-count')) mapInstance.removeLayer('cluster-count');
         if (mapInstance.getLayer('fasiliti-glow')) mapInstance.removeLayer('fasiliti-glow');
         if (mapInstance.getLayer('fasiliti-point')) mapInstance.removeLayer('fasiliti-point');
         if (mapInstance.getSource('fasiliti')) mapInstance.removeSource('fasiliti');
@@ -1146,26 +1007,38 @@ function updateMapMarkers() {
     // Filter facilities with GPS
     const facilitiesWithGPS = FILTERED_FASILITI.filter(f => f.lat && f.lng);
     
-    // Create GeoJSON
+    // Create GeoJSON with updated pin logic
     const geojson = {
         type: 'FeatureCollection',
-        features: facilitiesWithGPS.map(f => ({
-            type: 'Feature',
-            geometry: {
-                type: 'Point',
-                coordinates: [f.lng, f.lat]
-            },
-            properties: {
-                pk: f.pk,
-                nama: f.nama,
-                jenis: f.jenis,
-                daerah: f.daerah,
-                negeri: f.negeri,
-                status: f.status,
-                color: f.status === 'tutup' ? '#ef4444' : '#16a34a',
-                glow: f.status === 'tutup' ? '#f87171' : '#22c55e'
-            }
-        }))
+        features: facilitiesWithGPS.map(f => {
+            let pinColor = '#ef4444'; // Merah
+            let glowColor = '#f87171';
+            
+            if (f.status_lawatan === 'kuning') { pinColor = '#facc15'; glowColor = '#fef08a'; }
+            else if (f.status_lawatan === 'biru') { pinColor = '#3b82f6'; glowColor = '#93c5fd'; }
+            else if (f.status_lawatan === 'hijau') { pinColor = '#22c55e'; glowColor = '#86efac'; }
+
+            if (f.status === 'tutup') { pinColor = '#94a3b8'; glowColor = '#cbd5e1'; }
+
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [f.lng, f.lat]
+                },
+                properties: {
+                    pk: f.pk,
+                    nama: f.nama,
+                    jenis: f.jenis,
+                    daerah: f.daerah,
+                    negeri: f.negeri,
+                    status: f.status,
+                    color: pinColor,
+                    glow: glowColor,
+                    status_lawatan: f.status_lawatan || 'merah'
+                }
+            };
+        })
     };
     
     // Add source - WITHOUT clustering
@@ -1174,12 +1047,11 @@ function updateMapMarkers() {
         data: geojson
     });
     
-    // Individual glow effect - only show when zoom >= 10
+    // Individual glow effect (buang sekatan zoom)
     mapInstance.addLayer({
         id: 'fasiliti-glow',
         type: 'circle',
         source: 'fasiliti',
-        filter: ['>=', ['zoom'], 10],
         paint: {
             'circle-radius': 12,
             'circle-color': ['get', 'color'],
@@ -1188,16 +1060,15 @@ function updateMapMarkers() {
         }
     });
     
-    // Individual facility pins - only show when zoom >= 10
+    // Individual facility pins (buang sekatan zoom dan betulkan saiz)
     mapInstance.addLayer({
         id: 'fasiliti-point',
         type: 'circle',
         source: 'fasiliti',
-        filter: ['>=', ['zoom'], 10],
         paint: {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 3, 12, 5, 14, 7, 16, 10],
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 3, 10, 5, 14, 7, 16, 10],
             'circle-color': ['get', 'color'],
-            'circle-stroke-width': 2,
+            'circle-stroke-width': 1.5,
             'circle-stroke-color': '#ffffff'
         }
     });
@@ -1208,15 +1079,6 @@ function updateMapMarkers() {
         const f = FILTERED_FASILITI.find(x => x.pk == props.pk);
         if (f) {
             showFacilityPopup(f);
-            
-            // Highlight in list
-            document.querySelectorAll('.facility-item').forEach(el => {
-                el.classList.remove('selected');
-                if (el.dataset.pk == props.pk) {
-                    el.classList.add('selected');
-                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            });
         }
     });
     

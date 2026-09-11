@@ -240,6 +240,17 @@ class FacilityProfile(models.Model):
     submitted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='facility_profiles')
     status       = models.CharField(max_length=10, choices=STATUS_CHOICES, default='aktif')
     tahun        = models.IntegerField(default=_current_year, verbose_name="Tahun")
+    # TAMBAHAN BARU: Status Lawatan VIP
+    STATUS_LAWATAN_CHOICES = [
+        ('merah',  'Belum Dilawati'),
+        ('kuning', 'Dalam Perancangan/Proses'),
+        ('biru',   'Sudah Dilawati'),
+        ('hijau',  'Selesai/Dilaksanakan'),
+    ]
+    status_lawatan       = models.CharField(max_length=10, choices=STATUS_LAWATAN_CHOICES, default='merah', verbose_name="Status Lawatan")
+    tarikh_lawatan       = models.DateField(null=True, blank=True, verbose_name="Tarikh Lawatan")
+    nama_program_lawatan = models.CharField(max_length=255, blank=True, verbose_name="Nama Program/VIP")
+    catatan_lawatan      = models.TextField(blank=True, verbose_name="Catatan/Tindakan")
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
 

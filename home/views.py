@@ -10,6 +10,8 @@ from .models import (
     KlusterKejuruteraan, KlusterSumberManusia, KlusterPerkhidmatan,
     KlusterAset, KlusterFasiliti, KlusterPerancangan, KlusterKonsesi,
 )
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def custom_login(request):
     if request.user.is_authenticated:
@@ -382,6 +384,7 @@ def peta_fasiliti(request):
                 'tahun':  fp.tahun or '',
                 'lat':    ma.latitud,
                 'lng':    ma.longitud,
+                'status_lawatan': fp.status_lawatan,
             })
     return render(request, 'home/peta_fasiliti.html', {
         'fasiliti_json': json.dumps(data, ensure_ascii=False),
@@ -412,6 +415,7 @@ def peta_tm(request):
                 'tahun':  fp.tahun or '',
                 'lat':    ma.latitud,
                 'lng':    ma.longitud,
+                'status_lawatan': fp.status_lawatan,
             })
     return render(request, 'home/peta_tm.html', {
         'fasiliti_json': json.dumps(data, ensure_ascii=False),
@@ -656,6 +660,10 @@ def fasiliti_api_detail(request, pk):
             'poskod': txt(ma.poskod) if ma else '—',
             'lat':    ma.latitud if ma else None,
             'lng':    ma.longitud if ma else None,
+            'status_lawatan': fp.status_lawatan,
+            'nama_program': fp.nama_program_lawatan or '',
+            'tarikh_lawatan': str(fp.tarikh_lawatan) if fp.tarikh_lawatan else '',
+            'catatan': fp.catatan_lawatan or '',
         },
         'k1': None if not k1 else {
             'tahun_dibina':          str(k1.tahun_dibina) if k1.tahun_dibina else '—',
@@ -1877,3 +1885,24 @@ def _save_pesakit(request, fp):
     fp.save()
     messages.success(request, f'Data Pesakit "{ma.nama_fasiliti}" berjaya disimpan.')
     return redirect('home:senarai_fasiliti')
+
+@login_required
+@csrf_exempt
+def kemaskini_status_lawatan(request, pk):
+    """API khas untuk Admin menyimpan status lawatan dari pop-up peta"""
+    if not is_admin(request.user):
+        return JsonResponse({'status': 'error', 'message': 'Tiada kebenaran'}, status=403)
+        
+    if request.method == 'POST':
+        fp = get_object_or_404(FacilityProfile, pk=pk)
+        
+        fp.status_lawatan = request.POST.get('status_lawatan', 'merah')
+        fp.nama_program_lawatan = request.POST.get('nama_program', '').strip()
+        fp.catatan_lawatan = request.POST.get('catatan', '').strip()
+        
+        tarikh_raw = request.POST.get('tarikh_lawatan', '').strip()
+        fp.tarikh_lawatan = tarikh_raw if tarikh_raw else None
+        
+        fp.save(update_fields=['status_lawatan', 'nama_program_lawatan', 'tarikh_lawatan', 'catatan_lawatan'])
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)

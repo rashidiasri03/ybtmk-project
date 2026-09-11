@@ -9,6 +9,7 @@ urlpatterns = [
     path('bahagian/', views.bahagian_view, name='bahagian'),
     path('tm/', views.tm_portal, name='tm_portal'),
     path('profiling/<int:pk>/modul/', views.pilih_modul, name='pilih_modul'),
+    path('profiling/<int:pk>/lawatan/', views.kemaskini_status_lawatan, name='kemaskini_lawatan'),
     # Superadmin panel
     path('superadmin/', views.superadmin, name='superadmin'),
     # User management (admin only)
