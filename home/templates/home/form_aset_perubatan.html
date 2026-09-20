@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>3. Aset Perubatan | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya { border-color:#0d9488; background:#f0fdfa; color:#0f766e; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .pill-item input:checked + label.other { border-color:#eab308; background:#fefce8; color:#ca8a04; }
+        .chip-label { cursor:pointer; display:inline-flex; align-items:center; gap:5px; padding:6px 14px; border-radius:99px; border:2px solid #e2e8f0; font-size:.75rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s; user-select:none; }
+        .chip-label:hover { border-color:#94a3b8; }
+        .chip-cb:checked + .chip-label { border-color:#0d9488; background:#f0fdfa; color:#0f766e; }
+        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(13,148,136,.08); border-color:#99f6e4; }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(13,148,136,.05); }
+        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; text-transform:uppercase; }
+        .f-input, .f-textarea { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none; transition:all .15s; background:#fff; }
+        .f-input:focus, .f-textarea:focus { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,148,136,.1); }
+        .f-textarea { resize:vertical; min-height:80px; }
+        .btn-submit { background:linear-gradient(110deg,#0d9488,#14b8a6); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(13,148,136,.3); }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .4s ease both; }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
+            <div><p class="text-[9px] font-bold tracking-widest text-teal-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Aset Perubatan</p></div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+    </div>
+</nav>
+
+<div class="bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 3: ASET PERUBATAN</h1>
+        <p class="text-teal-100 text-xs opacity-80">{{ fp.nama_fasiliti }}</p>
+    </div>
+</div>
+
+<main class="px-8 pb-16 pt-6">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<div class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title"><div class="sec-dot bg-teal-50 text-teal-600">3.1</div><span class="sec-label">Peralatan Perubatan & Sokongan</span></div>
+    <div class="space-y-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Senaraikan peralatan perubatan (beserta unit & keadaan)</label><textarea name="senarai_peralatan" class="f-textarea">{{ senarai_peralatan|default:'' }}</textarea></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Aset / peralatan yang tidak mengikut spesifikasi KKM</label><textarea name="aset_tidak_ikut_spec" class="f-textarea">{{ aset_tidak_ikut_spec|default:'' }}</textarea></div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Disposable assets mencukupi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="disposable_mencukupi" id="disp_ya" value="1" {% if disposable_mencukupi == True %}checked{% endif %}><label for="disp_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="disposable_mencukupi" id="disp_tidak" value="0" {% if disposable_mencukupi == False %}checked{% endif %}><label for="disp_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div></div>
+            <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Bekalan ubat-ubatan mencukupi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="bekalan_ubat_mencukupi" id="ubat_ya" value="1" {% if bekalan_ubat_mencukupi == True %}checked{% endif %}><label for="ubat_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="bekalan_ubat_mencukupi" id="ubat_tidak" value="0" {% if bekalan_ubat_mencukupi == False %}checked{% endif %}><label for="ubat_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div></div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 mb-2">Adakah perkhidmatan ambulans disediakan?</label>
+                <div class="flex gap-2 mb-2">
+                    <div class="pill-item"><input type="radio" name="ada_ambulans" id="amb_ya" value="1" onchange="toggleNote('amb_nota_wrap', true)" {% if ada_ambulans == True %}checked{% endif %}><label for="amb_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                    <div class="pill-item"><input type="radio" name="ada_ambulans" id="amb_tidak" value="0" onchange="toggleNote('amb_nota_wrap', false)" {% if ada_ambulans == False %}checked{% endif %}><label for="amb_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                </div>
+                <div id="amb_nota_wrap" class="mt-2 {% if ada_ambulans != True %}hidden{% endif %}"><input type="text" name="ambulans_nota" class="f-input" placeholder="Cth: 2 buah (1 rosak, 1 baik)..." value="{{ ambulans_nota|default:'' }}"></div>
+            </div>
+            <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Bagaimana keadaan perabot di fasiliti ini (Ruang menunggu, katil, meja)?</label><textarea name="keadaan_perabot" class="f-textarea">{{ keadaan_perabot|default:'' }}</textarea></div>
+        </div>
+    </div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title"><div class="sec-dot bg-teal-50 text-teal-600">3.2</div><span class="sec-label">Pendigitalan & Keselamatan</span></div>
+    <div class="space-y-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Sistem Pendigitalan di fasiliti ini (Boleh pilih >1)</label>
+            <input type="hidden" name="sistem_pendigitalan" id="f_sistem_pendigitalan" value="{{ sistem_pendigitalan|default:'' }}">
+            <div class="flex flex-wrap gap-2" id="digital-group">
+                {% for d_choice in digital_choices %}
+                <label class="chip-label"><input type="checkbox" class="chip-cb hidden digital-cb" value="{{ d_choice }}"> {{ d_choice }}</label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Peranti/Gajet ICT digunakan dengan baik & selamat?</label>
+            <div class="flex gap-2 flex-wrap mb-2">
+                <div class="pill-item"><input type="radio" name="gajet_ict_baik" id="gajet_ya" value="1" onchange="toggleNote('gajet_nota_wrap', false)" {% if gajet_ict_baik == True %}checked{% endif %}><label for="gajet_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="gajet_ict_baik" id="gajet_tidak" value="0" onchange="toggleNote('gajet_nota_wrap', true)" {% if gajet_ict_baik == False %}checked{% endif %}><label for="gajet_tidak" class="other"><i class="fas fa-exclamation-triangle"></i> Tidak (Nyatakan Sebab)</label></div>
+            </div>
+            <div id="gajet_nota_wrap" class="mt-2 {% if gajet_ict_baik != False %}hidden{% endif %}"><input type="text" name="gajet_ict_nota" class="f-input" placeholder="Sila nyatakan sebab..." value="{{ gajet_ict_nota|default:'' }}"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Ada perkhidmatan Security?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_security" id="sec_ya" value="1" {% if ada_security == True %}checked{% endif %}><label for="sec_ya" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_security" id="sec_tidak" value="0" {% if ada_security == False %}checked{% endif %}><label for="sec_tidak" class="tidak">Tidak</label></div></div></div>
+            <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Ada Hemodialisis?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_hemodialisis" id="hemo_ya" value="1" {% if ada_hemodialisis == True %}checked{% endif %}><label for="hemo_ya" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_hemodialisis" id="hemo_tidak" value="0" {% if ada_hemodialisis == False %}checked{% endif %}><label for="hemo_tidak" class="tidak">Tidak</label></div></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.2s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-times text-xs"></i> Batal</a>
+    <button type="submit" class="btn-submit" onclick="syncDigital()"><i class="fas fa-save mr-2"></i> Kemaskini Aset Perubatan</button>
+</div>
+</form>
+</main>
+<script>
+    function toggleNote(id, show) {
+        const wrap = document.getElementById(id);
+        if(wrap) { if(show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+    }
+    const hiddenDig = document.getElementById('f_sistem_pendigitalan');
+    const cbsDig = document.querySelectorAll('.digital-cb');
+    if(hiddenDig && hiddenDig.value) {
+        const saved = hiddenDig.value.split(',').map(s=>s.trim());
+        cbsDig.forEach(cb => {
+            if(saved.includes(cb.value)) { cb.checked = true; cb.parentNode.classList.add('border-[#0d9488]','bg-[#f0fdfa]','text-[#0f766e]'); }
+        });
+    }
+    function syncDigital() {
+        let selected = [];
+        cbsDig.forEach(cb => { if(cb.checked) selected.push(cb.value); });
+        if(hiddenDig) hiddenDig.value = selected.join(', ');
+    }
+    cbsDig.forEach(cb => {
+        cb.parentNode.addEventListener('click', (e) => {
+            e.preventDefault(); cb.checked = !cb.checked;
+            if(cb.checked) cb.parentNode.classList.add('border-[#0d9488]','bg-[#f0fdfa]','text-[#0f766e]');
+            else cb.parentNode.classList.remove('border-[#0d9488]','bg-[#f0fdfa]','text-[#0f766e]');
+        });
+    });
+</script>
+</body>
+</html>

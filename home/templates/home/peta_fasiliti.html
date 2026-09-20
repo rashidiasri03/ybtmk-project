@@ -706,104 +706,6 @@ function renderDrawer(d) {
 
     let html = '';
 
-    // K0 – Maklumat Asas
-    let k0html = cell('Alamat', d.k0.alamat, true) + cell('Poskod', d.k0.poskod);
-    if (d.k0.lat && d.k0.lng) {
-        const gpsUrl = `https://www.google.com/maps?q=${d.k0.lat},${d.k0.lng}`;
-        k0html += `<div class="drawer-cell">
-            <div class="drawer-cell-label">GPS</div>
-            <div class="drawer-cell-val"><a href="${gpsUrl}" target="_blank" style="color:#2563eb;font-family:monospace;font-size:.72rem;font-weight:600;">${d.k0.lat.toFixed(5)}, ${d.k0.lng.toFixed(5)} <i class="fas fa-external-link-alt" style="font-size:.55rem;"></i></a></div>
-        </div>`;
-    }
-    html += section('fas fa-info-circle','#3b82f6','Maklumat Asas', k0html);
-
-    // K1 – Kejuruteraan
-    if (d.k1) {
-        html += section('fas fa-hard-hat','#d97706','K1 \u2014 Kejuruteraan',
-            cell('Tahun Dibina', d.k1.tahun_dibina) +
-            cell('Jenis Hospital/Klinik', d.k1.jenis_hospital_klinik) +
-            cell('Siling OK?', d.k1.siling_okay) +
-            cell('Keluasan Tanah', d.k1.ukuran_tanah));
-    }
-
-    // K2 – Sumber Manusia
-    if (d.k2) {
-        html += section('fas fa-users','#8b5cf6','K2 \u2014 Sumber Manusia',
-            cell('Kakitangan Tetap', d.k2.kakitangan_tetap) +
-            cell('Kakitangan Kontrak', d.k2.kakitangan_kontrak) +
-            cell('Kakitangan MySTeP', d.k2.kakitangan_mystep) +
-            cell('Staff Pinjaman?', d.k2.ada_kakitangan_pinjaman) +
-            cell('Staff Non-Medical/Admin', d.k2.bilangan_staff_non_medical) +
-            cell('Bilangan Shift Sehari', d.k2.bilangan_shift) +
-            cell('OT/Elaun?', d.k2.ada_ot_allowance) +
-            cell('Waktu Beroperasi', d.k2.waktu_beroperasi) +
-            cell('Cara Mohon Cuti', d.k2.cara_minta_cuti) +
-            cell('Isu Penempatan', d.k2.isu_penempatan, true));
-    }
-
-    // K3 – Perkhidmatan
-    if (d.k3) {
-        html += section('fas fa-stethoscope','#ef4444','K3 \u2014 Perkhidmatan Kesihatan',
-            cell('Jenis Perkhidmatan', d.k3.jenis_perkhidmatan, true) +
-            cell('Anggaran Pelawat Harian', d.k3.anggaran_pelawat_harian) +
-            cell('Penyakit Kerap', d.k3.jenis_penyakit_kerap) +
-            cell('Boleh Selesaikan Kes?', d.k3.boleh_selesaikan_kes) +
-            cell('Rujukan ke', d.k3.rujukan_ke) +
-            cell('Ruang Rehat?', d.k3.ada_ruang_rehat) +
-            cell('Hemodialisis?', d.k3.ada_hemodialisis) +
-            cell('Unit Hemodialisis', d.k3.unit_hemodialisis) +
-            cell('Bekalan Ubat Cukup?', d.k3.bekalan_ubat_mencukupi) +
-            cell('Keperluan Oksigen', d.k3.keperluan_oksigen) +
-            cell('EMR?', d.k3.ada_emr) +
-            cell('Wad Diasingkan?', d.k3.wad_diasingkan) +
-            cell('Kualiti Makanan', d.k3.kualiti_makanan) +
-            cell('In-Charge', d.k3.siapa_manage) +
-            cell('Masa Tunggu', d.k3.masa_tunggu) +
-            cell('OSCA?', d.k3.ada_osca));
-    }
-
-    // K4 – Aset
-    if (d.k4) {
-        html += section('fas fa-boxes','#f97316','K4 \u2014 Aset',
-            cell('Disposable Cukup?', d.k4.disposable_mencukupi) +
-            cell('Keadaan Aset', d.k4.keadaan_aset) +
-            cell('Ambulans?', d.k4.ada_ambulans) +
-            cell('Keadaan Ambulans', d.k4.keadaan_ambulans) +
-            cell('Aset Perlu Diganti', d.k4.aset_perlu_diganti, true) +
-            cell('Aset Tak Ikut Spec', d.k4.aset_tidak_ikut_spec, true) +
-            cell('Umur Komputer', d.k4.umur_komputer));
-    }
-
-    // K5 – Fasiliti
-    if (d.k5) {
-        html += section('fas fa-building','#22c55e','K5 \u2014 Fasiliti Fizikal',
-            cell('Keadaan Perabot', d.k5.keadaan_perabot) +
-            cell('Quarters?', d.k5.ada_quarters) +
-            cell('Quarters Mencukupi?', d.k5.quarters_mencukupi) +
-            cell('Isu Parking?', d.k5.ada_isu_parking) +
-            cell('Masalah Aircond?', d.k5.masalah_aircond) +
-            cell('Ruang Kerja Cukup?', d.k5.ruang_kerja_mencukupi) +
-            cell('Bilik Mayat?', d.k5.ada_bilik_mayat) +
-            cell('Kawasan Rehat Staff?', d.k5.ada_pantry) +
-            cell('Kantin/Mini Mart?', d.k5.ada_kantin) +
-            cell('Security?', d.k5.ada_security));
-    }
-
-    // K6 – Perancangan
-    if (d.k6) {
-        html += section('fas fa-chart-line','#6366f1','K6 \u2014 Perancangan',
-            cell('Perkhidmatan Baru', d.k6.perkhidmatan_baru, true) +
-            cell('Fasiliti Diperlukan', d.k6.fasiliti_diperlukan, true));
-    }
-
-    // K7 – Konsesi
-    if (d.k7) {
-        html += section('fas fa-wrench','#64748b','K7 \u2014 Konsesi & Lain-lain',
-            cell('Maintenance Konsesi OK?', d.k7.maintenance_okay) +
-            cell('Masalah Utama', d.k7.masalah_utama, true) +
-            cell('Wishlist', d.k7.wishlist, true));
-    }
-
     // -- UI BORANG STATUS LAWATAN VIP (ADMIN) --
     let badgeColor = d.k0.status_lawatan === 'kuning' ? '#facc15' : 
                      d.k0.status_lawatan === 'biru' ? '#3b82f6' : 
@@ -813,7 +715,7 @@ function renderDrawer(d) {
                     d.k0.status_lawatan === 'biru' ? 'Sudah Dilawati' : 
                     d.k0.status_lawatan === 'hijau' ? 'Selesai Dilaksanakan' : 'Belum Dilawati';
 
-    html = `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
+    html += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
             <h4 style="margin:0; font-size:0.75rem; font-weight:800; color:#334155;"><i class="fas fa-flag"></i> Status Lawatan VIP</h4>
             <span style="font-size:0.65rem; font-weight:800; padding:4px 10px; border-radius:20px; background:${badgeColor}22; color:${badgeColor}; border:1px solid ${badgeColor};">${badgeText}</span>
@@ -830,7 +732,197 @@ function renderDrawer(d) {
             <textarea id="input-catatan" placeholder="Catatan atau tindakan susulan..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.75rem; min-height:60px; outline:none; resize:none;">${d.k0.catatan}</textarea>
             <button type="submit" style="width:100%; padding:10px; background:#2563eb; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;">Simpan Perubahan</button>
         </form>
-    </div>` + html;
+    </div>`;
+
+    // 1. LATAR BELAKANG
+    let bgHtml = '';
+    // Responden
+    if(d.k0.nama_responden !== '—') {
+        bgHtml += `<div class="drawer-cell-full" style="background:#f1f5f9; padding:8px; border-radius:8px; margin-bottom:8px;">
+            <div style="font-size:0.65rem; font-weight:800; color:#475569; margin-bottom:4px; text-transform:uppercase;">Maklumat Responden</div>
+            <div style="font-size:0.75rem; color:#1e293b; font-weight:600;">${d.k0.nama_responden}</div>
+            <div style="font-size:0.7rem; color:#64748b;">${d.k0.jawatan_responden} | ${d.k0.no_telefon_responden} | ${d.k0.emel_responden}</div>
+        </div>`;
+    }
+    // Lokasi
+    bgHtml += cell('Alamat', d.k0.alamat, true) + cell('Poskod', d.k0.poskod) + cell('Zon / Parlimen', (d.k0.zon !== '—' ? d.k0.zon : '') + ' / ' + (d.k0.parlimen || '—'));
+    
+    // Asas Fasiliti (Tahun & Person in Charge)
+    if(d.k1 && d.k1.tahun_dibina !== '—') bgHtml += cell('Tahun Dibina', d.k1.tahun_dibina);
+    if(d.k3 && d.k3.siapa_manage !== '—') bgHtml += cell('Ketua Fasiliti', d.k3.siapa_manage);
+
+    if (d.k0.lat && d.k0.lng) {
+        const gpsUrl = `https://www.google.com/maps?q=${d.k0.lat},${d.k0.lng}`;
+        bgHtml += `<div class="drawer-cell">
+            <div class="drawer-cell-label">GPS</div>
+            <div class="drawer-cell-val"><a href="${gpsUrl}" target="_blank" style="color:#4f46e5;font-family:monospace;font-size:.72rem;font-weight:600;">${d.k0.lat.toFixed(5)}, ${d.k0.lng.toFixed(5)} <i class="fas fa-external-link-alt" style="font-size:.55rem;"></i></a></div>
+        </div>`;
+    }
+    html += section('fas fa-address-card','#4f46e5','1. Latar Belakang', bgHtml);
+
+
+    // 2. INFRASTRUKTUR FASILITI
+    let infHtml = '';
+    if (d.k1) {
+        infHtml += cell('Keluasan Tanah', d.k1.ukuran_tanah, true);
+        infHtml += cell('Tanah Mencukupi?', d.k1.tanah_mencukupi);
+        
+        let slgDisplay = d.k1.siling_okay;
+        if(d.k1.siling_okay === 'Tidak' && d.k1.siling_nota !== '—') slgDisplay += ` <span style="font-size:0.65rem; color:#64748b;">(${d.k1.siling_nota})</span>`;
+        infHtml += cell('Siling OK?', slgDisplay);
+    }
+    if (d.k5) {
+        infHtml += cell('Ruang Kerja Mencukupi?', d.k5.ruang_kerja_mencukupi);
+        infHtml += cell('Pantry Disediakan?', d.k5.ada_pantry);
+        infHtml += cell('Kantin Disediakan?', d.k5.ada_kantin);
+        
+        let prkDisplay = d.k5.ada_parking;
+        if(d.k5.ada_parking === 'Ya') prkDisplay += d.k5.parking_mencukupi === 'Ya' ? ' (Mencukupi)' : ' (Tak Mencukupi)';
+        infHtml += cell('Kemudahan Parking?', prkDisplay);
+        
+        let qrtDisplay = d.k5.ada_quarters;
+        if(d.k5.ada_quarters === 'Ya') qrtDisplay += d.k5.quarters_mencukupi === 'Ya' ? ' (Mencukupi)' : ' (Tak Mencukupi)';
+        infHtml += cell('Kuarters Kakitangan?', qrtDisplay);
+        
+        let acDisplay = d.k5.masalah_aircond;
+        if(d.k5.masalah_aircond === 'Ya' && d.k5.aircond_nota !== '—') acDisplay += ` <span style="font-size:0.65rem; color:#64748b;">(${d.k5.aircond_nota})</span>`;
+        infHtml += cell('Masalah Aircond?', acDisplay);
+        
+        let kpDisplay = d.k5.masalah_kipas;
+        if(d.k5.masalah_kipas === 'Ya' && d.k5.kipas_nota !== '—') kpDisplay += ` <span style="font-size:0.65rem; color:#64748b;">(${d.k5.kipas_nota})</span>`;
+        infHtml += cell('Masalah Kipas?', kpDisplay);
+    }
+    if(infHtml) html += section('fas fa-building','#2563eb','2. Infrastruktur Fasiliti', infHtml);
+
+
+    // 3. ASET PERUBATAN
+    let astHtml = '';
+    if (d.k4) {
+        if(d.k4.senarai_peralatan !== '—') astHtml += cell('Senarai Peralatan', d.k4.senarai_peralatan, true);
+        if(d.k4.aset_tidak_ikut_spec !== '—') astHtml += cell('Aset Tidak Ikut Spesifikasi', d.k4.aset_tidak_ikut_spec, true);
+        
+        astHtml += cell('Disposable Mencukupi?', d.k4.disposable_mencukupi);
+        if(d.k3) astHtml += cell('Bekalan Ubat Mencukupi?', d.k3.bekalan_ubat_mencukupi);
+        
+        let ambDisplay = d.k4.ada_ambulans;
+        if(d.k4.ada_ambulans === 'Ya' && d.k4.ambulans_nota !== '—') ambDisplay += ` <br><span style="font-size:0.65rem; color:#64748b;">${d.k4.ambulans_nota}</span>`;
+        astHtml += cell('Ambulans?', ambDisplay);
+        
+        if (d.k5) astHtml += cell('Keadaan Perabot', d.k5.keadaan_perabot);
+        
+        astHtml += cell('Sistem Pendigitalan', d.k4.sistem_pendigitalan, true);
+        
+        let ictDisplay = d.k4.gajet_ict_baik;
+        if(d.k4.gajet_ict_baik === 'Tidak' && d.k4.gajet_ict_nota !== '—') ictDisplay += ` <br><span style="font-size:0.65rem; color:#64748b;">Sebab: ${d.k4.gajet_ict_nota}</span>`;
+        astHtml += cell('Gajet ICT Berfungsi?', ictDisplay, true);
+        
+        if (d.k5) astHtml += cell('Kawalan Keselamatan (Security)?', d.k5.ada_security);
+        if (d.k3) astHtml += cell('Sediakan Hemodialisis?', d.k3.ada_hemodialisis);
+    }
+    if(astHtml) html += section('fas fa-stethoscope','#0d9488','3. Aset Perubatan', astHtml);
+
+
+    // 4. SUMBER MANUSIA
+    let smHtml = '';
+    if (d.k2) {
+        smHtml += cell('Jum. Perjawatan', d.k2.jumlah_perjawatan);
+        smHtml += cell('Jum. Pengisian', d.k2.jumlah_pengisian);
+        smHtml += cell('Jum. Kekosongan', d.k2.jumlah_kekosongan);
+        
+        let pinjamDisplay = d.k2.ada_kakitangan_pinjaman;
+        if(d.k2.ada_kakitangan_pinjaman === 'Ya' && d.k2.nota_kakitangan_pinjaman !== '—') pinjamDisplay += ` <br><span style="font-size:0.65rem; color:#64748b;">${d.k2.nota_kakitangan_pinjaman}</span>`;
+        smHtml += cell('Kakitangan Pinjaman?', pinjamDisplay);
+        
+        smHtml += cell('Isu Krisis Petugas?', d.k2.ada_isu_kakitangan);
+        smHtml += cell('Fasiliti/Layanan Petugas?', d.k2.ada_fasiliti_petugas);
+        
+        if(d.k2.jenis_shift !== '—') smHtml += cell('Bilangan Shift', d.k2.jenis_shift.replace(/\|\|\|/g, '<br>• '), true);
+        if(d.k2.corak_penugasan !== '—') smHtml += cell('Corak Penugasan', d.k2.corak_penugasan.replace(/\|\|\|/g, '<br>• '), true);
+        if(d.k2.pengurusan_jadual !== '—') smHtml += cell('Sistem Giliran (Roster)', d.k2.pengurusan_jadual.replace(/\|\|\|/g, '<br>• '), true);
+        if(d.k2.cara_minta_cuti !== '—') smHtml += cell('Sistem Merekod Cuti', d.k2.cara_minta_cuti.replace(/\|\|\|/g, '<br>• '), true);
+        if(d.k2.isu_penempatan !== '—') smHtml += cell('Isu Sistem Penjadualan', d.k2.isu_penempatan.replace(/\|\|\|/g, '<br>• '), true);
+        
+        if(d.k2.status_pertukaran_staf !== '—') {
+            let clr = '#64748b';
+            if(d.k2.status_pertukaran_staf.includes('Kritikal')) clr = '#dc2626';
+            else if(d.k2.status_pertukaran_staf.includes('Sederhana')) clr = '#d97706';
+            else if(d.k2.status_pertukaran_staf.includes('Rendah')) clr = '#16a34a';
+            smHtml += cell('Kadar Pertukaran Staf (1 Tahun)', `<span style="color:${clr}; font-weight:700;">${d.k2.status_pertukaran_staf}</span>`, true);
+        }
+    }
+    if(smHtml) html += section('fas fa-users','#7c3aed','4. Pengurusan Sumber Manusia', smHtml);
+
+
+    // 5. PERKHIDMATAN
+    let pkHtml = '';
+    if(d.k2 && d.k2.waktu_beroperasi !== '—') pkHtml += cell('Waktu Operasi', d.k2.waktu_beroperasi, true);
+    if(d.k3) {
+        if(d.k3.anggaran_pelawat_harian !== '—') pkHtml += cell('Purata Pelawat (Harian)', d.k3.anggaran_pelawat_harian);
+        if(d.k3.masa_tunggu !== '—') pkHtml += cell('Purata Masa Tunggu', d.k3.masa_tunggu);
+        
+        if(d.k3.jenis_perkhidmatan !== '—') pkHtml += cell('Program / Rawatan Disediakan', d.k3.jenis_perkhidmatan, true);
+        if(d.k3.jenis_penyakit_kerap !== '—') pkHtml += cell('Penyakit Paling Kerap', d.k3.jenis_penyakit_kerap, true);
+        
+        pkHtml += cell('Wad Diasingkan L/P?', d.k3.wad_diasingkan);
+        
+        let rtDisplay = d.k3.ruang_tunggu_selesa;
+        if(d.k3.ruang_tunggu_selesa === 'Tidak' && d.k3.ruang_tunggu_nota !== '—') rtDisplay += ` <br><span style="font-size:0.65rem; color:#64748b;">${d.k3.ruang_tunggu_nota}</span>`;
+        pkHtml += cell('Ruang Menunggu Selesa?', rtDisplay);
+        
+        let skDisplay = d.k3.boleh_selesaikan_kes;
+        if(d.k3.boleh_selesaikan_kes === 'Tidak' && d.k3.kekangan_rawatan !== '—') skDisplay += ` <br><span style="font-size:0.65rem; color:#64748b;">Kekangan: ${d.k3.kekangan_rawatan}</span>`;
+        pkHtml += cell('Mampu Selesaikan Kes?', skDisplay, true);
+    }
+    if(pkHtml) html += section('fas fa-briefcase-medical','#be123c','5. Penyampaian Perkhidmatan', pkHtml);
+
+
+    // 6. KEWANGAN
+    let kwHtml = '';
+    if(d.k6) {
+        if(d.k6.belanja_mengurus !== '—') kwHtml += cell('Belanja Mengurus (OE)', d.k6.belanja_mengurus, true);
+        if(d.k6.belanja_pembangunan !== '—') kwHtml += cell('Belanja Pembangunan (DE)', d.k6.belanja_pembangunan, true);
+    }
+    if(d.k7) {
+        kwHtml += cell('Penyelenggaraan (Konsesi) OK?', d.k7.maintenance_okay);
+        if(d.k7.masalah_utama !== '—') kwHtml += cell('Isu & Masalah Utama Penyampaian', d.k7.masalah_utama, true);
+    }
+    if(d.k6 && d.k6.fasiliti_diperlukan !== '—') kwHtml += cell('Fasiliti/Infrastruktur Diperlukan (Masa Depan)', d.k6.fasiliti_diperlukan, true);
+    
+    if(kwHtml) html += section('fas fa-chart-line','#ca8a04','6. Kewangan & Perancangan', kwHtml);
+
+
+    // 7. LAIN-LAIN (Arkib + Fail)
+    let lnHtml = '';
+    if(d.k7) {
+        if(d.k7.prosedur_kes_dadah !== '—') lnHtml += cell('Prosedur Kes Dadah', d.k7.prosedur_kes_dadah, true);
+        if(d.k7.hemodialisis_nota !== '—') lnHtml += cell('Unit Mesin Hemodialisis', d.k7.hemodialisis_nota, true);
+        
+        if(d.k7.status_bekalan_oksigen !== '—') {
+            let oxClr = '#64748b';
+            if(d.k7.status_bekalan_oksigen.includes('Kritikal')) oxClr = '#dc2626';
+            else if(d.k7.status_bekalan_oksigen.includes('Terhad')) oxClr = '#d97706';
+            else if(d.k7.status_bekalan_oksigen.includes('Mencukupi')) oxClr = '#16a34a';
+            lnHtml += cell('Bekalan Oksigen', `<span style="color:${oxClr}; font-weight:700;">${d.k7.status_bekalan_oksigen}</span>`, true);
+        }
+        
+        // Wishlist Download
+        if(d.k7.wishlist_fail_url) {
+            lnHtml += `<div class="drawer-cell-full" style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:12px; display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+                <div style="font-size:0.75rem; font-weight:700; color:#334155;"><i class="fas fa-file-download mr-2 text-slate-400"></i> Lampiran Wishlist Penambahbaikan</div>
+                <a href="${d.k7.wishlist_fail_url}" target="_blank" style="padding:6px 12px; background:#475569; color:#fff; border-radius:6px; font-size:0.7rem; font-weight:700; text-decoration:none;">Muat Turun Fail</a>
+            </div>`;
+        }
+        
+        // Arkib
+        let arkib = '';
+        if(d.k5 && d.k5.ada_bilik_mayat !== '—') arkib += `• Bilik Forensik: ${d.k5.ada_bilik_mayat}<br>`;
+        if(d.k3 && d.k3.kualiti_makanan !== '—') arkib += `• Kualiti Makanan: ${d.k3.kualiti_makanan}<br>`;
+        if(d.k4 && d.k4.umur_komputer !== '—') arkib += `• Umur Komputer: ${d.k4.umur_komputer}<br>`;
+        if(d.k7.wishlist !== '—') arkib += `• Wishlist Lama: ${d.k7.wishlist}<br>`;
+        
+        if(arkib) lnHtml += cell('Maklumat Tambahan (Arkib)', `<span style="color:#64748b; font-size:0.7rem;">${arkib}</span>`, true);
+    }
+    if(lnHtml) html += section('fas fa-list-ul','#475569','7. Lain-lain & Lampiran', lnHtml);
 
     drawerBody.innerHTML = html;
 }

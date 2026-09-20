@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>7. Lain-lain | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya    { border-color:#475569; background:#f8fafc; color:#334155; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .cb-label { display:flex; align-items:center; gap:10px; cursor:pointer; padding:10px; border-radius:8px; transition:background .15s; }
+        .cb-label:hover { background:#f8fafc; }
+        .cb-input { width:16px; height:16px; accent-color:#475569; }
+        .cb-text { font-size:.85rem; font-weight:600; color:#334155; }
+        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(71,85,105,.08); border-color:#cbd5e1; }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(71,85,105,.05); }
+        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; text-transform:uppercase; }
+        .f-input, .f-textarea { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none; transition:all .15s; background:#fff; }
+        .f-input:focus, .f-textarea:focus { border-color:#475569; box-shadow:0 0 0 3px rgba(71,85,105,.1); }
+        .f-textarea { resize:vertical; min-height:80px; }
+        .btn-submit { background:linear-gradient(110deg,#475569,#334155); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(71,85,105,.3); }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .4s ease both; }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
+            <div><p class="text-[9px] font-bold tracking-widest text-slate-500 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Lain-lain</p></div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+    </div>
+</nav>
+
+<div class="bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 7: LAIN-LAIN</h1>
+        <p class="text-slate-200 text-xs opacity-80">{{ fp.nama_fasiliti }}</p>
+    </div>
+</div>
+
+<main class="px-8 pb-16 pt-6">
+<form method="post" enctype="multipart/form-data" class="space-y-6">
+{% csrf_token %}
+
+<div class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title"><div class="sec-dot bg-slate-100 text-slate-600">7.1</div><span class="sec-label">Rawatan & Fasiliti Khusus</span></div>
+    <div class="space-y-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Apakah prosedur rawatan fasiliti ini dalam membantu pesakit kes dadah?</label><textarea name="prosedur_kes_dadah" class="f-textarea">{{ prosedur_kes_dadah|default:'' }}</textarea></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">HEMODIALISIS: Bilangan unit mesin dan kekerapan digunakan sehari?</label><textarea name="hemodialisis_nota" class="f-textarea">{{ hemodialisis_nota|default:'' }}</textarea></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">OKSIGEN: Adakah bekalan perkhidmatan oksigen mencukupi?</label>
+            <div class="flex flex-col gap-2">
+                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" value="Mencukupi - Bekalan sentiasa ada dan memenuhi keperluan harian" class="cb-input" {% if status_bekalan_oksigen == 'Mencukupi - Bekalan sentiasa ada dan memenuhi keperluan harian' %}checked{% endif %}><span class="cb-text text-green-600">Mencukupi (Bekalan sentiasa ada)</span></label>
+                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" value="Terhad / Tidak Mencukupi - Kerap berlaku kelewatan pengisian semula atau kekurangan tong / silinder" class="cb-input" {% if status_bekalan_oksigen == 'Terhad / Tidak Mencukupi - Kerap berlaku kelewatan pengisian semula atau kekurangan tong / silinder' %}checked{% endif %}><span class="cb-text text-amber-600">Terhad / Tidak Mencukupi</span></label>
+                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" value="Kritikal - Tiada bekalan oksigen / bergantung sepenuhnya pada rujukan fasiliti lain" class="cb-input" {% if status_bekalan_oksigen == 'Kritikal - Tiada bekalan oksigen / bergantung sepenuhnya pada rujukan fasiliti lain' %}checked{% endif %}><span class="cb-text text-red-600">Kritikal (Tiada bekalan oksigen)</span></label>
+                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" value="Tidak berkenaan" class="cb-input" {% if status_bekalan_oksigen == 'Tidak berkenaan' %}checked{% endif %}><span class="cb-text text-slate-500">Tidak berkenaan</span></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title"><div class="sec-dot bg-slate-100 text-slate-600">7.2</div><span class="sec-label">Lampiran Wishlist</span></div>
+    <div class="q-card">
+        <label class="block text-xs font-bold text-slate-500 mb-1.5">Muat naik <i>wishlist</i> cadangan penambahbaikan bagi fasiliti ini.</label>
+        <p class="text-[10px] text-slate-400 mb-3">Format disokong: PDF, Excel, Word atau Imej.</p>
+        <input type="hidden" name="delete_wishlist_fail" id="delete_wishlist_fail" value="0">
+        
+        {% if wishlist_fail %}
+        <div id="current_file_box" class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+            <span class="text-sm font-semibold text-blue-700 flex items-center gap-2"><i class="fas fa-file-alt"></i> Fail Semasa: <span class="text-xs font-mono ml-1">{{ wishlist_fail.name|slice:"15:" }}</span></span>
+            <div class="flex items-center gap-2"><a href="{{ wishlist_fail.url }}" target="_blank" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">Lihat Fail</a><button type="button" onclick="padamFailSemasa()" class="px-3 py-1.5 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition" title="Padam Fail Semasa"><i class="fas fa-trash-alt"></i> Padam</button></div>
+        </div>
+        {% endif %}
+        
+        <div id="upload_box" class="{% if wishlist_fail %}hidden{% endif %}">
+            <div class="flex items-center gap-3">
+                <input type="file" name="wishlist_fail" id="wishlist_input" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" class="flex-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition cursor-pointer" onchange="semakFailDipilih()">
+                <button type="button" id="btn_clear_new_file" onclick="batalPilihanFail()" class="hidden px-3 py-2 bg-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-300 transition"><i class="fas fa-times"></i> Batal Fail</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.2s;">
+    <div class="sec-title"><div class="sec-dot bg-slate-100 text-slate-600"><i class="fas fa-archive"></i></div><span class="sec-label">Maklumat Tambahan (Pilihan)</span></div>
+    <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+            <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Fasiliti dilengkapi bilik forensik / bilik jenazah?</label><div class="flex gap-2 flex-wrap"><div class="pill-item"><input type="radio" name="ada_bilik_mayat" id="bm_ya" value="1" {% if ada_bilik_mayat == True %}checked{% endif %}><label for="bm_ya" class="ya"><i class="fas fa-check text-[10px]"></i> Ya</label></div><div class="pill-item"><input type="radio" name="ada_bilik_mayat" id="bm_tidak" value="0" {% if ada_bilik_mayat == False %}checked{% endif %}><label for="bm_tidak" class="tidak"><i class="fas fa-times text-[10px]"></i> Tidak</label></div></div></div>
+            <div class="q-card">
+                <label class="block text-xs font-bold text-slate-500 mb-1.5">Kualiti Makanan Pesakit (Jika ada)</label>
+                <select name="kualiti_makanan" class="f-input bg-white">
+                    <option value="">-- Pilih --</option>
+                    <option {% if kualiti_makanan == 'Baik' %}selected{% endif %}>Baik</option><option {% if kualiti_makanan == 'Memuaskan' %}selected{% endif %}>Memuaskan</option><option {% if kualiti_makanan == 'Perlu penambahbaikan' %}selected{% endif %}>Perlu penambahbaikan</option><option {% if kualiti_makanan == 'Lemah / Ada aduan' %}selected{% endif %}>Lemah / Ada aduan</option><option {% if kualiti_makanan == 'Tiada perkhidmatan makanan' %}selected{% endif %}>Tiada perkhidmatan makanan</option>
+                </select>
+            </div>
+        </div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Umur Purata Komputer / Aset Digital</label><textarea name="umur_komputer" class="f-textarea">{{ umur_komputer|default:'' }}</textarea></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Wishlist (Teks Lama)</label><textarea name="wishlist_lama" class="f-textarea">{{ wishlist_lama|default:'' }}</textarea></div>
+    </div>
+</div>
+
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.25s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-times text-xs"></i> Batal</a>
+    <button type="submit" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini & Hantar</button>
+</div>
+</form>
+</main>
+<script>
+    function padamFailSemasa() {
+        if(confirm('Adakah anda pasti mahu memadam fail ini? Fail akan dibuang sepenuhnya dari pangkalan data apabila anda menekan "Kemaskini & Hantar".')) {
+            document.getElementById('current_file_box').style.display = 'none';
+            document.getElementById('delete_wishlist_fail').value = '1';
+            document.getElementById('upload_box').classList.remove('hidden');
+        }
+    }
+    function semakFailDipilih() {
+        const inputFile = document.getElementById('wishlist_input');
+        const clearBtn = document.getElementById('btn_clear_new_file');
+        if(inputFile.files && inputFile.files.length > 0) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+    }
+    function batalPilihanFail() {
+        const inputFile = document.getElementById('wishlist_input');
+        inputFile.value = ''; semakFailDipilih();
+    }
+</script>
+</body>
+</html>

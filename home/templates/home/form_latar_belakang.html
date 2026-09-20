@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>1. Latar Belakang | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(79,70,229,.08); border-color:#c7d2fe; }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(79,70,229,.05); }
+        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; text-transform:uppercase; }
+        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none; transition:all .15s; background:#fff; }
+        .f-input:focus { border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+        .btn-submit { background:linear-gradient(110deg,#4f46e5,#6366f1); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(79,70,229,.3); }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .4s ease both; }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
+            <div><p class="text-[9px] font-bold tracking-widest text-indigo-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Latar Belakang</p></div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+    </div>
+</nav>
+
+<div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 1: LATAR BELAKANG</h1>
+        <p class="text-indigo-100 text-xs opacity-80">{{ fp.nama_fasiliti }}</p>
+    </div>
+</div>
+
+<main class="px-8 pb-16 pt-6">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<div class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title"><div class="sec-dot bg-indigo-50 text-indigo-600">1.1</div><span class="sec-label">Maklumat Responden</span></div>
+    <div class="grid grid-cols-2 gap-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Nama Penuh <span class="text-red-500">*</span></label><input type="text" name="nama_responden" class="f-input" required value="{{ nama_responden|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jawatan <span class="text-red-500">*</span></label><input type="text" name="jawatan_responden" class="f-input" required value="{{ jawatan_responden|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">No. Telefon <span class="text-red-500">*</span></label><input type="text" name="no_telefon_responden" class="f-input" required value="{{ no_telefon_responden|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Emel Rasmi <span class="text-red-500">*</span></label><input type="email" name="emel_responden" class="f-input" required value="{{ emel_responden|default:'' }}"></div>
+    </div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title"><div class="sec-dot bg-indigo-50 text-indigo-600">1.2</div><span class="sec-label">Maklumat Fasiliti & Lokasi</span></div>
+    <div class="q-card mb-3"><label class="block text-xs font-bold text-blue-800 mb-1.5">Nama Fasiliti Kesihatan <span class="text-red-500">*</span></label><input type="text" name="nama_fasiliti" class="f-input font-bold text-blue-800" required value="{{ nama_fasiliti|default:'' }}"></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">Kelas Fasiliti <span class="text-red-500">*</span></label>
+            <select name="jenis_fasiliti" class="f-input bg-white" required>
+                <option value="">-- Pilih Kategori --</option>
+                <option value="hospital" {% if jenis_fasiliti == 'hospital' %}selected{% endif %}>Hospital</option>
+                <option value="hospital_pakar" {% if jenis_fasiliti == 'hospital_pakar' %}selected{% endif %}>Hospital Pakar</option>
+                <option value="klinik_kesihatan" {% if jenis_fasiliti == 'klinik_kesihatan' %}selected{% endif %}>Klinik Kesihatan</option>
+                <option value="klinik_desa" {% if jenis_fasiliti == 'klinik_desa' %}selected{% endif %}>Klinik Desa</option>
+                <option value="klinik_komuniti" {% if jenis_fasiliti == 'klinik_komuniti' %}selected{% endif %}>Klinik Komuniti</option>
+                <option value="institusi_perubatan_khas" {% if jenis_fasiliti == 'institusi_perubatan_khas' %}selected{% endif %}>Institusi Perubatan Khas</option>
+                <option value="institusi_latihan" {% if jenis_fasiliti == 'institusi_latihan' %}selected{% endif %}>Institusi Latihan</option>
+                <option value="jabatan_kes_negeri" {% if jenis_fasiliti == 'jabatan_kes_negeri' %}selected{% endif %}>Jabatan Kesihatan Negeri</option>
+                <option value="klinik_pergigian" {% if jenis_fasiliti == 'klinik_pergigian' %}selected{% endif %}>Klinik Pergigian (Pelbagai Kategori)</option>
+                <option value="pkp" {% if jenis_fasiliti == 'pkp' %}selected{% endif %}>Pejabat Kesihatan (Pergigian/Daerah)</option>
+                <option value="lain" {% if jenis_fasiliti == 'lain' %}selected{% endif %}>Lain-lain</option>
+            </select>
+        </div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Tahun Dibina</label><input type="number" name="tahun_dibina" class="f-input" value="{{ tahun_dibina|default:'' }}"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">Negeri <span class="text-red-500">*</span></label>
+            <select name="negeri" class="f-input bg-white" required>
+                <option value="">-- Pilih Negeri --</option>
+                <option value="johor" {% if fp.maklumat_asas.negeri == 'johor' %}selected{% endif %}>Johor</option><option value="kedah" {% if fp.maklumat_asas.negeri == 'kedah' %}selected{% endif %}>Kedah</option><option value="kelantan" {% if fp.maklumat_asas.negeri == 'kelantan' %}selected{% endif %}>Kelantan</option><option value="melaka" {% if fp.maklumat_asas.negeri == 'melaka' %}selected{% endif %}>Melaka</option><option value="negeri_sembilan" {% if fp.maklumat_asas.negeri == 'negeri_sembilan' %}selected{% endif %}>Negeri Sembilan</option><option value="pahang" {% if fp.maklumat_asas.negeri == 'pahang' %}selected{% endif %}>Pahang</option><option value="perak" {% if fp.maklumat_asas.negeri == 'perak' %}selected{% endif %}>Perak</option><option value="perlis" {% if fp.maklumat_asas.negeri == 'perlis' %}selected{% endif %}>Perlis</option><option value="pulau_pinang" {% if fp.maklumat_asas.negeri == 'pulau_pinang' %}selected{% endif %}>Pulau Pinang</option><option value="sabah" {% if fp.maklumat_asas.negeri == 'sabah' %}selected{% endif %}>Sabah</option><option value="sarawak" {% if fp.maklumat_asas.negeri == 'sarawak' %}selected{% endif %}>Sarawak</option><option value="selangor" {% if fp.maklumat_asas.negeri == 'selangor' %}selected{% endif %}>Selangor</option><option value="terengganu" {% if fp.maklumat_asas.negeri == 'terengganu' %}selected{% endif %}>Terengganu</option><option value="wp_kl" {% if fp.maklumat_asas.negeri == 'wp_kl' %}selected{% endif %}>W.P. Kuala Lumpur</option><option value="wp_putrajaya" {% if fp.maklumat_asas.negeri == 'wp_putrajaya' %}selected{% endif %}>W.P. Putrajaya</option><option value="wp_labuan" {% if fp.maklumat_asas.negeri == 'wp_labuan' %}selected{% endif %}>W.P. Labuan</option>
+            </select>
+        </div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Daerah / Bandar <span class="text-red-500">*</span></label><input type="text" name="daerah" class="f-input" required value="{{ fp.maklumat_asas.daerah|default:'' }}"></div>
+    </div>
+    <div class="grid grid-cols-3 gap-3 mb-3">
+        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-1.5">Alamat Penuh</label><input type="text" name="alamat" class="f-input" value="{{ fp.maklumat_asas.alamat|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Poskod</label><input type="text" name="poskod" class="f-input" value="{{ fp.maklumat_asas.poskod|default:'' }}"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Latitud (GPS Peta)</label><input type="number" step="any" name="latitud" class="f-input font-mono" value="{{ fp.maklumat_asas.latitud|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Longitud (GPS Peta)</label><input type="number" step="any" name="longitud" class="f-input font-mono" value="{{ fp.maklumat_asas.longitud|default:'' }}"></div>
+    </div>
+    <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Ketua Fasiliti (Person in Charge)</label><input type="text" name="siapa_manage" class="f-input" value="{{ siapa_manage|default:'' }}"></div>
+</div>
+
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.25s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-times text-xs"></i> Batal</a>
+    <button type="submit" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Latar Belakang</button>
+</div>
+</form>
+</main>
+</body>
+</html>

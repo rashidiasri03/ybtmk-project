@@ -11,6 +11,9 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .sec-row:last-child { border-bottom: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen antialiased">
@@ -41,7 +44,6 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <!-- User chip -->
                 <div class="flex items-center gap-1.5 pl-1.5 pr-1.5 py-1.5 rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
                     <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                         {{ request.user.username|first|upper }}
@@ -64,7 +66,6 @@
         <main class="flex-1 px-8 py-8">
             <div class="max-w-3xl mx-auto">
 
-                <!-- Alert messages -->
                 {% for msg in messages %}
                 <div class="mb-5 flex items-start gap-3 rounded-2xl px-5 py-4 text-sm bg-red-50 border border-red-200 text-red-700 shadow-sm">
                     <i class="fas fa-exclamation-circle text-red-400 mt-0.5 shrink-0"></i>
@@ -75,7 +76,7 @@
                 <form method="post">
                     {% csrf_token %}
 
-                    <!-- â”€â”€ Section 1: Account Info â”€â”€ -->
+                    <!-- ── Section 1: Account Info ── -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-5">
                         <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
                             <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
@@ -87,11 +88,8 @@
                             </div>
                         </div>
                         <div class="px-6 py-5 space-y-4">
-                            <!-- Username -->
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                                    Nama Pengguna <span class="text-red-400">*</span>
-                                </label>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nama Pengguna <span class="text-red-400">*</span></label>
                                 <div class="relative">
                                     <i class="fas fa-at absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
                                     <input type="text" name="username" required
@@ -99,7 +97,6 @@
                                            placeholder="cth: ahmad.ali">
                                 </div>
                             </div>
-                            <!-- Full name + email side by side -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nama Penuh</label>
@@ -123,7 +120,7 @@
                         </div>
                     </div>
 
-                    <!-- â”€â”€ Section 2: Security â”€â”€ -->
+                    <!-- ── Section 2: Security ── -->
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-5">
                         <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
                             <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
@@ -135,11 +132,8 @@
                             </div>
                         </div>
                         <div class="px-6 py-5 space-y-4">
-                            <!-- Password -->
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                                    Kata Laluan <span class="text-red-400">*</span>
-                                </label>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Kata Laluan <span class="text-red-400">*</span></label>
                                 <div class="relative">
                                     <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
                                     <input type="text" name="password" id="pw" required
@@ -147,9 +141,10 @@
                                            placeholder="Minimum 8 aksara disyorkan">
                                 </div>
                             </div>
-                            <!-- Admin toggle -->
+                            
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Peranan</label>
+                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Peranan (Boleh pilih lebih dari satu)</label>
+                                
                                 <label class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-indigo-300 hover:bg-indigo-50 transition group">
                                     <div class="relative">
                                         <input type="checkbox" name="is_staff" id="is_staff" class="sr-only peer">
@@ -157,12 +152,12 @@
                                         <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-5"></div>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-semibold text-slate-700 group-hover:text-indigo-700 transition">Beri Akses Admin</p>
-                                        <p class="text-xs text-slate-400">Pengguna boleh mengakses panel pengurusan</p>
+                                        <p class="text-sm font-semibold text-slate-700 group-hover:text-indigo-700 transition">Beri Akses Admin Utama</p>
+                                        <p class="text-xs text-slate-400">Pengguna boleh mengakses panel pengurusan dan memadam fasiliti</p>
                                     </div>
                                 </label>
-                                <!-- Top Management toggle -->
-                                <label class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition group mt-2">
+                                
+                                <label class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition group mt-3">
                                     <div class="relative">
                                         <input type="checkbox" name="is_top_management" id="is_top_management" class="sr-only peer">
                                         <div class="w-11 h-6 bg-slate-200 peer-checked:bg-emerald-600 rounded-full transition-colors duration-200"></div>
@@ -170,15 +165,48 @@
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-slate-700 group-hover:text-emerald-700 transition">Top Management (Baca Sahaja)</p>
-                                        <p class="text-xs text-slate-400">Boleh lihat semua data dan graf, tidak boleh tambah/edit/padam</p>
+                                        <p class="text-xs text-slate-400">Boleh lihat semua data dan graf eksekutif, tidak boleh tambah/edit</p>
                                     </div>
                                 </label>
+
+                                <label class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-purple-300 hover:bg-purple-50 transition group mt-3">
+                                    <div class="relative">
+                                        <input type="checkbox" name="is_jkn" id="is_jkn" class="sr-only peer" onchange="toggleJknFacilities()">
+                                        <div class="w-11 h-6 bg-slate-200 peer-checked:bg-purple-600 rounded-full transition-colors duration-200"></div>
+                                        <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 peer-checked:translate-x-5"></div>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-slate-700 group-hover:text-purple-700 transition">Akses Fasiliti Spesifik (JKN / Pegawai)</p>
+                                        <p class="text-xs text-slate-400">Boleh mengemaskini (edit) senarai fasiliti yang diperuntukkan sahaja</p>
+                                    </div>
+                                </label>
+
+                                <div id="jkn_facilities_container" class="mt-3 p-4 border border-purple-200 rounded-xl bg-purple-50/30 hidden transition-all">
+                                    <p class="text-xs font-bold text-purple-700 uppercase tracking-wider mb-3">Tandakan Fasiliti Yang Dibenarkan Untuk Akaun Ini:</p>
+                                    
+                                    <!-- Carian (Search) -->
+                                    <div class="relative mb-3">
+                                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 text-sm pointer-events-none"></i>
+                                        <input type="text" id="search_fasiliti" onkeyup="filterFasiliti()" placeholder="Cari nama fasiliti..." class="w-full pl-9 pr-4 py-2 border border-purple-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-400 transition bg-white">
+                                    </div>
+
+                                    <div class="max-h-56 overflow-y-auto space-y-2 pr-2 custom-scrollbar bg-white p-3 rounded-lg border border-slate-200" id="fasiliti_list_container">
+                                        {% for fasiliti in all_facilities %}
+                                        <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-purple-50 cursor-pointer transition fasiliti-item">
+                                            <input type="checkbox" name="assigned_facilities" value="{{ fasiliti }}" class="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-500">
+                                            <span class="text-sm font-medium text-slate-700 fasiliti-name">{{ fasiliti }}</span>
+                                        </label>
+                                        {% empty %}
+                                        <p class="text-xs text-slate-400 italic p-2">Tiada fasiliti dijumpai dalam sistem. Sila daftar sekurang-kurangnya satu fasiliti di Bahagian 1 terlebih dahulu.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
 
                             </div>
                         </div>
                     </div>
 
-                    <!-- â”€â”€ Actions â”€â”€ -->
+                    <!-- ── Actions ── -->
                     <div class="flex items-center justify-between gap-3">
                         <a href="{% url 'home:urus_pengguna' %}"
                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 bg-white hover:bg-slate-50 transition shadow-sm">
@@ -208,6 +236,31 @@ if (toggleBtn) {
     });
 }
 
+// JKN Facilities Box toggle
+function toggleJknFacilities() {
+    const isJkn = document.getElementById('is_jkn').checked;
+    const container = document.getElementById('jkn_facilities_container');
+    if (isJkn) {
+        container.classList.remove('hidden');
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
+// Search Filter Logic
+function filterFasiliti() {
+    const input = document.getElementById('search_fasiliti').value.toLowerCase();
+    const items = document.querySelectorAll('.fasiliti-item');
+
+    items.forEach(item => {
+        const text = item.querySelector('.fasiliti-name').textContent.toLowerCase();
+        if (text.includes(input)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
 </script>
 </body>
 </html>

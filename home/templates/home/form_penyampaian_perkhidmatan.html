@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>5. Penyampaian Perkhidmatan | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya { border-color:#e11d48; background:#fff1f2; color:#be123c; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .pill-item input:checked + label.other { border-color:#eab308; background:#fefce8; color:#ca8a04; }
+        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(225,29,72,.08); border-color:#fecdd3; }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(225,29,72,.05); }
+        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; text-transform:uppercase; }
+        .f-input, .f-textarea { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none; transition:all .15s; background:#fff; }
+        .f-input:focus, .f-textarea:focus { border-color:#e11d48; box-shadow:0 0 0 3px rgba(225,29,72,.1); }
+        .f-textarea { resize:vertical; min-height:80px; }
+        .btn-submit { background:linear-gradient(110deg,#e11d48,#f43f5e); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(225,29,72,.3); }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .4s ease both; }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
+            <div><p class="text-[9px] font-bold tracking-widest text-rose-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Penyampaian Perkhidmatan</p></div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+    </div>
+</nav>
+
+<div class="bg-gradient-to-r from-rose-700 via-rose-600 to-rose-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 5: PENYAMPAIAN PERKHIDMATAN</h1>
+        <p class="text-rose-100 text-xs opacity-80">{{ fp.nama_fasiliti }}</p>
+    </div>
+</div>
+
+<main class="px-8 pb-16 pt-6">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<div class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title"><div class="sec-dot bg-rose-50 text-rose-600">5.1</div><span class="sec-label">Operasi & Pesakit</span></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Waktu Operasi</label><input type="text" name="waktu_beroperasi" class="f-input" placeholder="Cth: 8.00 pagi - 5.00 petang" value="{{ waktu_beroperasi|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Anggaran Pelawat Sehari</label><input type="number" name="anggaran_pelawat_harian" class="f-input" min="0" placeholder="0" value="{{ anggaran_pelawat_harian|default:'' }}"></div>
+    </div>
+    <div class="q-card mb-3"><label class="block text-xs font-bold text-slate-500 mb-1.5">Program / Perkhidmatan Disediakan</label><textarea name="jenis_perkhidmatan" class="f-textarea">{{ jenis_perkhidmatan|default:'' }}</textarea></div>
+    <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jenis Penyakit Kerap Dilaporkan</label><textarea name="jenis_penyakit_kerap" class="f-textarea">{{ jenis_penyakit_kerap|default:'' }}</textarea></div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title"><div class="sec-dot bg-rose-50 text-rose-600">5.2</div><span class="sec-label">Kapasiti Rawatan & Keselesaan</span></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Wad lelaki & perempuan diasingkan?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="wad_diasingkan" id="wad_ya" value="1" {% if wad_diasingkan == True %}checked{% endif %}><label for="wad_ya" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="wad_diasingkan" id="wad_tidak" value="0" {% if wad_diasingkan == False %}checked{% endif %}><label for="wad_tidak" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Ruang menunggu selesa & mencukupi?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ruang_tunggu_selesa" id="rts_ya" value="1" onchange="toggleNote('rt_nota_wrap', false)" {% if ruang_tunggu_selesa == True %}checked{% endif %}><label for="rts_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ruang_tunggu_selesa" id="rts_tidak" value="0" onchange="toggleNote('rt_nota_wrap', true)" {% if ruang_tunggu_selesa == False %}checked{% endif %}><label for="rts_tidak" class="other"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+            </div>
+            <div id="rt_nota_wrap" class="mt-2 {% if ruang_tunggu_selesa != False %}hidden{% endif %}"><input type="text" name="ruang_tunggu_nota" class="f-input" placeholder="Sila nyatakan..." value="{{ ruang_tunggu_nota|default:'' }}"></div>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Boleh rawat/selesaikan kes sepenuhnya?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="boleh_selesaikan_kes" id="sk_ya" value="1" onchange="toggleNote('sk_nota_wrap', false)" {% if boleh_selesaikan_kes == True %}checked{% endif %}><label for="sk_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="boleh_selesaikan_kes" id="sk_tidak" value="0" onchange="toggleNote('sk_nota_wrap', true)" {% if boleh_selesaikan_kes == False %}checked{% endif %}><label for="sk_tidak" class="other"><i class="fas fa-times"></i> Tidak (Kekangan)</label></div>
+            </div>
+            <div id="sk_nota_wrap" class="mt-2 {% if boleh_selesaikan_kes != False %}hidden{% endif %}"><textarea name="kekangan_rawatan" class="f-textarea" placeholder="Nyatakan kekangan...">{{ kekangan_rawatan|default:'' }}</textarea></div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">Masa Tunggu Rawatan</label>
+            <select name="masa_tunggu" class="f-input bg-white">
+                <option value="">-- Pilih --</option>
+                <option value="Kurang daripada 1 jam" {% if masa_tunggu == 'Kurang daripada 1 jam' %}selected{% endif %}>Kurang 1 jam</option>
+                <option value="1 hingga 2 jam" {% if masa_tunggu == '1 hingga 2 jam' %}selected{% endif %}>1 hingga 2 jam</option>
+                <option value="2 hingga 3 jam" {% if masa_tunggu == '2 hingga 3 jam' %}selected{% endif %}>2 hingga 3 jam</option>
+                <option value="Lebih daripada 3 jam" {% if masa_tunggu == 'Lebih daripada 3 jam' %}selected{% endif %}>Lebih 3 jam</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.2s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-times text-xs"></i> Batal</a>
+    <button type="submit" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Perkhidmatan</button>
+</div>
+</form>
+</main>
+<script>
+    function toggleNote(id, show) {
+        const wrap = document.getElementById(id);
+        if(wrap) { if(show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+    }
+</script>
+</body>
+</html>

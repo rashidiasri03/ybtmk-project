@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>2. Infrastruktur | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya { border-color:#2563eb; background:#eff6ff; color:#1d4ed8; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .pill-item input:checked + label.other { border-color:#eab308; background:#fefce8; color:#ca8a04; }
+        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(37,99,235,.08); border-color:#bfdbfe; }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(37,99,235,.05); }
+        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; text-transform:uppercase; }
+        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none; transition:all .15s; background:#fff; }
+        .f-input:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+        .btn-submit { background:linear-gradient(110deg,#2563eb,#3b82f6); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(37,99,235,.3); }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .4s ease both; }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
+            <div><p class="text-[9px] font-bold tracking-widest text-blue-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Infrastruktur</p></div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+    </div>
+</nav>
+
+<div class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 2: INFRASTRUKTUR FASILITI</h1>
+        <p class="text-blue-100 text-xs opacity-80">{{ fp.nama_fasiliti }}</p>
+    </div>
+</div>
+
+<main class="px-8 pb-16 pt-6">
+<form method="post" class="space-y-6">
+{% csrf_token %}
+
+<div class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.1</div><span class="sec-label">Bangunan & Ruang Tapak</span></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Berapakah keluasan (hektar/ekar) tapak fasiliti?</label><input type="text" name="ukuran_tanah" class="f-input" value="{{ ukuran_tanah|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Adakah keluasan mencukupi untuk menambah fasiliti?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="tanah_mencukupi" id="tanah_ya" value="1" {% if tanah_mencukupi == True %}checked{% endif %}><label for="tanah_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="tanah_mencukupi" id="tanah_tidak" value="0" {% if tanah_mencukupi == False %}checked{% endif %}><label for="tanah_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div></div>
+    </div>
+    <div class="q-card">
+        <label class="block text-xs font-bold text-slate-500 mb-2">Adakah siling fasiliti dalam keadaan baik?</label>
+        <div class="flex gap-2 flex-wrap mb-2">
+            <div class="pill-item"><input type="radio" name="siling_okay" id="siling_ya" value="1" onchange="toggleNote('siling_nota_wrap', false)" {% if siling_okay == True %}checked{% endif %}><label for="siling_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+            <div class="pill-item"><input type="radio" name="siling_okay" id="siling_tidak" value="0" onchange="toggleNote('siling_nota_wrap', true)" {% if siling_okay == False %}checked{% endif %}><label for="siling_tidak" class="other"><i class="fas fa-exclamation-triangle"></i> Tidak (Nyatakan)</label></div>
+        </div>
+        <div id="siling_nota_wrap" class="mt-2 {% if siling_okay != False %}hidden{% endif %}"><input type="text" name="siling_nota" class="f-input" placeholder="Nyatakan keadaan siling..." value="{{ siling_nota|default:'' }}"></div>
+    </div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.2</div><span class="sec-label">Kemudahan Fasiliti</span></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Ruang perkhidmatan / bilik rawatan mencukupi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ruang_kerja_mencukupi" id="rk_ya" value="1" {% if ruang_kerja_mencukupi == True %}checked{% endif %}><label for="rk_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="ruang_kerja_mencukupi" id="rk_tidak" value="0" {% if ruang_kerja_mencukupi == False %}checked{% endif %}><label for="rk_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Ada ruang rehat untuk pelawat?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_ruang_rehat" id="rr_ya" value="1" {% if ada_ruang_rehat == True %}checked{% endif %}><label for="rr_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="ada_ruang_rehat" id="rr_tidak" value="0" {% if ada_ruang_rehat == False %}checked{% endif %}><label for="rr_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Kawasan rehat staf (pantry) disediakan?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_pantry" id="pnt_ya" value="1" {% if ada_pantry == True %}checked{% endif %}><label for="pnt_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="ada_pantry" id="pnt_tidak" value="0" {% if ada_pantry == False %}checked{% endif %}><label for="pnt_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Kantin / Mini Mart disediakan?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_kantin" id="knt_ya" value="1" {% if ada_kantin == True %}checked{% endif %}><label for="knt_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="ada_kantin" id="knt_tidak" value="0" {% if ada_kantin == False %}checked{% endif %}><label for="knt_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div></div>
+    </div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.2s;">
+    <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.3</div><span class="sec-label">Kemudahan Tambahan & Utiliti</span></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Kemudahan parking kenderaan disediakan?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_parking" id="prk_ya" value="1" onchange="toggleNote('prk_mencukupi_wrap', true)" {% if ada_parking == True %}checked{% endif %}><label for="prk_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_parking" id="prk_tidak" value="0" onchange="toggleNote('prk_mencukupi_wrap', false)" {% if ada_parking == False %}checked{% endif %}><label for="prk_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+            <div id="prk_mencukupi_wrap" class="mt-2 border-t border-slate-200 pt-2 {% if ada_parking != True %}hidden{% endif %}">
+                <label class="block text-xs font-bold text-slate-500 mb-1.5">Mencukupi?</label>
+                <div class="flex gap-2"><div class="pill-item"><input type="radio" name="parking_mencukupi" id="prkm_ya" value="1" {% if parking_mencukupi == True %}checked{% endif %}><label for="prkm_ya" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="parking_mencukupi" id="prkm_tidak" value="0" {% if parking_mencukupi == False %}checked{% endif %}><label for="prkm_tidak" class="tidak">Tidak</label></div></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Kuarters disediakan di fasiliti ini?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_quarters" id="qr_ya" value="1" onchange="toggleNote('qr_mencukupi_wrap', true)" {% if ada_quarters == True %}checked{% endif %}><label for="qr_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_quarters" id="qr_tidak" value="0" onchange="toggleNote('qr_mencukupi_wrap', false)" {% if ada_quarters == False %}checked{% endif %}><label for="qr_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+            <div id="qr_mencukupi_wrap" class="mt-2 border-t border-slate-200 pt-2 {% if ada_quarters != True %}hidden{% endif %}">
+                <label class="block text-xs font-bold text-slate-500 mb-1.5">Mencukupi?</label>
+                <div class="flex gap-2"><div class="pill-item"><input type="radio" name="quarters_mencukupi" id="qrm_ya" value="1" {% if quarters_mencukupi == True %}checked{% endif %}><label for="qrm_ya" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="quarters_mencukupi" id="qrm_tidak" value="0" {% if quarters_mencukupi == False %}checked{% endif %}><label for="qrm_tidak" class="tidak">Tidak</label></div></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Terdapat masalah Aircond?</label>
+            <div class="flex gap-2 flex-wrap mb-2">
+                <div class="pill-item"><input type="radio" name="masalah_aircond" id="ac_ya" value="1" onchange="toggleNote('ac_nota_wrap', true)" {% if masalah_aircond == True %}checked{% endif %}><label for="ac_ya" class="other"><i class="fas fa-exclamation-triangle"></i> Ya (Nyatakan)</label></div>
+                <div class="pill-item"><input type="radio" name="masalah_aircond" id="ac_tidak" value="0" onchange="toggleNote('ac_nota_wrap', false)" {% if masalah_aircond == False %}checked{% endif %}><label for="ac_tidak" class="ya"><i class="fas fa-check"></i> Tidak</label></div>
+            </div>
+            <div id="ac_nota_wrap" class="mt-2 {% if masalah_aircond != True %}hidden{% endif %}"><input type="text" name="aircond_nota" class="f-input" placeholder="Sila nyatakan..." value="{{ aircond_nota|default:'' }}"></div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Terdapat masalah Kipas?</label>
+            <div class="flex gap-2 flex-wrap mb-2">
+                <div class="pill-item"><input type="radio" name="masalah_kipas" id="kp_ya" value="1" onchange="toggleNote('kp_nota_wrap', true)" {% if masalah_kipas == True %}checked{% endif %}><label for="kp_ya" class="other"><i class="fas fa-exclamation-triangle"></i> Ya (Nyatakan)</label></div>
+                <div class="pill-item"><input type="radio" name="masalah_kipas" id="kp_tidak" value="0" onchange="toggleNote('kp_nota_wrap', false)" {% if masalah_kipas == False %}checked{% endif %}><label for="kp_tidak" class="ya"><i class="fas fa-check"></i> Tidak</label></div>
+            </div>
+            <div id="kp_nota_wrap" class="mt-2 {% if masalah_kipas != True %}hidden{% endif %}"><input type="text" name="kipas_nota" class="f-input" placeholder="Sila nyatakan..." value="{{ kipas_nota|default:'' }}"></div>
+        </div>
+    </div>
+</div>
+
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.25s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-times text-xs"></i> Batal</a>
+    <button type="submit" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Infrastruktur</button>
+</div>
+</form>
+</main>
+<script>
+    function toggleNote(id, show) {
+        const wrap = document.getElementById(id);
+        if(wrap) { if(show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+    }
+</script>
+</body>
+</html>

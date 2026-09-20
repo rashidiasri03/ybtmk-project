@@ -55,6 +55,14 @@ class MaklumatAsas(models.Model):
         ('sarawak', 'Sarawak'),
         ('labuan',  'W.P. Labuan'),
     ]
+    
+    # --- MAKLUMAT RESPONDEN (Baru) ---
+    nama_responden       = models.CharField(max_length=200, blank=True, verbose_name="Nama Penuh Responden")
+    jawatan_responden    = models.CharField(max_length=150, blank=True, verbose_name="Jawatan Responden")
+    no_telefon_responden = models.CharField(max_length=20, blank=True, verbose_name="No. Telefon Responden")
+    emel_responden       = models.EmailField(blank=True, verbose_name="Emel Responden")
+
+    # --- MAKLUMAT FASILITI (Sedia Ada) ---
     nama_fasiliti  = models.CharField(max_length=200, verbose_name="Nama Fasiliti")
     jenis_fasiliti = models.CharField(max_length=30, choices=FACILITY_TYPE_CHOICES, verbose_name="Jenis Fasiliti")
     negeri         = models.CharField(max_length=30, choices=NEGERI_CHOICES, blank=True, verbose_name="Negeri")
@@ -87,6 +95,11 @@ class KlusterKejuruteraan(models.Model):
     jenis_hospital_klinik = models.CharField(max_length=200, blank=True, verbose_name="Q2 – Jenis Hospital/Klinik")
     siling_okay           = models.BooleanField(null=True, blank=True, verbose_name="Q32 – Siling Okay?")
     ukuran_tanah          = models.TextField(blank=True, verbose_name="Q29 – Ukuran Tanah & Boleh Extend?")
+    
+    # --- MEDAN BARU (FASA 2) ---
+    siling_nota           = models.CharField(max_length=255, blank=True, verbose_name="Nota Siling")
+    tanah_mencukupi       = models.BooleanField(null=True, blank=True, verbose_name="Tanah Mencukupi?")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -109,6 +122,21 @@ class KlusterSumberManusia(models.Model):
     waktu_beroperasi           = models.CharField(max_length=200, blank=True, verbose_name="Q43 – Waktu Beroperasi")
     cara_minta_cuti            = models.TextField(blank=True, verbose_name="Q42 – Cara Minta Cuti & Rotasi")
     isu_penempatan             = models.TextField(blank=True, verbose_name="Q36 – Isu Penempatan Staff")
+    
+    # --- MEDAN BARU (FASA 4) ---
+    jumlah_perjawatan          = models.IntegerField(null=True, blank=True, verbose_name="Jumlah Perjawatan")
+    jumlah_pengisian           = models.IntegerField(null=True, blank=True, verbose_name="Jumlah Pengisian")
+    jumlah_kekosongan          = models.IntegerField(null=True, blank=True, verbose_name="Jumlah Kekosongan")
+    nota_kakitangan_pinjaman   = models.CharField(max_length=255, blank=True, verbose_name="Nota Pinjaman Staf")
+    
+    ada_isu_kakitangan         = models.BooleanField(null=True, blank=True, verbose_name="Ada Isu/Krisis Kakitangan?")
+    ada_fasiliti_petugas       = models.BooleanField(null=True, blank=True, verbose_name="Ada Fasiliti/Layanan Petugas?")
+    
+    jenis_shift                = models.TextField(blank=True, verbose_name="Bilangan Shift (Teks)")
+    corak_penugasan            = models.TextField(blank=True, verbose_name="Corak Penugasan")
+    pengurusan_jadual          = models.TextField(blank=True, verbose_name="Pengurusan Jadual (Roster)")
+    status_pertukaran_staf     = models.CharField(max_length=255, blank=True, verbose_name="Status Pertukaran Staf")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -138,6 +166,12 @@ class KlusterPerkhidmatan(models.Model):
     masa_tunggu             = models.CharField(max_length=100, blank=True, verbose_name="Q46 – Masa Tunggu Rawatan")
     ada_osca                = models.BooleanField(null=True, blank=True, verbose_name="Q48 – Ada OSCA?")
     bilangan_osca           = models.IntegerField(null=True, blank=True, verbose_name="Q48a – Bilangan OSCA")
+    
+    # --- MEDAN BARU (FASA 5) ---
+    ruang_tunggu_selesa     = models.BooleanField(null=True, blank=True, verbose_name="Ruang Menunggu Selesa?")
+    ruang_tunggu_nota       = models.CharField(max_length=255, blank=True, verbose_name="Nota Ruang Menunggu")
+    kekangan_rawatan        = models.TextField(blank=True, verbose_name="Kekangan Rawatan (Jika Tidak Boleh Selesai Kes)")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -157,6 +191,14 @@ class KlusterAset(models.Model):
     aset_perlu_diganti   = models.TextField(blank=True, verbose_name="Q24 – Aset Yang Perlu Diganti")
     aset_tidak_ikut_spec = models.TextField(blank=True, verbose_name="Q25 – Aset Tidak Ikut Spec KKM")
     umur_komputer        = models.TextField(blank=True, verbose_name="Q31 – Umur Komputer")
+    
+    # --- MEDAN BARU (FASA 3) ---
+    senarai_peralatan    = models.TextField(blank=True, verbose_name="Senarai Peralatan Perubatan")
+    ambulans_nota        = models.CharField(max_length=255, blank=True, verbose_name="Nota Ambulans")
+    sistem_pendigitalan  = models.CharField(max_length=500, blank=True, verbose_name="Sistem Pendigitalan")
+    gajet_ict_baik       = models.BooleanField(null=True, blank=True, verbose_name="Gajet ICT Baik?")
+    gajet_ict_nota       = models.CharField(max_length=255, blank=True, verbose_name="Nota Gajet ICT")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -179,6 +221,14 @@ class KlusterFasiliti(models.Model):
     ada_pantry            = models.BooleanField(null=True, blank=True, verbose_name="Q29b – Ada Kawasan Rehat Staff?")
     ada_kantin            = models.BooleanField(null=True, blank=True, verbose_name="Q44 – Ada Kantin/Mini Mart?")
     ada_security          = models.BooleanField(null=True, blank=True, verbose_name="Q45 – Ada Security?")
+    
+    # --- MEDAN BARU (FASA 2) ---
+    ada_parking           = models.BooleanField(null=True, blank=True, verbose_name="Ada Parking Disediakan?")
+    parking_mencukupi     = models.BooleanField(null=True, blank=True, verbose_name="Parking Mencukupi?")
+    aircond_nota          = models.CharField(max_length=255, blank=True, verbose_name="Nota Aircond")
+    masalah_kipas         = models.BooleanField(null=True, blank=True, verbose_name="Masalah Kipas?")
+    kipas_nota            = models.CharField(max_length=255, blank=True, verbose_name="Nota Kipas")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -193,6 +243,11 @@ class KlusterFasiliti(models.Model):
 class KlusterPerancangan(models.Model):
     perkhidmatan_baru   = models.TextField(blank=True, verbose_name="Q18 – Perkhidmatan Baru Yang Ingin Diwujudkan")
     fasiliti_diperlukan = models.TextField(blank=True, verbose_name="Q19 – Fasiliti Yang Sangat Diperlukan")
+    
+    # --- MEDAN BARU (FASA 6) ---
+    belanja_mengurus    = models.CharField(max_length=255, blank=True, verbose_name="Belanja Mengurus (OE)")
+    belanja_pembangunan = models.CharField(max_length=255, blank=True, verbose_name="Belanja Pembangunan (DE)")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -208,6 +263,13 @@ class KlusterKonsesi(models.Model):
     maintenance_okay = models.BooleanField(null=True, blank=True, verbose_name="Q28 – Maintenance Konsesi OK?")
     masalah_utama    = models.TextField(blank=True, verbose_name="Q17 – Masalah Utama")
     wishlist         = models.TextField(blank=True, verbose_name="Q17a – Wishlist")
+    
+    # --- MEDAN BARU (FASA 7) ---
+    prosedur_kes_dadah     = models.TextField(blank=True, verbose_name="Prosedur Kes Dadah")
+    hemodialisis_nota      = models.TextField(blank=True, verbose_name="Nota Mesin Hemodialisis")
+    status_bekalan_oksigen = models.CharField(max_length=150, blank=True, verbose_name="Status Bekalan Oksigen")
+    wishlist_fail          = models.FileField(upload_to='wishlist_files/', null=True, blank=True, verbose_name="Fail Wishlist")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

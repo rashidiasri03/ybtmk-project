@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>4. Sumber Manusia | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya { border-color:#9333ea; background:#faf5ff; color:#7e22ce; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .pill-item input:checked + label.other { border-color:#eab308; background:#fefce8; color:#ca8a04; }
+        .cb-label { display:flex; align-items:center; gap:10px; cursor:pointer; padding:10px; border-radius:8px; transition:background .15s; }
+        .cb-label:hover { background:#f8fafc; }
+        .cb-input { width:16px; height:16px; accent-color:#9333ea; }
+        .cb-text { font-size:.85rem; font-weight:600; color:#334155; }
+        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(147,51,234,.08); border-color:#d8b4fe; }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(147,51,234,.05); }
+        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; text-transform:uppercase; }
+        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none; transition:all .15s; background:#fff; }
+        .f-input:focus { border-color:#9333ea; box-shadow:0 0 0 3px rgba(147,51,234,.1); }
+        .btn-submit { background:linear-gradient(110deg,#9333ea,#a855f7); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(147,51,234,.3); }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+        .fade-in { opacity:0; animation:fadeUp .4s ease both; }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
+            <div><p class="text-[9px] font-bold tracking-widest text-purple-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Sumber Manusia</p></div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+    </div>
+</nav>
+
+<div class="bg-gradient-to-r from-purple-700 via-purple-600 to-purple-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 4: PENGURUSAN SUMBER MANUSIA</h1>
+        <p class="text-purple-100 text-xs opacity-80">{{ fp.nama_fasiliti }}</p>
+    </div>
+</div>
+
+<main class="px-8 pb-16 pt-6">
+<form method="post" id="mainForm" class="space-y-6">
+{% csrf_token %}
+
+<div class="sec-group fade-in" style="animation-delay:.1s;">
+    <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.1</div><span class="sec-label">Bilangan & Penempatan Staf</span></div>
+    <div class="grid grid-cols-3 gap-3 mb-3">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Perjawatan</label><input type="number" name="jumlah_perjawatan" class="f-input" min="0" value="{{ jumlah_perjawatan|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Pengisian</label><input type="number" name="jumlah_pengisian" class="f-input" min="0" value="{{ jumlah_pengisian|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Kekosongan</label><input type="number" name="jumlah_kekosongan" class="f-input" min="0" value="{{ jumlah_kekosongan|default:'' }}"></div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Terdapat kakitangan pinjaman fasiliti lain?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_ya" value="1" onchange="toggleNote('pinjam_nota_wrap', true)" {% if ada_kakitangan_pinjaman == True %}checked{% endif %}><label for="pinjam_ya" class="other"><i class="fas fa-check"></i> Ya (Nyatakan)</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_tidak" value="0" onchange="toggleNote('pinjam_nota_wrap', false)" {% if ada_kakitangan_pinjaman == False %}checked{% endif %}><label for="pinjam_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+            <div id="pinjam_nota_wrap" class="mt-2 {% if ada_kakitangan_pinjaman != True %}hidden{% endif %}"><input type="text" name="nota_kakitangan_pinjaman" class="f-input" placeholder="Cth: 1 Pegawai Perubatan..." value="{{ nota_kakitangan_pinjaman|default:'' }}"></div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Isu/krisis kepada petugas?</label>
+            <div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_isu_kakitangan" id="isu_ya" value="1" {% if ada_isu_kakitangan == True %}checked{% endif %}><label for="isu_ya" class="other"><i class="fas fa-exclamation-triangle"></i> Ya</label></div><div class="pill-item"><input type="radio" name="ada_isu_kakitangan" id="isu_tidak" value="0" {% if ada_isu_kakitangan == False %}checked{% endif %}><label for="isu_tidak" class="ya"><i class="fas fa-check"></i> Tidak</label></div></div>
+        </div>
+    </div>
+    <div class="q-card">
+        <label class="block text-xs font-bold text-slate-500 mb-3">Status pertukaran perjawatan petugas dalam setahun?</label>
+        <div class="flex flex-col gap-2">
+            <label class="cb-label"><input type="radio" name="status_pertukaran_staf" value="Tinggi / Kritikal" class="cb-input" {% if status_pertukaran_staf == 'Tinggi / Kritikal' %}checked{% endif %}><span class="cb-text text-red-600">Tinggi / Kritikal (Sering bertukar)</span></label>
+            <label class="cb-label"><input type="radio" name="status_pertukaran_staf" value="Sederhana" class="cb-input" {% if status_pertukaran_staf == 'Sederhana' %}checked{% endif %}><span class="cb-text text-amber-600">Sederhana</span></label>
+            <label class="cb-label"><input type="radio" name="status_pertukaran_staf" value="Rendah" class="cb-input" {% if status_pertukaran_staf == 'Rendah' %}checked{% endif %}><span class="cb-text text-green-600">Rendah / Tiada Keperluan (Kekal Stabil)</span></label>
+        </div>
+    </div>
+</div>
+
+<div class="sec-group fade-in" style="animation-delay:.15s;">
+    <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.2</div><span class="sec-label">Penjadualan & Syif</span></div>
+    <div class="space-y-3">
+        <!-- Render checkboxes via custom logic (using template strings to make it easy) -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Bilangan Shift Kerja (Boleh pilih >1):</label>
+            <input type="hidden" name="jenis_shift" id="f_jenis_shift" value="{{ jenis_shift|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-shift">
+                {% for opt in opt_shift %}
+                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
+                <label class="cb-label"><input type="checkbox" class="cb-input shift-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
+                {% endfor %}
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input shift-cb" id="shift_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="shift_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Corak Penugasan / Penjadualan Syif:</label>
+            <input type="hidden" name="corak_penugasan" id="f_corak_penugasan" value="{{ corak_penugasan|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-corak">
+                {% for opt in opt_corak %}
+                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
+                <label class="cb-label"><input type="checkbox" class="cb-input corak-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
+                {% endfor %}
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input corak-cb" id="corak_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="corak_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Pengurusan Jadual (Duty Roster):</label>
+            <input type="hidden" name="pengurusan_jadual" id="f_pengurusan_jadual" value="{{ pengurusan_jadual|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-roster">
+                {% for opt in opt_roster %}
+                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
+                <label class="cb-label"><input type="checkbox" class="cb-input roster-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
+                {% endfor %}
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input roster-cb" id="roster_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="roster_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Proses Merekod Masa Cuti:</label>
+            <input type="hidden" name="cara_minta_cuti" id="f_cara_minta_cuti" value="{{ cara_minta_cuti|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-cuti">
+                {% for opt in opt_cuti %}
+                <label class="cb-label"><input type="checkbox" class="cb-input cuti-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
+                {% endfor %}
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input cuti-cb" id="cuti_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="cuti_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Isu Penjadualan & Syif:</label>
+            <input type="hidden" name="isu_penempatan" id="f_isu_penempatan" value="{{ isu_penempatan|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-isu">
+                {% for opt in opt_isu %}
+                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
+                <label class="cb-label"><input type="checkbox" class="cb-input isu-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
+                {% endfor %}
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input isu-cb" id="isu_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="isu_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.2s;">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-times text-xs"></i> Batal</a>
+    <button type="submit" class="btn-submit" onclick="syncAllCheckboxes()"><i class="fas fa-save mr-2"></i> Kemaskini Sumber Manusia</button>
+</div>
+</form>
+</main>
+<script>
+    function toggleNote(id, show) {
+        const wrap = document.getElementById(id);
+        if(wrap) { if(show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+    }
+    function bindCheckboxGroup(hiddenId, cbClass, otherCbId, otherTextId) {
+        const hidden = document.getElementById(hiddenId);
+        if(!hidden) return function(){};
+        const cbs = document.querySelectorAll('.' + cbClass);
+        const otherCb = document.getElementById(otherCbId);
+        const otherText = document.getElementById(otherTextId);
+        const savedRaw = hidden.value;
+        if(savedRaw && otherCb) {
+            const savedItems = savedRaw.split('|||').map(s=>s.trim()).filter(Boolean);
+            savedItems.forEach(item => {
+                let matched = false;
+                cbs.forEach(cb => { if(cb.value === item && cb.id !== otherCbId) { cb.checked = true; matched = true; } });
+                if(!matched) { otherCb.checked = true; otherText.value = item; }
+            });
+        }
+        return function sync() {
+            let selected = [];
+            cbs.forEach(cb => { if(cb.checked && (!otherCb || cb.id !== otherCbId)) selected.push(cb.value); });
+            if(otherCb && otherCb.checked && otherText.value.trim() !== '') selected.push(otherText.value.trim());
+            hidden.value = otherCb ? selected.join('|||') : selected.join(', ');
+        };
+    }
+    const syncShift = bindCheckboxGroup('f_jenis_shift', 'shift-cb', 'shift_other_cb', 'shift_other_text');
+    const syncCorak = bindCheckboxGroup('f_corak_penugasan', 'corak-cb', 'corak_other_cb', 'corak_other_text');
+    const syncRoster = bindCheckboxGroup('f_pengurusan_jadual', 'roster-cb', 'roster_other_cb', 'roster_other_text');
+    const syncCuti = bindCheckboxGroup('f_cara_minta_cuti', 'cuti-cb', 'cuti_other_cb', 'cuti_other_text');
+    const syncIsu = bindCheckboxGroup('f_isu_penempatan', 'isu-cb', 'isu_other_cb', 'isu_other_text');
+    function syncAllCheckboxes() { syncShift(); syncCorak(); syncRoster(); syncCuti(); syncIsu(); }
+</script>
+</body>
+</html>

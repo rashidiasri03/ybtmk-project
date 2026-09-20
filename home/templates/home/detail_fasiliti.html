@@ -29,18 +29,18 @@
 </head>
 <body class="bg-slate-50 min-h-screen antialiased">
 <div class="flex min-h-screen">
+    <!-- Menu Sisi Admin -->
     {% include 'home/_sidebar.html' with active_page='senarai_fasiliti' %}
 
     <div class="ml-64 flex-1 flex flex-col">
 
-        <!-- Header -->
+        <!-- Header Admin -->
         <header class="no-print relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-b border-white/10">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-5">
                 <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
             </div>
             
-            <!-- Top Navigation Bar -->
             <div class="relative px-8 py-4 flex items-center justify-between border-b border-white/5">
                 <!-- Left: Back & Title -->
                 <div class="flex items-center gap-4">
@@ -62,7 +62,6 @@
                 
                 <!-- Right: Actions & User -->
                 <div class="flex items-center gap-3">
-                    <!-- Action Buttons -->
                     <div class="flex items-center gap-2">
                         <button onclick="window.print()" class="group flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
                             <i class="fas fa-print text-blue-300 group-hover:text-white transition-colors"></i>
@@ -75,7 +74,6 @@
                         </button>
                     </div>
                     
-                    <!-- User Profile -->
                     <div class="flex items-center gap-3 pl-4 border-l border-white/10">
                         <div class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
                             <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
@@ -126,6 +124,19 @@
                                         <i class="fas fa-ban"></i> Tutup
                                     </span>
                                     {% endif %}
+                                    
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border
+                                        {% if fp.status_lawatan == 'kuning' %}bg-yellow-400 bg-opacity-20 text-yellow-100 border-yellow-300 border-opacity-40
+                                        {% elif fp.status_lawatan == 'biru' %}bg-blue-400 bg-opacity-20 text-blue-100 border-blue-300 border-opacity-40
+                                        {% elif fp.status_lawatan == 'hijau' %}bg-green-400 bg-opacity-20 text-green-100 border-green-300 border-opacity-40
+                                        {% else %}bg-red-400 bg-opacity-20 text-red-100 border-red-300 border-opacity-40{% endif %}">
+                                        <i class="fas fa-flag"></i> VIP: 
+                                        {% if fp.status_lawatan == 'kuning' %}Proses
+                                        {% elif fp.status_lawatan == 'biru' %}Sudah Dilawat
+                                        {% elif fp.status_lawatan == 'hijau' %}Selesai
+                                        {% else %}Belum{% endif %}
+                                    </span>
+                                    
                                     <span class="text-blue-200 text-xs">Dikemaskini: {{ fp.updated_at|date:"d M Y" }}</span>
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-white bg-opacity-20 text-white border border-white border-opacity-30">
                                         <i class="fas fa-calendar-alt text-[10px]"></i> {{ fp.tahun }}
@@ -146,7 +157,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Meta row -->
+                
                 <div class="grid grid-cols-4 divide-x divide-slate-100 border-t border-slate-100">
                     <div class="px-6 py-4">
                         <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Jenis Fasiliti</p>
@@ -165,25 +176,8 @@
                         <p class="text-slate-800 font-semibold mt-1">{% if fp.submitted_by %}{{ fp.submitted_by.get_full_name|default:fp.submitted_by.username }}{% else %}—{% endif %}</p>
                     </div>
                 </div>
-                <!-- Wilayah / Zon / Parlimen row -->
-                {% if fp.wilayah or fp.zon or fp.parlimen %}
-                <div class="grid grid-cols-3 divide-x divide-slate-100 border-t border-slate-100">
-                    <div class="px-6 py-3">
-                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Wilayah</p>
-                        <p class="text-slate-700 text-sm font-semibold mt-0.5">{{ fp.wilayah|capfirst|default:"&mdash;" }}</p>
-                    </div>
-                    <div class="px-6 py-3">
-                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Zon</p>
-                        <p class="text-slate-700 text-sm font-semibold mt-0.5">{{ fp.zon|default:"&mdash;" }}</p>
-                    </div>
-                    <div class="px-6 py-3">
-                        <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Parlimen</p>
-                        <p class="text-slate-700 text-sm font-semibold mt-0.5">{{ fp.parlimen|default:"&mdash;" }}</p>
-                    </div>
-                </div>
-                {% endif %}
+                
                 {% if fp.alamat or fp.poskod or fp.latitud %}
-                <!-- Address + map row -->
                 <div class="border-t border-slate-100">
                     <div class="grid grid-cols-3 divide-x divide-slate-100 bg-slate-50/40">
                         <div class="px-6 py-3 col-span-2">
@@ -202,199 +196,349 @@
                             {% endif %}
                         </div>
                     </div>
-
-                    {% if fp.latitud %}
-                    <!-- Embedded Leaflet map -->
-                    <div id="facility-map" class="w-full h-56 border-t border-slate-100"></div>
-                    {% endif %}
                 </div>
                 {% endif %}
             </div>
 
-            <!-- Kluster 1: Kejuruteraan -->
+            <!-- ── 1. LATAR BELAKANG ── -->
             <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 text-sm">
-                        <i class="fas fa-hard-hat"></i>
-                    </div>
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-indigo-100 bg-indigo-50">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-200 flex items-center justify-center text-indigo-700 text-sm"><i class="fas fa-address-card"></i></div>
                     <div>
-                        <h3 class="font-bold text-slate-800">Kluster 1 — Kejuruteraan</h3>
-                        <p class="text-xs text-slate-400">Maklumat fizikal bangunan dan infrastruktur</p>
+                        <h3 class="font-bold text-slate-800 text-sm">Bahagian 1: Latar Belakang</h3>
+                        <p class="text-[11px] text-slate-500">Maklumat Responden dan Fasiliti</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 divide-x divide-slate-50 px-2">
-                    {% include 'home/_detail_row.html' with label="Kod Fasiliti" value=fp.kod_fasiliti type="text" %}
-                    {% include 'home/_detail_row.html' with label="Tahun Dibina" value=fp.tahun_dibina type="text" %}
-                    {% include 'home/_detail_row.html' with label="Jenis Hospital/Klinik" value=fp.jenis_hospital_klinik type="text" %}
-                    {% include 'home/_detail_row.html' with label="Ukuran Tanah & Boleh Extend?" value=fp.ukuran_tanah type="text" %}
-                    {% include 'home/_detail_row.html' with label="Siling Okay?" value=fp.siling_okay type="bool" %}
-                </div>
-            </div>
-
-            <!-- Kluster 2: Sumber Manusia -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-sm">
-                        <i class="fas fa-users"></i>
-                    </div>
+                
+                <div class="p-5 border-b border-slate-50 bg-slate-50 flex gap-6">
+                    {% if fp.maklumat_asas.nama_responden %}
                     <div>
-                        <h3 class="font-bold text-slate-800">Kluster 2 — Sumber Manusia</h3>
-                        <p class="text-xs text-slate-400">Kakitangan, shift, dan pengurusan tenaga kerja</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Kakitangan Tetap" value=fp.kakitangan_tetap type="text" %}
-                    {% include 'home/_detail_row.html' with label="Kakitangan Kontrak" value=fp.kakitangan_kontrak type="text" %}
-                    {% include 'home/_detail_row.html' with label="Kakitangan MySTeP" value=fp.kakitangan_mystep type="text" %}
-                    {% include 'home/_detail_row.html' with label="Jumlah Kakitangan" value=fp.jumlah_kakitangan type="text" %}
-                    {% include 'home/_detail_row.html' with label="Bilangan Shift Sehari" value=fp.bilangan_shift type="text" %}
-                    {% include 'home/_detail_row.html' with label="Bil. Staff Non-Medical/Admin" value=fp.bilangan_staff_non_medical type="text" %}
-                    {% include 'home/_detail_row.html' with label="Waktu Beroperasi" value=fp.waktu_beroperasi type="text" %}
-                    {% include 'home/_detail_row.html' with label="Cara Minta Cuti & Rotasi" value=fp.cara_minta_cuti type="long" %}
-                    {% include 'home/_detail_row.html' with label="Ada Staff Pinjaman?" value=fp.ada_kakitangan_pinjaman type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada OT/Allowance?" value=fp.ada_ot_allowance type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Isu Penempatan Staff" value=fp.isu_penempatan type="long" %}
-                    {% include 'home/_detail_row.html' with label="In-Charge Fasiliti" value=fp.siapa_manage type="text" %}
-                </div>
-            </div>
-
-            <!-- Kluster 3: Perkhidmatan Kesihatan -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center text-green-600 text-sm">
-                        <i class="fas fa-stethoscope"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-800">Kluster 3 — Perkhidmatan Kesihatan & Perubatan</h3>
-                        <p class="text-xs text-slate-400">Jenis perkhidmatan, pelawat, penyakit, ubat, dan kemudahan rawatan</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Jenis Perkhidmatan" value=fp.jenis_perkhidmatan type="long" %}
-                    {% include 'home/_detail_row.html' with label="Jenis Penyakit Kerap" value=fp.jenis_penyakit_kerap type="long" %}
-                    {% include 'home/_detail_row.html' with label="Anggaran Pelawat Harian" value=fp.anggaran_pelawat_harian type="text" %}
-                    {% include 'home/_detail_row.html' with label="Boleh Selesaikan Kes?" value=fp.boleh_selesaikan_kes type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Jika Tidak, Rujuk ke" value=fp.rujukan_ke type="text" %}
-                    {% include 'home/_detail_row.html' with label="Kualiti Makanan" value=fp.kualiti_makanan type="long" %}
-                    {% include 'home/_detail_row.html' with label="Masa Tunggu Rawatan" value=fp.masa_tunggu type="text" %}
-                    {% include 'home/_detail_row.html' with label="Ada OSCA (Kes Dadah)?" value=fp.ada_osca type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Bilangan Unit OSCA" value=fp.bilangan_osca type="text" %}
-                    {% include 'home/_detail_row.html' with label="Bekalan Ubat Mencukupi?" value=fp.bekalan_ubat_mencukupi type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Bilik Mayat/Forensik?" value=fp.ada_bilik_mayat type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Ruang Rehat Pelawat?" value=fp.ada_ruang_rehat type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Keperluan Oksigen" value=fp.keperluan_oksigen type="long" %}
-                    {% include 'home/_detail_row.html' with label="Wad Diasingkan (L/P)?" value=fp.wad_diasingkan type="bool" %}
-                </div>
-            </div>
-
-            <!-- Kluster 4: Aset -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-sm">
-                        <i class="fas fa-boxes"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-800">Kluster 4 — Aset</h3>
-                        <p class="text-xs text-slate-400">Keadaan peralatan, ambulans, dan aset perubatan</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Keadaan Aset (Umur & Fungsi)" value=fp.keadaan_aset type="long" %}
-                    {% include 'home/_detail_row.html' with label="Umur Komputer" value=fp.umur_komputer type="long" %}
-                    {% include 'home/_detail_row.html' with label="Aset Yang Perlu Diganti" value=fp.aset_perlu_diganti type="long" %}
-                    {% include 'home/_detail_row.html' with label="Aset Tidak Ikut Spec KKM" value=fp.aset_tidak_ikut_spec type="long" %}
-                    {% include 'home/_detail_row.html' with label="Disposable Mencukupi?" value=fp.disposable_mencukupi type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Ambulans?" value=fp.ada_ambulans type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Keadaan Ambulans" value=fp.keadaan_ambulans type="long" %}
-                    {% include 'home/_detail_row.html' with label="Ada Hemodialisis?" value=fp.ada_hemodialisis type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Bilangan Unit Hemodialisis" value=fp.unit_hemodialisis type="text" %}
-                    {% include 'home/_detail_row.html' with label="Ada EMR (Sistem Digital)?" value=fp.ada_emr type="bool" %}
-                </div>
-            </div>
-
-            <!-- Kluster 5: Fasiliti -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600 text-sm">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-800">Kluster 5 — Fasiliti</h3>
-                        <p class="text-xs text-slate-400">Kemudahan fizikal, quarters, parking, dan keselamatan</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Keadaan Perabot/Infrastruktur" value=fp.keadaan_perabot type="long" %}
-                    {% include 'home/_detail_row.html' with label="Ada Quarters?" value=fp.ada_quarters type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Quarters Mencukupi?" value=fp.quarters_mencukupi type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Isu Parking?" value=fp.ada_isu_parking type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Masalah Aircond/Kipas?" value=fp.masalah_aircond type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ruang Kerja/Treatment Mencukupi?" value=fp.ruang_kerja_mencukupi type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Kawasan Rehat Staff?" value=fp.ada_pantry type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Kantin/Mini Mart?" value=fp.ada_kantin type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Ada Security?" value=fp.ada_security type="bool" %}
-                </div>
-            </div>
-
-            <!-- Kluster 6: Perancangan -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 text-sm">
-                        <i class="fas fa-lightbulb"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-800">Kluster 6 — Perancangan</h3>
-                        <p class="text-xs text-slate-400">Perkhidmatan baharu dan keperluan masa depan</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Perkhidmatan Baru Yang Ingin Diwujudkan" value=fp.perkhidmatan_baru type="long" %}
-                    {% include 'home/_detail_row.html' with label="Fasiliti Yang Sangat Diperlukan" value=fp.fasiliti_diperlukan type="long" %}
-                </div>
-            </div>
-
-            <!-- Kluster 7: Konsesi -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600 text-sm">
-                        <i class="fas fa-tools"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-800">Kluster 7 — Perkhidmatan Konsesi</h3>
-                        <p class="text-xs text-slate-400">Status penyelenggaraan dan perkhidmatan pihak ketiga</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Maintenance Konsesi OK?" value=fp.maintenance_okay type="bool" %}
-                </div>
-            </div>
-
-            <!-- Kluster 8: Lain-lain -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
-                    <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center text-red-500 text-sm">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-800">Kluster 8 — Lain-lain / Isu Utama</h3>
-                        <p class="text-xs text-slate-400">Masalah utama dan cadangan (wishlist)</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1">
-                    {% if fp.masalah_utama %}
-                    <div class="px-6 py-4 border-b border-slate-50">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Masalah Utama</p>
-                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.masalah_utama }}</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Penyedia Laporan (Responden)</p>
+                        <p class="text-sm font-semibold text-slate-800">{{ fp.maklumat_asas.nama_responden }}</p>
+                        <p class="text-xs text-slate-500">{{ fp.maklumat_asas.jawatan_responden }} &bull; {{ fp.maklumat_asas.no_telefon_responden }} &bull; {{ fp.maklumat_asas.emel_responden }}</p>
                     </div>
                     {% endif %}
-                    {% if fp.wishlist %}
+                </div>
+                
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Nama Fasiliti" value=fp.maklumat_asas.nama_fasiliti type="text" %}
+                    {% include 'home/_detail_row.html' with label="Kelas Fasiliti" value=fp.maklumat_asas.get_jenis_fasiliti_display type="text" %}
+                    {% include 'home/_detail_row.html' with label="Tahun Dibina" value=fp.k_kejuruteraan.tahun_dibina type="text" %}
+                    {% include 'home/_detail_row.html' with label="Ketua Fasiliti (Person in Charge)" value=fp.k_perkhidmatan.siapa_manage type="text" %}
+                </div>
+            </div>
+
+            <!-- ── 2. INFRASTRUKTUR FASILITI ── -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-blue-100 bg-blue-50">
+                    <div class="w-9 h-9 rounded-xl bg-blue-200 flex items-center justify-center text-blue-700 text-sm"><i class="fas fa-building"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Bahagian 2: Infrastruktur Fasiliti</h3>
+                        <p class="text-[11px] text-slate-500">Keadaan fizikal, ruang, utiliti dan kemudahan</p>
+                    </div>
+                </div>
+                {% if fp.k_kejuruteraan or fp.k_fasiliti %}
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Keluasan Tanah" value=fp.k_kejuruteraan.ukuran_tanah type="text" %}
+                    {% include 'home/_detail_row.html' with label="Tanah Mencukupi untuk Penambahan?" value=fp.k_kejuruteraan.tanah_mencukupi type="bool" %}
+                    
+                    {% if fp.k_kejuruteraan.siling_okay == False %}
+                        {% with siling_txt="Tidak ("|add:fp.k_kejuruteraan.siling_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Siling OK?" value=siling_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Siling OK?" value=fp.k_kejuruteraan.siling_okay type="bool" %}
+                    {% endif %}
+                    
+                    {% include 'home/_detail_row.html' with label="Ruang Kerja/Rawatan Mencukupi?" value=fp.k_fasiliti.ruang_kerja_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Ruang Rehat Pelawat?" value=fp.k_perkhidmatan.ada_ruang_rehat type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Kawasan Rehat Staf (Pantry)?" value=fp.k_fasiliti.ada_pantry type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Kantin / Mini Mart?" value=fp.k_fasiliti.ada_kantin type="bool" %}
+                    
+                    {% if fp.k_fasiliti.ada_parking %}
+                        {% with park_status=fp.k_fasiliti.parking_mencukupi|yesno:"Mencukupi,Tidak Mencukupi" %}
+                        {% with park_txt="Ya ("|add:park_status|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Kemudahan Parking?" value=park_txt type="text" %}
+                        {% endwith %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Kemudahan Parking?" value=fp.k_fasiliti.ada_parking type="bool" %}
+                    {% endif %}
+
+                    {% if fp.k_fasiliti.ada_quarters %}
+                        {% with qrt_status=fp.k_fasiliti.quarters_mencukupi|yesno:"Mencukupi,Tidak Mencukupi" %}
+                        {% with qrt_txt="Ya ("|add:qrt_status|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Kuarters Kakitangan?" value=qrt_txt type="text" %}
+                        {% endwith %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Kuarters Kakitangan?" value=fp.k_fasiliti.ada_quarters type="bool" %}
+                    {% endif %}
+                    
+                    {% if fp.k_fasiliti.masalah_aircond %}
+                        {% with ac_txt="Ya ("|add:fp.k_fasiliti.aircond_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Masalah Aircond?" value=ac_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Masalah Aircond?" value=fp.k_fasiliti.masalah_aircond type="bool" %}
+                    {% endif %}
+
+                    {% if fp.k_fasiliti.masalah_kipas %}
+                        {% with kp_txt="Ya ("|add:fp.k_fasiliti.kipas_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Masalah Kipas?" value=kp_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Masalah Kipas?" value=fp.k_fasiliti.masalah_kipas type="bool" %}
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
+                {% endif %}
+            </div>
+
+            <!-- ── 3. ASET PERUBATAN ── -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-teal-100 bg-teal-50">
+                    <div class="w-9 h-9 rounded-xl bg-teal-200 flex items-center justify-center text-teal-700 text-sm"><i class="fas fa-stethoscope"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Bahagian 3: Aset Perubatan</h3>
+                        <p class="text-[11px] text-slate-500">Peralatan, stok, ubat, dan aset sokongan</p>
+                    </div>
+                </div>
+                {% if fp.k_aset %}
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Senarai Peralatan (Ada Isu)" value=fp.k_aset.senarai_peralatan type="long" %}
+                    {% include 'home/_detail_row.html' with label="Aset Tidak Ikut Spec KKM" value=fp.k_aset.aset_tidak_ikut_spec type="long" %}
+                    {% include 'home/_detail_row.html' with label="Disposable Assets Mencukupi?" value=fp.k_aset.disposable_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Bekalan Ubat Mencukupi?" value=fp.k_perkhidmatan.bekalan_ubat_mencukupi type="bool" %}
+                    
+                    {% if fp.k_aset.ada_ambulans %}
+                        {% with amb_txt="Ya ("|add:fp.k_aset.ambulans_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Perkhidmatan Ambulans?" value=amb_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Perkhidmatan Ambulans?" value=fp.k_aset.ada_ambulans type="bool" %}
+                    {% endif %}
+                    
+                    {% include 'home/_detail_row.html' with label="Keadaan Perabot Ruang Menunggu/Wad" value=fp.k_fasiliti.keadaan_perabot type="long" %}
+                    {% include 'home/_detail_row.html' with label="Sistem Pendigitalan Digunakan" value=fp.k_aset.sistem_pendigitalan type="text" %}
+
+                    {% if fp.k_aset.gajet_ict_baik == False %}
+                        {% with ict_txt="Tidak ("|add:fp.k_aset.gajet_ict_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Gajet ICT Baik & Selamat?" value=ict_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Gajet ICT Baik & Selamat?" value=fp.k_aset.gajet_ict_baik type="bool" %}
+                    {% endif %}
+
+                    {% include 'home/_detail_row.html' with label="Kawalan Keselamatan (Security)?" value=fp.k_fasiliti.ada_security type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Perkhidmatan Hemodialisis?" value=fp.k_perkhidmatan.ada_hemodialisis type="bool" %}
+                </div>
+                {% else %}
+                <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
+                {% endif %}
+            </div>
+
+            <!-- ── 4. SUMBER MANUSIA ── -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-purple-100 bg-purple-50">
+                    <div class="w-9 h-9 rounded-xl bg-purple-200 flex items-center justify-center text-purple-700 text-sm"><i class="fas fa-users"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Bahagian 4: Pengurusan Sumber Manusia</h3>
+                        <p class="text-[11px] text-slate-500">Kekuatan staf, penjadualan, syif, dan pertukaran</p>
+                    </div>
+                </div>
+                {% if fp.k_sumber_manusia %}
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Jumlah Perjawatan" value=fp.k_sumber_manusia.jumlah_perjawatan type="text" %}
+                    {% include 'home/_detail_row.html' with label="Jumlah Pengisian (Berkhidmat)" value=fp.k_sumber_manusia.jumlah_pengisian type="text" %}
+                    {% include 'home/_detail_row.html' with label="Jumlah Kekosongan" value=fp.k_sumber_manusia.jumlah_kekosongan type="text" %}
+                    
+                    {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman %}
+                        {% with pinjam_txt="Ya ("|add:fp.k_sumber_manusia.nota_kakitangan_pinjaman|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Tenaga Kerja/Pinjaman Fasiliti Lain?" value=pinjam_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Tenaga Kerja/Pinjaman Fasiliti Lain?" value=fp.k_sumber_manusia.ada_kakitangan_pinjaman type="bool" %}
+                    {% endif %}
+
+                    {% include 'home/_detail_row.html' with label="Ada Isu/Krisis Petugas?" value=fp.k_sumber_manusia.ada_isu_kakitangan type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Fasiliti/Layanan Khas Petugas?" value=fp.k_sumber_manusia.ada_fasiliti_petugas type="bool" %}
+                </div>
+                <div class="grid grid-cols-1 divide-y divide-slate-50 border-t border-slate-50">
                     <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Wishlist</p>
-                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.wishlist }}</p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Bilangan Shift Kerja</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.jenis_shift|default:"—"|linebreaksbr }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Corak Penugasan</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.corak_penugasan|default:"—"|linebreaksbr }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Jadual Giliran (Duty Roster)</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.pengurusan_jadual|default:"—"|linebreaksbr }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Proses Merekod Cuti</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.cara_minta_cuti|default:"—"|linebreaksbr }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Isu Penjadualan & Cuti</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.isu_penempatan|default:"—"|linebreaksbr }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Status Pertukaran Petugas (1 Tahun)</p>
+                        <p class="text-sm font-bold {% if 'Kritikal' in fp.k_sumber_manusia.status_pertukaran_staf %}text-red-600{% elif 'Sederhana' in fp.k_sumber_manusia.status_pertukaran_staf %}text-amber-600{% else %}text-green-600{% endif %}">
+                            {{ fp.k_sumber_manusia.status_pertukaran_staf|default:"—" }}
+                        </p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
+                {% endif %}
+            </div>
+
+            <!-- ── 5. PENYAMPAIAN PERKHIDMATAN ── -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-rose-100 bg-rose-50">
+                    <div class="w-9 h-9 rounded-xl bg-rose-200 flex items-center justify-center text-rose-700 text-sm"><i class="fas fa-briefcase-medical"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Bahagian 5: Penyampaian Perkhidmatan</h3>
+                        <p class="text-[11px] text-slate-500">Waktu operasi, perkhidmatan, dan keselesaan pesakit</p>
+                    </div>
+                </div>
+                {% if fp.k_perkhidmatan %}
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Waktu Operasi" value=fp.k_sumber_manusia.waktu_beroperasi type="text" %}
+                    {% include 'home/_detail_row.html' with label="Anggaran Pelawat Sehari" value=fp.k_perkhidmatan.anggaran_pelawat_harian type="text" %}
+                    {% include 'home/_detail_row.html' with label="Program / Perkhidmatan" value=fp.k_perkhidmatan.jenis_perkhidmatan type="long" %}
+                    {% include 'home/_detail_row.html' with label="Penyakit Sering Dilaporkan" value=fp.k_perkhidmatan.jenis_penyakit_kerap type="long" %}
+                    {% include 'home/_detail_row.html' with label="Wad Lelaki & Perempuan Diasingkan?" value=fp.k_perkhidmatan.wad_diasingkan type="bool" %}
+                    
+                    {% if fp.k_perkhidmatan.ruang_tunggu_selesa == False %}
+                        {% with rt_txt="Tidak ("|add:fp.k_perkhidmatan.ruang_tunggu_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Ruang Menunggu Selesa?" value=rt_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Ruang Menunggu Selesa?" value=fp.k_perkhidmatan.ruang_tunggu_selesa type="bool" %}
+                    {% endif %}
+
+                    {% if fp.k_perkhidmatan.boleh_selesaikan_kes == False %}
+                        {% with sk_txt="Tidak (Kekangan: "|add:fp.k_perkhidmatan.kekangan_rawatan|add:")" %}
+                        {% include 'home/_detail_row.html' with label="Pesakit Dapat Dirawat Sepenuhnya?" value=sk_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="Pesakit Dapat Dirawat Sepenuhnya?" value=fp.k_perkhidmatan.boleh_selesaikan_kes type="bool" %}
+                    {% endif %}
+                    
+                    {% include 'home/_detail_row.html' with label="Masa Menunggu Rawatan" value=fp.k_perkhidmatan.masa_tunggu type="text" %}
+                </div>
+                {% else %}
+                <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
+                {% endif %}
+            </div>
+
+            <!-- ── 6. KEWANGAN, KONSESI & PERANCANGAN ── -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-yellow-100 bg-yellow-50">
+                    <div class="w-9 h-9 rounded-xl bg-yellow-200 flex items-center justify-center text-yellow-700 text-sm"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Bahagian 6: Kewangan, Konsesi & Perancangan</h3>
+                        <p class="text-[11px] text-slate-500">Peruntukan (OE/DE) dan perancangan masa depan</p>
+                    </div>
+                </div>
+                {% if fp.k_perancangan %}
+                <div class="grid grid-cols-2 divide-x divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="Belanja Mengurus (OE)" value=fp.k_perancangan.belanja_mengurus type="text" %}
+                    {% include 'home/_detail_row.html' with label="Belanja Pembangunan (DE)" value=fp.k_perancangan.belanja_pembangunan type="text" %}
+                    {% include 'home/_detail_row.html' with label="Penyelenggaraan Konsesi Memuaskan?" value=fp.k_konsesi.maintenance_okay type="bool" %}
+                </div>
+                <div class="divide-y divide-slate-50 border-t border-slate-50">
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Isu / Masalah Utama</p>
+                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.k_konsesi.masalah_utama|default:"—" }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Fasiliti / Infrastruktur Masa Depan</p>
+                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.k_perancangan.fasiliti_diperlukan|default:"—" }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
+                {% endif %}
+            </div>
+
+            <!-- ── 7. LAIN-LAIN ── -->
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-200 bg-slate-100">
+                    <div class="w-9 h-9 rounded-xl bg-slate-300 flex items-center justify-center text-slate-700 text-sm"><i class="fas fa-list-ul"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Bahagian 7: Lain-lain</h3>
+                        <p class="text-[11px] text-slate-500">Khusus, fail lampiran, dan arkib</p>
+                    </div>
+                </div>
+                {% if fp.k_konsesi %}
+                <div class="grid grid-cols-1 divide-y divide-slate-50">
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Prosedur Kes Dadah</p>
+                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.k_konsesi.prosedur_kes_dadah|default:"—" }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Unit Mesin Hemodialisis</p>
+                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.k_konsesi.hemodialisis_nota|default:"—" }}</p>
+                    </div>
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Bekalan Oksigen</p>
+                        <p class="text-sm font-bold {% if 'Kritikal' in fp.k_konsesi.status_bekalan_oksigen %}text-red-600{% elif 'Terhad' in fp.k_konsesi.status_bekalan_oksigen %}text-amber-600{% else %}text-green-600{% endif %}">
+                            {{ fp.k_konsesi.status_bekalan_oksigen|default:"—" }}
+                        </p>
+                    </div>
+
+                    <!-- Muat Turun Wishlist -->
+                    {% if fp.k_konsesi.wishlist_fail %}
+                    <div class="px-6 py-5 bg-blue-50/50">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Lampiran Wishlist Fasiliti</p>
+                        <a href="{{ fp.k_konsesi.wishlist_fail.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition shadow-sm">
+                            <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
+                        </a>
                     </div>
                     {% endif %}
                 </div>
+                {% else %}
+                <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
+                {% endif %}
             </div>
+
+            <!-- ── Maklumat Tambahan (Arkib Lama) ── -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden mt-6 mb-8">
+                <div class="px-6 py-3 border-b border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-archive mr-2"></i>Maklumat Tambahan (Arkib)</h4>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-200">
+                    {% include 'home/_detail_row.html' with label="Ada Bilik Mayat/Forensik?" value=fp.k_fasiliti.ada_bilik_mayat type="bool" %}
+                    {% include 'home/_detail_row.html' with label="Kualiti Makanan Pesakit" value=fp.k_perkhidmatan.kualiti_makanan type="text" %}
+                    {% include 'home/_detail_row.html' with label="Umur Purata Komputer" value=fp.k_aset.umur_komputer type="long" %}
+                    {% include 'home/_detail_row.html' with label="Teks Wishlist Lama" value=fp.k_konsesi.wishlist type="long" %}
+                </div>
+            </div>
+
+            {% if fp.latitud %}
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden no-print mb-8">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-sky-100 bg-sky-50">
+                    <div class="w-9 h-9 rounded-xl bg-sky-200 flex items-center justify-center text-sky-700 text-sm"><i class="fas fa-map-marked-alt"></i></div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Lokasi Fasiliti</h3>
+                        <p class="text-[11px] text-slate-500">
+                            {{ fp.latitud|floatformat:6 }}, {{ fp.longitud|floatformat:6 }} &nbsp;&mdash;&nbsp;
+                            <a href="https://www.google.com/maps?q={{ fp.latitud }},{{ fp.longitud }}" target="_blank" class="text-sky-600 hover:underline">
+                                Buka Google Maps <i class="fas fa-external-link-alt text-[9px]"></i>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                <div id="facility-map" class="w-full h-64"></div>
+            </div>
+            {% endif %}
 
         </main>
     </div>

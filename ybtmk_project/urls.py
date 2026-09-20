@@ -13,7 +13,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/',  custom_login,  name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # serve static files during development
 if settings.DEBUG:

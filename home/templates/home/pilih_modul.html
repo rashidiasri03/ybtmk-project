@@ -142,50 +142,57 @@
 <!-- MODULE CARDS -->
 <main class="max-w-7xl mx-auto px-6 py-12">
     <p class="text-[11px] font-bold tracking-[.14em] text-slate-400 uppercase text-center mb-8 fade-in" style="animation-delay:.05s;">
-        Pilih modul untuk dikemaskini
+        Pilih modul untuk dikemaskini mengikut bahagian
     </p>
     <div class="flex flex-wrap justify-center gap-6">
 
-        <!-- FASILITI -->
-        <a href="{% url 'home:edit_fasiliti_ringkas' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#2563eb;--accent2:#3b82f6;--icon-bg:#eff6ff;--icon-color:#2563eb;--icon-shadow:rgba(37,99,235,.28);animation-delay:.1s;">
-            <div class="mod-icon-wrap"><i class="fas fa-hospital-alt"></i></div>
-            <div><p class="mod-title">Fasiliti</p><p class="mod-desc">Hospital, Klinik & Pusat Kesihatan</p></div>
+        <!-- 1. LATAR BELAKANG -->
+        <a href="{% url 'home:edit_latar_belakang' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#4f46e5;--accent2:#6366f1;--icon-bg:#eef2ff;--icon-color:#4f46e5;--icon-shadow:rgba(79,70,229,.28);animation-delay:.1s;">
+            <div class="mod-icon-wrap"><i class="fas fa-address-card"></i></div>
+            <div><p class="mod-title">Latar Belakang</p><p class="mod-desc">Maklumat Responden & Fasiliti</p></div>
         </a>
 
-        <!-- SUMBER MANUSIA -->
-        <a href="{% url 'home:edit_sumber_manusia' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#7c3aed;--accent2:#8b5cf6;--icon-bg:#f5f3ff;--icon-color:#7c3aed;--icon-shadow:rgba(124,58,237,.28);animation-delay:.17s;">
-            <div class="mod-icon-wrap"><i class="fas fa-users"></i></div>
-            <div><p class="mod-title">Sumber Manusia</p><p class="mod-desc">HR, Perjawatan & Tenaga Kerja</p></div>
+        <!-- 2. INFRASTRUKTUR FASILITI -->
+        <a href="{% url 'home:edit_infrastruktur' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#2563eb;--accent2:#3b82f6;--icon-bg:#eff6ff;--icon-color:#2563eb;--icon-shadow:rgba(37,99,235,.28);animation-delay:.17s;">
+            <div class="mod-icon-wrap"><i class="fas fa-building"></i></div>
+            <div><p class="mod-title">Infrastruktur</p><p class="mod-desc">Fizikal, Ruang & Kemudahan</p></div>
         </a>
 
-        <!-- ASET -->
-        <a href="{% url 'home:edit_aset' fp.pk %}" class="mod-card fade-in"
+        <!-- 3. ASET PERUBATAN -->
+        <a href="{% url 'home:edit_aset_perubatan' fp.pk %}" class="mod-card fade-in"
            style="--accent:#0d9488;--accent2:#14b8a6;--icon-bg:#f0fdfa;--icon-color:#0d9488;--icon-shadow:rgba(13,148,136,.28);animation-delay:.24s;">
-            <div class="mod-icon-wrap"><i class="fas fa-boxes"></i></div>
-            <div><p class="mod-title">Aset</p><p class="mod-desc">Peralatan, Jentera & Inventori</p></div>
+            <div class="mod-icon-wrap"><i class="fas fa-stethoscope"></i></div>
+            <div><p class="mod-title">Aset Perubatan</p><p class="mod-desc">Peralatan, Stok & Ambulans</p></div>
         </a>
 
-        <!-- SERVIS -->
-        <a href="{% url 'home:edit_servis' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#0369a1;--accent2:#0ea5e9;--icon-bg:#f0f9ff;--icon-color:#0369a1;--icon-shadow:rgba(3,105,161,.28);animation-delay:.31s;">
-            <div class="mod-icon-wrap"><i class="fas fa-cogs"></i></div>
-            <div><p class="mod-title">Servis</p><p class="mod-desc">Penyelenggaraan & Perkhidmatan</p></div>
+        <!-- 4. PENGURUSAN SUMBER MANUSIA -->
+        <a href="{% url 'home:edit_pengurusan_sumber_manusia' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#7c3aed;--accent2:#8b5cf6;--icon-bg:#f5f3ff;--icon-color:#7c3aed;--icon-shadow:rgba(124,58,237,.28);animation-delay:.31s;">
+            <div class="mod-icon-wrap"><i class="fas fa-users"></i></div>
+            <div><p class="mod-title">Sumber Manusia</p><p class="mod-desc">Perjawatan & Syif Kakitangan</p></div>
         </a>
 
-        <!-- UBAT -->
-        <a href="{% url 'home:edit_ubat' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#16a34a;--accent2:#22c55e;--icon-bg:#f0fdf4;--icon-color:#16a34a;--icon-shadow:rgba(22,163,74,.28);animation-delay:.38s;">
-            <div class="mod-icon-wrap"><i class="fas fa-pills"></i></div>
-            <div><p class="mod-title">Ubat</p><p class="mod-desc">Farmasi, Stok & Bekalan</p></div>
+        <!-- 5. PENYAMPAIAN PERKHIDMATAN -->
+        <a href="{% url 'home:edit_penyampaian_perkhidmatan' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#be123c;--accent2:#f43f5e;--icon-bg:#fff1f2;--icon-color:#be123c;--icon-shadow:rgba(190,18,60,.28);animation-delay:.38s;">
+            <div class="mod-icon-wrap"><i class="fas fa-briefcase-medical"></i></div>
+            <div><p class="mod-title">Perkhidmatan</p><p class="mod-desc">Waktu Operasi, Kes & Rawatan</p></div>
         </a>
 
-        <!-- PESAKIT -->
-        <a href="{% url 'home:edit_pesakit' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#be123c;--accent2:#f43f5e;--icon-bg:#fff1f2;--icon-color:#be123c;--icon-shadow:rgba(190,18,60,.28);animation-delay:.45s;">
-            <div class="mod-icon-wrap"><i class="fas fa-procedures"></i></div>
-            <div><p class="mod-title">Pesakit</p><p class="mod-desc">Data Klinikal & Rekod Rawatan</p></div>
+        <!-- 6. KEWANGAN, KONSESI & PERANCANGAN -->
+        <a href="{% url 'home:edit_kewangan_perancangan' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#ca8a04;--accent2:#eab308;--icon-bg:#fefce8;--icon-color:#ca8a04;--icon-shadow:rgba(202,138,4,.28);animation-delay:.45s;">
+            <div class="mod-icon-wrap"><i class="fas fa-chart-line"></i></div>
+            <div><p class="mod-title">Kewangan & Rancang</p><p class="mod-desc">Peruntukan & Masa Depan</p></div>
+        </a>
+
+        <!-- 7. LAIN-LAIN -->
+        <a href="{% url 'home:edit_lain_lain' fp.pk %}" class="mod-card fade-in"
+           style="--accent:#475569;--accent2:#64748b;--icon-bg:#f8fafc;--icon-color:#475569;--icon-shadow:rgba(71,85,105,.28);animation-delay:.52s;">
+            <div class="mod-icon-wrap"><i class="fas fa-list-ul"></i></div>
+            <div><p class="mod-title">Lain-lain</p><p class="mod-desc">Maklumat Tambahan & Wishlist</p></div>
         </a>
 
     </div>

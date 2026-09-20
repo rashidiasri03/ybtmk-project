@@ -35,6 +35,14 @@ urlpatterns = [
     # Borang Ringkas (soalan terpilih)
     path('profiling/ringkas/tambah/', views.tambah_fasiliti_ringkas, name='tambah_fasiliti_ringkas'),
     path('profiling/ringkas/<int:pk>/edit/', views.edit_fasiliti_ringkas, name='edit_fasiliti_ringkas'),
+    # Borang 7 Modul Baharu (Google Forms)
+    path('profiling/latar-belakang/<int:pk>/edit/', views.edit_latar_belakang, name='edit_latar_belakang'),
+    path('profiling/infrastruktur/<int:pk>/edit/', views.edit_infrastruktur, name='edit_infrastruktur'),
+    path('profiling/aset-perubatan/<int:pk>/edit/', views.edit_aset_perubatan, name='edit_aset_perubatan'),
+    path('profiling/sumber-manusia/<int:pk>/edit/', views.edit_pengurusan_sumber_manusia, name='edit_pengurusan_sumber_manusia'),
+    path('profiling/perkhidmatan/<int:pk>/edit/', views.edit_penyampaian_perkhidmatan, name='edit_penyampaian_perkhidmatan'),
+    path('profiling/kewangan-perancangan/<int:pk>/edit/', views.edit_kewangan_perancangan, name='edit_kewangan_perancangan'),
+    path('profiling/lain-lain/<int:pk>/edit/', views.edit_lain_lain, name='edit_lain_lain'),
     # Borang Sumber Manusia
     path('profiling/sm/tambah/', views.tambah_sumber_manusia, name='tambah_sumber_manusia'),
     path('profiling/sm/<int:pk>/edit/', views.edit_sumber_manusia, name='edit_sumber_manusia'),
