@@ -18,10 +18,55 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# ==============================================================================
+# 1. SUIS KAWALAN PERSEKITARAN (Tukar ke False sebelum upload (Zip) ke Bluehost!)
+# ==============================================================================
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+if DEBUG:
+    # -----------------------------------------
+    # TETAPAN LOCALHOST (Komputer Anda)
+    # -----------------------------------------
+    ALLOWED_HOSTS = ['*']
+    
+    # Kekalkan TiDB untuk ujian di komputer supaya data lama masih ada
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'test',
+            'USER': '2CwNRpLuETQ92Zu.root',
+            'PASSWORD': 's27Rm9mBo1KWq1jE',
+            'HOST': 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+            'PORT': '4000',
+            'OPTIONS': {
+                'ssl': {},
+            }
+        }
+    }
+else:
+    # -----------------------------------------
+    # TETAPAN BLUEHOST (Production / Live)
+    # -----------------------------------------
+    # Simbol '*' diletakkan agar anda tidak mendapat ralat ketika menguji sistem di Bluehost
+    ALLOWED_HOSTS = ['digitalreadiness.michma.org', 'healomic.org', '129.121.121.11', 'localhost', '127.0.0.1', '*']
+    
+    # Pangkalan data MySQL Bluehost
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'healomic_ybtmkdb',
+            'USER': 'healomic_dbadmin',
+            'PASSWORD': '@Hpu_ybtmk2026',
+            'HOST': 'box5692.bluehost.com',
+            'PORT': '3306',
+        }
+    }
+
+# Jika berjalan di pelayan Render (Linux), kekalkan laluan fail sijil ini
+if os.environ.get('RENDER'):
+    DATABASES['default']['OPTIONS']['ssl']['ca'] = '/etc/ssl/certs/ca-certificates.crt'
+# ==============================================================================
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -65,26 +110,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ybtmk_project.wsgi.application'
 
-# Database – TiDB Serverless Cloud
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test',
-        'USER': '2CwNRpLuETQ92Zu.root',
-        'PASSWORD': 's27Rm9mBo1KWq1jE',
-        'HOST': 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
-        'PORT': '4000',
-        'OPTIONS': {
-            # PyMySQL hanya perlukan dict 'ssl' untuk mengaktifkan penyulitan
-            'ssl': {},
-        }
-    }
-}
-
-# Jika berjalan di pelayan Render (Linux), tambah laluan fail sijil
-if os.environ.get('RENDER'):
-    DATABASES['default']['OPTIONS']['ssl']['ca'] = '/etc/ssl/certs/ca-certificates.crt'
-
 # Auth redirects
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/profiling/peta/'
@@ -119,7 +144,6 @@ STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else 
 
 # Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
