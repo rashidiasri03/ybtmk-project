@@ -63,8 +63,8 @@ else:
     }
 
 # Jika berjalan di pelayan Render (Linux), kekalkan laluan fail sijil ini
-if os.environ.get('RENDER'):
-    DATABASES['default']['OPTIONS']['ssl']['ca'] = '/etc/ssl/certs/ca-certificates.crt'
+#if os.environ.get('RENDER'):
+#    DATABASES['default']['OPTIONS']['ssl']['ca'] = '/etc/ssl/certs/ca-certificates.crt'
 # ==============================================================================
 
 
