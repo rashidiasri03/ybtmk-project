@@ -300,8 +300,7 @@ def bahagian_view(request):
     qs = FacilityProfile.objects.select_related('maklumat_asas').order_by('-updated_at')
     carian = request.GET.get('carian', '').strip()
     if carian:
-        pattern = '(^|[^a-zA-Z])' + re.escape(carian)
-        qs = qs.filter(maklumat_asas__nama_fasiliti__iregex=pattern)
+        qs = qs.filter(maklumat_asas__nama_fasiliti__icontains=carian)
     paginator = Paginator(qs, 50)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
@@ -334,8 +333,7 @@ def tm_portal(request):
     qs = FacilityProfile.objects.select_related('maklumat_asas').order_by('-updated_at')
     carian = request.GET.get('carian', '').strip()
     if carian:
-        pattern = '(^|[^a-zA-Z])' + re.escape(carian)
-        qs = qs.filter(maklumat_asas__nama_fasiliti__iregex=pattern)
+        qs = qs.filter(maklumat_asas__nama_fasiliti__icontains=carian)
     paginator = Paginator(qs, 25)
     page_obj  = paginator.get_page(request.GET.get('page', 1))
     return render(request, 'home/tm_portal.html', {
@@ -832,8 +830,7 @@ def senarai_fasiliti(request):
     import re
     carian = request.GET.get('carian', '').strip()
     if carian:
-        pattern = '(^|[^a-zA-Z])' + re.escape(carian)
-        qs = qs.filter(maklumat_asas__nama_fasiliti__iregex=pattern)
+        qs = qs.filter(maklumat_asas__nama_fasiliti__icontains=carian)
 
     # Filter negeri
     negeri_filter = request.GET.get('negeri', '').strip()
