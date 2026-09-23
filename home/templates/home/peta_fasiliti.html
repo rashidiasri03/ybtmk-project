@@ -711,9 +711,9 @@ function renderDrawer(d) {
                      d.k0.status_lawatan === 'biru' ? '#3b82f6' : 
                      d.k0.status_lawatan === 'hijau' ? '#22c55e' : '#ef4444';
                      
-    let badgeText = d.k0.status_lawatan === 'kuning' ? 'Dalam Proses' : 
-                    d.k0.status_lawatan === 'biru' ? 'Sudah Dilawati' : 
-                    d.k0.status_lawatan === 'hijau' ? 'Selesai Dilaksanakan' : 'Belum Dilawati';
+    let badgeText = d.k0.status_lawatan === 'kuning' ? 'DALAM PROSES' : 
+                d.k0.status_lawatan === 'biru' ? 'SUDAH DILAWATI' : 
+                d.k0.status_lawatan === 'hijau' ? 'SELESAI DILAKSANAKAN' : 'BELUM DILAWATI';
 
     html += `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin-bottom:16px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">

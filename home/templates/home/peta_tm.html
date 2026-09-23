@@ -904,9 +904,9 @@ function showFacilityPopup(f) {
                      f.status_lawatan === 'biru' ? '#3b82f6' : 
                      f.status_lawatan === 'hijau' ? '#22c55e' : '#ef4444';
                      
-    let badgeText = f.status_lawatan === 'kuning' ? 'Dalam Proses' : 
-                    f.status_lawatan === 'biru' ? 'Sudah Dilawati' : 
-                    f.status_lawatan === 'hijau' ? 'Selesai Dilaksanakan' : 'Belum Dilawati';
+    let badgeText = f.status_lawatan === 'kuning' ? 'DALAM PROSES' : 
+                f.status_lawatan === 'biru' ? 'SUDAH DILAWATI' : 
+                f.status_lawatan === 'hijau' ? 'SELESAI DILAKSANAKAN' : 'BELUM DILAWATI';
     
     const popup = new maplibregl.Popup({
         maxWidth: '300px',
