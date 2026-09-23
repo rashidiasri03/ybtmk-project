@@ -2508,3 +2508,10 @@ def _save_lain_lain(request, fp):
     
     messages.success(request, 'Bahagian Lain-lain dan Lampiran berjaya dikemaskini.')
     return redirect('home:pilih_modul', pk=fp.pk)
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def custom_logout(request):
+    logout(request)
+    return redirect('login')  # Mengarahkan semula pengguna ke halaman login
