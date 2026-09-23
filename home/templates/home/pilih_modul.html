@@ -12,7 +12,7 @@
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
         html, body { height: 100%; margin: 0; }
-        body { background: #f0f4fa; min-height: 100vh; }
+        body { background: #f0f4fa; min-height: 100vh; overflow-x: hidden; }
 
         /* particles */
         .particles { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
@@ -27,34 +27,85 @@
         .hero-blob1 { position:absolute; width:320px; height:320px; border-radius:50%; background:rgba(255,255,255,.06); right:-60px; top:-90px; }
         .hero-blob2 { position:absolute; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.05); right:160px; bottom:-60px; }
 
-        /* mod card */
+        /* Carousel Wrapper */
+        .carousel-wrapper {
+            position: relative;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .carousel-container {
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scroll-snap-type: x mandatory;
+            padding: 20px 10px 40px;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;    /* Firefox */
+        }
+        .carousel-container::-webkit-scrollbar { display: none; }
+
+        /* Carousel Navigation Buttons */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fff;
+            color: #2563eb;
+            font-size: 1.2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(37,99,235,.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all .2s ease;
+        }
+        .nav-btn:hover { background: #eff6ff; border-color: #bfdbfe; box-shadow: 0 6px 16px rgba(37,99,235,.25); transform: translateY(-50%) scale(1.05); }
+        .nav-btn:active { transform: translateY(-50%) scale(0.95); }
+        .nav-btn-left { left: -10px; }
+        .nav-btn-right { right: -10px; }
+
         @keyframes fadeUp { from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);} }
         @keyframes shimmerSweep { 0%{left:-80%;}100%{left:140%;} }
         @keyframes iconBounce { 0%{transform:scale(1);}30%{transform:scale(1.22);}60%{transform:scale(.95);}80%{transform:scale(1.06);}100%{transform:scale(1);} }
-        @keyframes modalIn { from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);} }
-        @keyframes rippleAnim { to{transform:scale(4);opacity:0;} }
-
+        
         .fade-in { opacity:0; animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both; }
 
+        /* mod card */
         .mod-card {
             background:#fff; border:1.5px solid #e8edf5; border-radius:22px;
-            width:200px; padding:32px 20px 26px;
+            min-width: 220px; max-width: 220px; padding:32px 20px 26px;
             display:flex; flex-direction:column; align-items:center; gap:14px;
             cursor:pointer; text-decoration:none; position:relative; overflow:hidden;
             transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, border-color .3s;
+            scroll-snap-align: center;
+            flex-shrink: 0;
+            transform: scale(0.98); /* Initial zoom-out state */
         }
+
         .mod-card::after {
             content:''; position:absolute; top:0; left:-80%; width:60%; height:100%;
             background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
             transform:skewX(-18deg); pointer-events:none; opacity:0; transition:opacity .1s;
         }
-        .mod-card:not(.soon):hover::after { opacity:1; animation:shimmerSweep .55s ease-out forwards; }
+        
+        /* Zoom In effect on Hover */
         .mod-card:not(.soon):hover {
-            transform:translateY(-10px) scale(1.02);
-            box-shadow:0 24px 52px rgba(30,58,138,.14), 0 0 0 1px var(--accent,#2563eb);
-            border-color:var(--accent,#2563eb);
+            transform: translateY(-8px) scale(1.06); /* Zoom in higher */
+            box-shadow: 0 24px 52px rgba(30,58,138,.14), 0 0 0 1px var(--accent,#2563eb);
+            border-color: var(--accent,#2563eb);
+            z-index: 5; /* Keep it above others while hovered */
         }
-        .mod-card:not(.soon):active { transform:translateY(-4px) scale(.98); transition-duration:.1s; }
+        
+        .mod-card:not(.soon):hover::after { opacity:1; animation:shimmerSweep .55s ease-out forwards; }
+        .mod-card:not(.soon):active { transform: translateY(-2px) scale(1.02); transition-duration:.1s; }
         .mod-card.soon { opacity:.55; cursor:not-allowed; }
 
         /* active top line */
@@ -77,21 +128,15 @@
         .mod-title { font-size:.975rem; font-weight:800; color:#1e293b; text-align:center; letter-spacing:-.01em; }
         .mod-desc  { font-size:.72rem; font-weight:500; color:#94a3b8; text-align:center; margin-top:-4px; }
 
-        .ripple-wave { position:absolute; border-radius:50%; background:rgba(37,99,235,.18); transform:scale(0); animation:rippleAnim .55s ease-out forwards; pointer-events:none; }
-
+        /* UI Overlays */
         .modal-box { animation:modalIn .28s cubic-bezier(.22,1,.36,1) both; }
-        .toast-in  { animation:toastIn .3s cubic-bezier(.22,1,.36,1) both; }
-        .toast-out { animation:toastOut .22s ease-in both; }
-        @keyframes toastIn  { from{opacity:0;transform:translate(-50%,18px);}to{opacity:1;transform:translate(-50%,0);} }
-        @keyframes toastOut { from{opacity:1;}to{opacity:0;transform:translate(-50%,10px);} }
+        @keyframes modalIn { from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);} }
     </style>
 </head>
 <body>
 
-<!-- PARTICLES -->
 <div class="particles" id="particles"></div>
 
-<!-- TOPBAR -->
 <nav class="topbar sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -105,23 +150,15 @@
         </div>
         <div class="flex items-center gap-2">
             {% if user.is_authenticated %}
-                <a href="{% url 'home:bahagian' %}"
-                   class="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
-                    <i class="fas fa-arrow-left text-[10px]"></i> Kembali
-                </a>
-                <a href="{% url 'home:profil_saya' %}"
-                   class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition-all">
-                    <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px] font-extrabold">
-                        {{ user.username|first|upper }}
-                    </div>
+                <a href="{% url 'home:bahagian' %}" class="flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all"><i class="fas fa-arrow-left text-[10px]"></i> Kembali</a>
+                <a href="{% url 'home:profil_saya' %}" class="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition-all">
+                    <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px] font-extrabold">{{ user.username|first|upper }}</div>
                     <span class="hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
                 </a>
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
-                    <button type="button" onclick="showLogoutModal(this.closest('form'))"
-                            class="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
-                        <i class="fas fa-sign-out-alt text-[10px]"></i>
-                        <span class="hidden sm:inline">Log Keluar</span>
+                    <button type="button" onclick="showLogoutModal(this.closest('form'))" class="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-bold px-3.5 py-2 rounded-xl transition-all">
+                        <i class="fas fa-sign-out-alt text-[10px]"></i><span class="hidden sm:inline">Log Keluar</span>
                     </button>
                 </form>
             {% endif %}
@@ -129,7 +166,6 @@
     </div>
 </nav>
 
-<!-- HERO -->
 <div class="hero-strip">
     <div class="hero-blob1"></div>
     <div class="hero-blob2"></div>
@@ -140,107 +176,89 @@
     </div>
 </div>
 
-<!-- MODULE CARDS -->
-<main class="max-w-7xl mx-auto px-6 py-12">
-    <p class="text-[11px] font-bold tracking-[.14em] text-slate-400 uppercase text-center mb-8 fade-in" style="animation-delay:.05s;">
+<main class="w-full mx-auto px-4 py-12 relative z-10">
+    <p class="text-[11px] font-bold tracking-[.14em] text-slate-400 uppercase text-center mb-6 fade-in" style="animation-delay:.05s;">
         Pilih modul untuk dikemaskini mengikut bahagian
     </p>
-    <div class="flex flex-wrap justify-center gap-6">
 
-        <!-- 1. LATAR BELAKANG -->
-        <a href="{% url 'home:edit_latar_belakang' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#4f46e5;--accent2:#6366f1;--icon-bg:#eef2ff;--icon-color:#4f46e5;--icon-shadow:rgba(79,70,229,.28);animation-delay:.1s;">
-            <div class="mod-icon-wrap"><i class="fas fa-address-card"></i></div>
-            <div><p class="mod-title">Latar Belakang</p><p class="mod-desc">Maklumat Responden & Fasiliti</p></div>
-        </a>
+    <!-- Carousel Container Wrapper -->
+    <div class="carousel-wrapper fade-in" style="animation-delay: .1s;">
+        <button class="nav-btn nav-btn-left" onclick="scrollCarousel(-300)"><i class="fas fa-chevron-left"></i></button>
+        
+        <div class="carousel-container" id="module-carousel">
+            
+            <a href="{% url 'home:edit_latar_belakang' fp.pk %}" class="mod-card" style="--accent:#4f46e5;--accent2:#6366f1;--icon-bg:#eef2ff;--icon-color:#4f46e5;--icon-shadow:rgba(79,70,229,.28);">
+                <div class="mod-icon-wrap"><i class="fas fa-address-card"></i></div>
+                <div><p class="mod-title">Latar Belakang</p><p class="mod-desc">Maklumat Responden & Fasiliti</p></div>
+            </a>
 
-        <!-- 2. INFRASTRUKTUR FASILITI -->
-        <a href="{% url 'home:edit_infrastruktur' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#2563eb;--accent2:#3b82f6;--icon-bg:#eff6ff;--icon-color:#2563eb;--icon-shadow:rgba(37,99,235,.28);animation-delay:.17s;">
-            <div class="mod-icon-wrap"><i class="fas fa-building"></i></div>
-            <div><p class="mod-title">Infrastruktur</p><p class="mod-desc">Fizikal, Ruang & Kemudahan</p></div>
-        </a>
+            <a href="{% url 'home:edit_infrastruktur' fp.pk %}" class="mod-card" style="--accent:#2563eb;--accent2:#3b82f6;--icon-bg:#eff6ff;--icon-color:#2563eb;--icon-shadow:rgba(37,99,235,.28);">
+                <div class="mod-icon-wrap"><i class="fas fa-building"></i></div>
+                <div><p class="mod-title">Infrastruktur</p><p class="mod-desc">Fizikal, Ruang & Kemudahan</p></div>
+            </a>
 
-        <!-- 3. ASET PERUBATAN -->
-        <a href="{% url 'home:edit_aset_perubatan' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#0d9488;--accent2:#14b8a6;--icon-bg:#f0fdfa;--icon-color:#0d9488;--icon-shadow:rgba(13,148,136,.28);animation-delay:.24s;">
-            <div class="mod-icon-wrap"><i class="fas fa-stethoscope"></i></div>
-            <div><p class="mod-title">Aset Perubatan</p><p class="mod-desc">Peralatan, Stok & Ambulans</p></div>
-        </a>
+            <a href="{% url 'home:edit_aset_perubatan' fp.pk %}" class="mod-card" style="--accent:#0d9488;--accent2:#14b8a6;--icon-bg:#f0fdfa;--icon-color:#0d9488;--icon-shadow:rgba(13,148,136,.28);">
+                <div class="mod-icon-wrap"><i class="fas fa-stethoscope"></i></div>
+                <div><p class="mod-title">Aset Perubatan</p><p class="mod-desc">Peralatan, Stok & Ambulans</p></div>
+            </a>
 
-        <!-- 4. PENGURUSAN SUMBER MANUSIA -->
-        <a href="{% url 'home:edit_pengurusan_sumber_manusia' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#7c3aed;--accent2:#8b5cf6;--icon-bg:#f5f3ff;--icon-color:#7c3aed;--icon-shadow:rgba(124,58,237,.28);animation-delay:.31s;">
-            <div class="mod-icon-wrap"><i class="fas fa-users"></i></div>
-            <div><p class="mod-title">Sumber Manusia</p><p class="mod-desc">Perjawatan & Syif Kakitangan</p></div>
-        </a>
+            <a href="{% url 'home:edit_pengurusan_sumber_manusia' fp.pk %}" class="mod-card" style="--accent:#7c3aed;--accent2:#8b5cf6;--icon-bg:#f5f3ff;--icon-color:#7c3aed;--icon-shadow:rgba(124,58,237,.28);">
+                <div class="mod-icon-wrap"><i class="fas fa-users"></i></div>
+                <div><p class="mod-title">Sumber Manusia</p><p class="mod-desc">Perjawatan & Syif Kakitangan</p></div>
+            </a>
 
-        <!-- 5. PENYAMPAIAN PERKHIDMATAN -->
-        <a href="{% url 'home:edit_penyampaian_perkhidmatan' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#be123c;--accent2:#f43f5e;--icon-bg:#fff1f2;--icon-color:#be123c;--icon-shadow:rgba(190,18,60,.28);animation-delay:.38s;">
-            <div class="mod-icon-wrap"><i class="fas fa-briefcase-medical"></i></div>
-            <div><p class="mod-title">Perkhidmatan</p><p class="mod-desc">Waktu Operasi, Kes & Rawatan</p></div>
-        </a>
+            <a href="{% url 'home:edit_penyampaian_perkhidmatan' fp.pk %}" class="mod-card" style="--accent:#be123c;--accent2:#f43f5e;--icon-bg:#fff1f2;--icon-color:#be123c;--icon-shadow:rgba(190,18,60,.28);">
+                <div class="mod-icon-wrap"><i class="fas fa-briefcase-medical"></i></div>
+                <div><p class="mod-title">Perkhidmatan</p><p class="mod-desc">Waktu Operasi, Kes & Rawatan</p></div>
+            </a>
 
-        <!-- 6. KEWANGAN, KONSESI & PERANCANGAN -->
-        <a href="{% url 'home:edit_kewangan_perancangan' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#ca8a04;--accent2:#eab308;--icon-bg:#fefce8;--icon-color:#ca8a04;--icon-shadow:rgba(202,138,4,.28);animation-delay:.45s;">
-            <div class="mod-icon-wrap"><i class="fas fa-chart-line"></i></div>
-            <div><p class="mod-title">Kewangan & Rancang</p><p class="mod-desc">Peruntukan & Masa Depan</p></div>
-        </a>
+            <a href="{% url 'home:edit_kewangan_perancangan' fp.pk %}" class="mod-card" style="--accent:#ca8a04;--accent2:#eab308;--icon-bg:#fefce8;--icon-color:#ca8a04;--icon-shadow:rgba(202,138,4,.28);">
+                <div class="mod-icon-wrap"><i class="fas fa-chart-line"></i></div>
+                <div><p class="mod-title">Kewangan & Rancang</p><p class="mod-desc">Peruntukan & Masa Depan</p></div>
+            </a>
 
-        <!-- 7. LAIN-LAIN -->
-        <a href="{% url 'home:edit_lain_lain' fp.pk %}" class="mod-card fade-in"
-           style="--accent:#475569;--accent2:#64748b;--icon-bg:#f8fafc;--icon-color:#475569;--icon-shadow:rgba(71,85,105,.28);animation-delay:.52s;">
-            <div class="mod-icon-wrap"><i class="fas fa-list-ul"></i></div>
-            <div><p class="mod-title">Lain-lain</p><p class="mod-desc">Maklumat Tambahan & Wishlist</p></div>
-        </a>
+            <a href="{% url 'home:edit_lain_lain' fp.pk %}" class="mod-card" style="--accent:#475569;--accent2:#64748b;--icon-bg:#f8fafc;--icon-color:#475569;--icon-shadow:rgba(71,85,105,.28);">
+                <div class="mod-icon-wrap"><i class="fas fa-list-ul"></i></div>
+                <div><p class="mod-title">Lain-lain</p><p class="mod-desc">Maklumat Tambahan & Wishlist</p></div>
+            </a>
 
+        </div>
+
+        <button class="nav-btn nav-btn-right" onclick="scrollCarousel(300)"><i class="fas fa-chevron-right"></i></button>
     </div>
 </main>
 
-<footer class="text-center pb-8">
-    <p class="text-xs text-slate-400 font-medium">&copy; 2026 Kementerian Kesihatan Malaysia &middot; YBTMK Dashboard</p>
+<footer class="text-center pb-8 mt-10">
+    <p class="text-xs text-slate-400 font-medium">&copy; {% now "Y" %} Kementerian Kesihatan Malaysia &middot; YBTMK Dashboard</p>
 </footer>
 
 <!-- LOGOUT MODAL -->
-<div id="logout-modal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+<div id="logout-modal" class="hidden fixed inset-0 z-[100] items-center justify-center p-4">
     <div class="absolute inset-0 bg-slate-900 bg-opacity-40 backdrop-blur-sm" onclick="hideLogoutModal()"></div>
-    <div class="modal-box relative bg-white rounded-2xl w-full max-w-sm mx-auto p-8 flex flex-col items-center text-center border border-slate-100"
-         style="box-shadow:0 24px 80px rgba(30,58,138,.18);">
-        <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5">
-            <i class="fas fa-sign-out-alt text-red-500 text-xl"></i>
-        </div>
+    <div class="modal-box relative bg-white rounded-2xl w-full max-w-sm mx-auto p-8 flex flex-col items-center text-center border border-slate-100" style="box-shadow:0 24px 80px rgba(30,58,138,.18);">
+        <div class="w-14 h-14 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-5"><i class="fas fa-sign-out-alt text-red-500 text-xl"></i></div>
         <h2 class="text-slate-800 font-extrabold text-lg mb-1.5">Log Keluar?</h2>
         <p class="text-slate-500 text-sm mb-7">Adakah anda pasti mahu log keluar<br>daripada sistem YBTMK Dashboard?</p>
         <div class="flex gap-3 w-full">
-            <button type="button" onclick="hideLogoutModal()"
-                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
-            <button type="button" onclick="confirmLogout()"
-                    class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white bg-red-500 hover:bg-red-600 transition">
-                <i class="fas fa-sign-out-alt mr-1.5"></i> Ya, Log Keluar
-            </button>
+            <button type="button" onclick="hideLogoutModal()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+            <button type="button" onclick="confirmLogout()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white bg-red-500 hover:bg-red-600 transition"><i class="fas fa-sign-out-alt mr-1.5"></i> Ya, Log Keluar</button>
         </div>
     </div>
 </div>
 
 <script>
+    /* Carousel logic */
+    function scrollCarousel(offset) {
+        const carousel = document.getElementById('module-carousel');
+        carousel.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+
     /* particles */
     (function(){
         const c = document.getElementById('particles');
         const data = [[14,5,14,0],[20,12,18,1.2],[28,22,12,2.5],[18,32,20,0.7],[24,45,16,3.1],[16,55,22,1.8],[22,65,11,4],[30,75,17,0.4],[12,85,13,2.9],[26,93,19,1.5]];
         data.forEach(([s,l,d,dl])=>{ const p=document.createElement('div'); p.className='particle'; p.style.cssText=`width:${s}px;height:${s}px;left:${l}%;animation-duration:${d}s;animation-delay:${dl}s;`; c.appendChild(p); });
     })();
-
-    /* ripple on clickable cards */
-    document.querySelectorAll('.mod-card:not(.soon)').forEach(card=>{
-        card.addEventListener('click', function(e){
-            const r=document.createElement('span'); r.className='ripple-wave';
-            const rect=this.getBoundingClientRect(), size=Math.max(rect.width,rect.height);
-            r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
-            this.appendChild(r); setTimeout(()=>r.remove(),600);
-        });
-    });
 
     /* logout modal */
     let _lf=null;
