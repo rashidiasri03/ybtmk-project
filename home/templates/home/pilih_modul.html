@@ -30,9 +30,9 @@
         /* Carousel Wrapper */
         .carousel-wrapper {
             position: relative;
-            max-width: 1100px;
+            max-width: 1240px;
             margin: 0 auto;
-            padding: 0 40px;
+            padding: 0 20px;
         }
 
         .carousel-container {
@@ -41,36 +41,36 @@
             overflow-x: auto;
             scroll-behavior: smooth;
             scroll-snap-type: x mandatory;
-            padding: 20px 10px 40px;
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none;    /* Firefox */
+            padding: 20px 10px 30px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .carousel-container::-webkit-scrollbar { display: none; }
 
-        /* Carousel Navigation Buttons */
+        /* Navigation Buttons */
         .nav-btn {
             position: absolute;
-            top: 50%;
+            top: 45%;
             transform: translateY(-50%);
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             background: #fff;
             color: #2563eb;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px rgba(37,99,235,.15);
+            box-shadow: 0 8px 20px rgba(30,58,138,.12);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 10;
-            transition: all .2s ease;
+            z-index: 20;
+            transition: all .25s ease;
         }
-        .nav-btn:hover { background: #eff6ff; border-color: #bfdbfe; box-shadow: 0 6px 16px rgba(37,99,235,.25); transform: translateY(-50%) scale(1.05); }
+        .nav-btn:hover { background: #2563eb; color: #fff; border-color: #2563eb; box-shadow: 0 10px 24px rgba(37,99,235,.3); transform: translateY(-50%) scale(1.08); }
         .nav-btn:active { transform: translateY(-50%) scale(0.95); }
-        .nav-btn-left { left: -10px; }
-        .nav-btn-right { right: -10px; }
+        .nav-btn-left { left: -5px; }
+        .nav-btn-right { right: -5px; }
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);} }
         @keyframes shimmerSweep { 0%{left:-80%;}100%{left:140%;} }
@@ -78,57 +78,105 @@
         
         .fade-in { opacity:0; animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both; }
 
-        /* mod card */
+        /* Larger & Responsive Module Card */
         .mod-card {
-            background:#fff; border:1.5px solid #e8edf5; border-radius:22px;
-            min-width: 220px; max-width: 220px; padding:32px 20px 26px;
-            display:flex; flex-direction:column; align-items:center; gap:14px;
-            cursor:pointer; text-decoration:none; position:relative; overflow:hidden;
-            transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, border-color .3s;
+            background: #fff;
+            border: 1.5px solid #e8edf5;
+            border-radius: 24px;
+            min-width: 270px; /* Saiz lebih besar */
+            max-width: 270px;
+            padding: 36px 22px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
             scroll-snap-align: center;
             flex-shrink: 0;
-            transform: scale(0.98); /* Initial zoom-out state */
+            transform: scale(0.97); /* Zoom-out lembut waktu idle */
+            transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, border-color .35s;
         }
 
         .mod-card::after {
             content:''; position:absolute; top:0; left:-80%; width:60%; height:100%;
-            background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+            background:linear-gradient(105deg,transparent,rgba(255,255,255,.6),transparent);
             transform:skewX(-18deg); pointer-events:none; opacity:0; transition:opacity .1s;
         }
         
-        /* Zoom In effect on Hover */
+        /* Smooth Zoom-In on Hover */
         .mod-card:not(.soon):hover {
-            transform: translateY(-8px) scale(1.06); /* Zoom in higher */
-            box-shadow: 0 24px 52px rgba(30,58,138,.14), 0 0 0 1px var(--accent,#2563eb);
+            transform: translateY(-8px) scale(1.05); /* Zoom-in gagah */
+            box-shadow: 0 28px 60px rgba(30,58,138,.16), 0 0 0 1.5px var(--accent,#2563eb);
             border-color: var(--accent,#2563eb);
-            z-index: 5; /* Keep it above others while hovered */
+            z-index: 5;
         }
         
         .mod-card:not(.soon):hover::after { opacity:1; animation:shimmerSweep .55s ease-out forwards; }
-        .mod-card:not(.soon):active { transform: translateY(-2px) scale(1.02); transition-duration:.1s; }
-        .mod-card.soon { opacity:.55; cursor:not-allowed; }
+        .mod-card:not(.soon):active { transform: translateY(-2px) scale(1.01); }
 
-        /* active top line */
+        /* Top Accent Line */
         .mod-card:not(.soon)::before {
-            content:''; position:absolute; top:0; left:20px; right:20px;
-            height:3px; border-radius:0 0 6px 6px;
+            content:''; position:absolute; top:0; left:24px; right:24px;
+            height:4px; border-radius:0 0 8px 8px;
             background:linear-gradient(90deg,var(--accent,#2563eb),var(--accent2,#3b82f6));
         }
 
         .mod-icon-wrap {
-            width:70px; height:70px; border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            font-size:1.65rem;
-            background:var(--icon-bg,#eff6ff); color:var(--icon-color,#2563eb);
-            transition:box-shadow .3s; flex-shrink:0;
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.85rem;
+            background: var(--icon-bg,#eff6ff);
+            color: var(--icon-color,#2563eb);
+            transition: box-shadow .3s, transform .3s;
+            flex-shrink: 0;
         }
-        .mod-card:not(.soon):hover .mod-icon-wrap { box-shadow:0 8px 28px var(--icon-shadow,rgba(37,99,235,.25)); }
+        .mod-card:not(.soon):hover .mod-icon-wrap { box-shadow:0 10px 30px var(--icon-shadow,rgba(37,99,235,.28)); }
         .mod-card:not(.soon):hover .mod-icon-wrap i { animation:iconBounce .5s cubic-bezier(.22,1,.36,1) both; }
 
-        .mod-title { font-size:.975rem; font-weight:800; color:#1e293b; text-align:center; letter-spacing:-.01em; }
-        .mod-desc  { font-size:.72rem; font-weight:500; color:#94a3b8; text-align:center; margin-top:-4px; }
+        .mod-title { font-size:1.05rem; font-weight:800; color:#1e293b; text-align:center; letter-spacing:-.01em; }
+        .mod-desc  { font-size:.75rem; font-weight:500; color:#94a3b8; text-align:center; margin-top:-4px; line-height:1.3; }
 
-        /* UI Overlays */
+        /* Carousel Indicator Dots & Counter */
+        .dots-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 20px;
+            background: #cbd5e1;
+            cursor: pointer;
+            transition: all .3s cubic-bezier(.22,1,.36,1);
+        }
+        .dot.active {
+            width: 28px;
+            background: #2563eb;
+            box-shadow: 0 2px 8px rgba(37,99,235,.35);
+        }
+
+        /* Responsive Mobile Layout */
+        @media (max-width: 640px) {
+            .carousel-wrapper { padding: 0 10px; }
+            .nav-btn { display: none; } /* On mobile, swipe touch is used */
+            .mod-card {
+                min-width: 82vw; /* Cards fill screen gracefully on mobile */
+                max-width: 82vw;
+                padding: 30px 18px 24px;
+            }
+        }
+
+        /* Modal styling */
         .modal-box { animation:modalIn .28s cubic-bezier(.22,1,.36,1) both; }
         @keyframes modalIn { from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);} }
     </style>
@@ -137,6 +185,7 @@
 
 <div class="particles" id="particles"></div>
 
+<!-- TOPBAR -->
 <nav class="topbar sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -166,6 +215,7 @@
     </div>
 </nav>
 
+<!-- HERO -->
 <div class="hero-strip">
     <div class="hero-blob1"></div>
     <div class="hero-blob2"></div>
@@ -176,7 +226,8 @@
     </div>
 </div>
 
-<main class="w-full mx-auto px-4 py-12 relative z-10">
+<!-- MAIN CAROUSEL CONTENT -->
+<main class="w-full mx-auto px-2 py-10 relative z-10">
     <p class="text-[11px] font-bold tracking-[.14em] text-slate-400 uppercase text-center mb-6 fade-in" style="animation-delay:.05s;">
         Pilih modul untuk dikemaskini mengikut bahagian
     </p>
@@ -225,10 +276,14 @@
         </div>
 
         <button class="nav-btn nav-btn-right" onclick="scrollCarousel(300)"><i class="fas fa-chevron-right"></i></button>
+
+        <!-- Dynamic Indicator Dots & Counter -->
+        <div class="dots-container" id="carousel-dots"></div>
+        <p class="text-center text-xs font-semibold text-slate-400 mt-2" id="carousel-counter">Modul 1 daripada 7</p>
     </div>
 </main>
 
-<footer class="text-center pb-8 mt-10">
+<footer class="text-center pb-8 mt-6">
     <p class="text-xs text-slate-400 font-medium">&copy; {% now "Y" %} Kementerian Kesihatan Malaysia &middot; YBTMK Dashboard</p>
 </footer>
 
@@ -247,13 +302,49 @@
 </div>
 
 <script>
-    /* Carousel logic */
+    const carousel = document.getElementById('module-carousel');
+    const cards = carousel.querySelectorAll('.mod-card');
+    const dotsContainer = document.getElementById('carousel-dots');
+    const counterText = document.getElementById('carousel-counter');
+
+    // Create dots automatically
+    cards.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+        dot.onclick = () => scrollToCard(idx);
+        dotsContainer.appendChild(dot);
+    });
+
+    const dots = dotsContainer.querySelectorAll('.dot');
+
     function scrollCarousel(offset) {
-        const carousel = document.getElementById('module-carousel');
         carousel.scrollBy({ left: offset, behavior: 'smooth' });
     }
 
-    /* particles */
+    function scrollToCard(index) {
+        const cardWidth = cards[0].offsetWidth + 24; // Width + gap
+        carousel.scrollTo({ left: cardWidth * index, behavior: 'smooth' });
+    }
+
+    // Active card detection on scroll
+    carousel.addEventListener('scroll', () => {
+        const cardWidth = cards[0].offsetWidth + 24;
+        const activeIndex = Math.round(carousel.scrollLeft / cardWidth);
+        
+        dots.forEach((dot, idx) => {
+            if (idx === activeIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+
+        if (counterText && cards[activeIndex]) {
+            counterText.textContent = `Modul ${activeIndex + 1} daripada ${cards.length}`;
+        }
+    });
+
+    /* particles background */
     (function(){
         const c = document.getElementById('particles');
         const data = [[14,5,14,0],[20,12,18,1.2],[28,22,12,2.5],[18,32,20,0.7],[24,45,16,3.1],[16,55,22,1.8],[22,65,11,4],[30,75,17,0.4],[12,85,13,2.9],[26,93,19,1.5]];
