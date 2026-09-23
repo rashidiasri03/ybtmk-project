@@ -1238,6 +1238,7 @@ def _save_facility_form(request, clusters, allowed_steps=None):
 
     if in_scope(1):
         k1 = clusters[1]
+        k1.kod_fasiliti = post.get('kod_fasiliti', '').strip()  # <--- TAMBAH BARIS INI
         k1.tahun_dibina = intval('tahun_dibina')
         k1.ukuran_tanah = post.get('ukuran_tanah', '').strip()
         k1.tanah_mencukupi = yesno('tanah_mencukupi')
@@ -1945,6 +1946,7 @@ def edit_latar_belakang(request, pk):
         })
     if fp.k_kejuruteraan:
         ctx['tahun_dibina'] = fp.k_kejuruteraan.tahun_dibina
+        ctx['kod_fasiliti'] = fp.k_kejuruteraan.kod_fasiliti
     if fp.k_perkhidmatan:
         ctx['siapa_manage'] = fp.k_perkhidmatan.siapa_manage
 
@@ -1987,6 +1989,7 @@ def _save_latar_belakang(request, fp):
 
     # Kluster 1 (Tahun Dibina)
     k1 = (fp.k_kejuruteraan if fp and fp.k_kejuruteraan else None) or KlusterKejuruteraan()
+    k1.kod_fasiliti = post.get('kod_fasiliti', '').strip()
     try:
         k1.tahun_dibina = int(post.get('tahun_dibina', ''))
     except (ValueError, TypeError):

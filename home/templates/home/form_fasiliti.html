@@ -133,9 +133,15 @@
                         <!-- 1.2 Fasiliti & Lokasi -->
                         <div class="space-y-3">
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-4">1.2 Maklumat Fasiliti & Lokasi</p>
-                            <div class="q-card border-blue-200 bg-blue-50/30">
-                                <label class="block text-xs font-bold text-blue-800 mb-1.5">Nama Fasiliti Kesihatan <span class="text-red-500">*</span></label>
-                                <input type="text" name="nama_fasiliti" id="f_nama_fasiliti" class="f-input font-bold text-blue-800" required placeholder="Cth. Klinik Kesihatan Kuala Lumpur">
+                            <div class="grid grid-cols-3 gap-3 mb-3">
+                                <div class="q-card border-blue-200 bg-blue-50/30 col-span-2">
+                                    <label class="block text-xs font-bold text-blue-800 mb-1.5">Nama Fasiliti Kesihatan <span class="text-red-500">*</span></label>
+                                    <input type="text" name="nama_fasiliti" id="f_nama_fasiliti" class="f-input font-bold text-blue-800" required placeholder="Cth. Klinik Kesihatan Kuala Lumpur">
+                                </div>
+                                <div class="q-card border-blue-200 bg-blue-50/30">
+                                    <label class="block text-xs font-bold text-blue-800 mb-1.5">Kod Fasiliti</label>
+                                    <input type="text" name="kod_fasiliti" id="f_kod_fasiliti" class="f-input font-mono uppercase" placeholder="Cth: 010101">
+                                </div>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-3">

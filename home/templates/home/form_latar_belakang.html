@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>1. Latar Belakang | YBTMK</title>
+    <link rel="icon" type="image/png" href="{% static 'home/images/jata negara.png' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -60,7 +61,10 @@
 
 <div class="sec-group fade-in" style="animation-delay:.15s;">
     <div class="sec-title"><div class="sec-dot bg-indigo-50 text-indigo-600">1.2</div><span class="sec-label">Maklumat Fasiliti & Lokasi</span></div>
-    <div class="q-card mb-3"><label class="block text-xs font-bold text-blue-800 mb-1.5">Nama Fasiliti Kesihatan <span class="text-red-500">*</span></label><input type="text" name="nama_fasiliti" class="f-input font-bold text-blue-800" required value="{{ nama_fasiliti|default:'' }}"></div>
+    <div class="grid grid-cols-3 gap-3 mb-3">
+        <div class="q-card col-span-2"><label class="block text-xs font-bold text-blue-800 mb-1.5">Nama Fasiliti Kesihatan <span class="text-red-500">*</span></label><input type="text" name="nama_fasiliti" class="f-input font-bold text-blue-800" required value="{{ nama_fasiliti|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Kod Fasiliti</label><input type="text" name="kod_fasiliti" class="f-input font-mono uppercase" placeholder="Cth: 010101" value="{{ kod_fasiliti|default:'' }}"></div>
+    </div>
     <div class="grid grid-cols-2 gap-3 mb-3">
         <div class="q-card">
             <label class="block text-xs font-bold text-slate-500 mb-1.5">Kelas Fasiliti <span class="text-red-500">*</span></label>
