@@ -32,7 +32,8 @@
             position: relative;
             max-width: 1240px;
             margin: 0 auto;
-            padding: 0 20px;
+            /* PADDING BESAR: Beri ruang supaya butang tak sentuh kad */
+            padding: 0 80px; 
         }
 
         .carousel-container {
@@ -69,8 +70,10 @@
         }
         .nav-btn:hover { background: #2563eb; color: #fff; border-color: #2563eb; box-shadow: 0 10px 24px rgba(37,99,235,.3); transform: translateY(-50%) scale(1.08); }
         .nav-btn:active { transform: translateY(-50%) scale(0.95); }
-        .nav-btn-left { left: -5px; }
-        .nav-btn-right { right: -5px; }
+        
+        /* POSISI BUTANG: Ditarik ke ruang padding yang kita sediakan */
+        .nav-btn-left { left: 15px; } 
+        .nav-btn-right { right: 15px; }
 
         @keyframes fadeUp { from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);} }
         @keyframes shimmerSweep { 0%{left:-80%;}100%{left:140%;} }
@@ -83,7 +86,7 @@
             background: #fff;
             border: 1.5px solid #e8edf5;
             border-radius: 24px;
-            min-width: 270px; /* Saiz lebih besar */
+            min-width: 270px;
             max-width: 270px;
             padding: 36px 22px 30px;
             display: flex;
@@ -96,7 +99,7 @@
             overflow: hidden;
             scroll-snap-align: center;
             flex-shrink: 0;
-            transform: scale(0.97); /* Zoom-out lembut waktu idle */
+            transform: scale(0.97); 
             transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, border-color .35s;
         }
 
@@ -108,7 +111,7 @@
         
         /* Smooth Zoom-In on Hover */
         .mod-card:not(.soon):hover {
-            transform: translateY(-8px) scale(1.05); /* Zoom-in gagah */
+            transform: translateY(-8px) scale(1.05);
             box-shadow: 0 28px 60px rgba(30,58,138,.16), 0 0 0 1.5px var(--accent,#2563eb);
             border-color: var(--accent,#2563eb);
             z-index: 5;
@@ -168,9 +171,9 @@
         /* Responsive Mobile Layout */
         @media (max-width: 640px) {
             .carousel-wrapper { padding: 0 10px; }
-            .nav-btn { display: none; } /* On mobile, swipe touch is used */
+            .nav-btn { display: none; }
             .mod-card {
-                min-width: 82vw; /* Cards fill screen gracefully on mobile */
+                min-width: 82vw;
                 max-width: 82vw;
                 padding: 30px 18px 24px;
             }
