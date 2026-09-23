@@ -60,28 +60,28 @@
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(37,99,235,0.4); filter: brightness(1.06); }
     .btn-primary:active { transform: translateY(0); }
 
-    /* ══════════ COVERFLOW CAROUSEL ══════════ */
+    /* ══════════ COVERFLOW CAROUSEL (Diperbesar) ══════════ */
     .features-carousel {
       position: relative;
       width: 100%;
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
       justify-content: center;
       align-items: center;
-      perspective: 1000px; /* Kedalaman 3D */
-      padding: 40px 0;
-      height: 380px;
+      perspective: 1200px; /* Kedalaman 3D ditingkatkan */
+      padding: 50px 0;
+      height: 440px; /* Ketinggian ditambah */
     }
 
     .feature-card {
       position: absolute;
-      width: 320px;
-      height: 280px;
+      width: 360px; /* Lebar dibesarkan */
+      height: 300px; /* Tinggi dibesarkan */
       background: #fff;
       border: 1.5px solid #e8f0fe;
-      border-radius: 24px;
-      padding: 32px 24px;
+      border-radius: 28px;
+      padding: 36px 28px;
       box-shadow: 0 10px 40px rgba(30,58,138,0.08);
       transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
       cursor: pointer;
@@ -93,7 +93,7 @@
 
     /* Kad Aktif (Tengah) */
     .feature-card.active {
-      transform: translateX(0) scale(1.1);
+      transform: translateX(0) scale(1.15); /* Zoom-in lebih ketara */
       z-index: 10;
       opacity: 1;
       border-color: #2563eb;
@@ -102,29 +102,40 @@
 
     /* Kad Kiri */
     .feature-card.prev {
-      transform: translateX(-65%) scale(0.85) rotateY(10deg);
+      transform: translateX(-65%) scale(0.85) rotateY(12deg);
       z-index: 5;
       opacity: 0.6;
     }
 
     /* Kad Kanan */
     .feature-card.next {
-      transform: translateX(65%) scale(0.85) rotateY(-10deg);
+      transform: translateX(65%) scale(0.85) rotateY(-12deg);
       z-index: 5;
       opacity: 0.6;
     }
 
-    /* Hover effect untuk kad yang tidak aktif */
-    .feature-card:not(.active):hover {
-      opacity: 0.9;
+    /* Kad Tersembunyi (Ke-4 dan Ke-5) */
+    .feature-card.hidden-card {
+      transform: scale(0.6);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
     }
+
+    /* Hover effect untuk kad yang tidak aktif di sisi */
+    .feature-card:not(.active):not(.hidden-card):hover {
+      opacity: 0.95;
+      transform: translateX(var(--translate-hover, 0)) scale(0.88) rotateY(var(--rotate-hover, 0));
+    }
+    .feature-card.prev:hover { --translate-hover: -65%; --rotate-hover: 12deg; }
+    .feature-card.next:hover { --translate-hover: 65%; --rotate-hover: -12deg; }
 
     /* Indicators (Dots) */
     .carousel-indicators {
       display: flex;
       justify-content: center;
       gap: 8px;
-      margin-top: 20px;
+      margin-top: 10px;
     }
     .carousel-dot {
       width: 10px;
@@ -141,16 +152,16 @@
     }
 
     /* Mobile Responsive Adjustments */
-    @media (max-width: 768px) {
-      .features-carousel { height: 320px; }
-      .feature-card { width: 280px; height: 260px; padding: 24px 20px; }
-      .feature-card.prev { transform: translateX(-50%) scale(0.8); opacity: 0.4; }
-      .feature-card.next { transform: translateX(50%) scale(0.8); opacity: 0.4; }
+    @media (max-width: 850px) {
+      .features-carousel { height: 380px; }
+      .feature-card { width: 300px; height: 260px; padding: 28px 24px; }
+      .feature-card.prev { transform: translateX(-55%) scale(0.8); opacity: 0.4; }
+      .feature-card.next { transform: translateX(55%) scale(0.8); opacity: 0.4; }
     }
     @media (max-width: 480px) {
-      .feature-card.prev { transform: translateX(-40%) scale(0.75); opacity: 0; pointer-events: none; }
-      .feature-card.next { transform: translateX(40%) scale(0.75); opacity: 0; pointer-events: none; }
-      .feature-card.active { transform: translateX(0) scale(1); }
+      .feature-card.prev { transform: translateX(-30%) scale(0.75); opacity: 0; pointer-events: none; }
+      .feature-card.next { transform: translateX(30%) scale(0.75); opacity: 0; pointer-events: none; }
+      .feature-card.active { transform: translateX(0) scale(1.05); }
     }
   </style>
 </head>
@@ -237,7 +248,7 @@
         <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight mb-3">
           Direkabentuk untuk Kepimpinan Kesihatan
         </h2>
-        <p class="text-slate-400 text-base max-w-xl mx-auto">Semua yang anda perlukan untuk memantau dan mengurus fasiliti kesihatan dalam satu platform.</p>
+        <p class="text-slate-400 text-base max-w-xl mx-auto">Semua yang anda perlukan untuk memantau dan mengurus fasiliti kesihatan dalam satu platform terpusat.</p>
       </div>
 
       <!-- Carousel Wrapper -->
@@ -245,29 +256,47 @@
         
         <!-- Card 1 -->
         <div class="feature-card" data-index="0" onclick="updateCarousel(0)">
-          <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-6 shrink-0">
-            <i class="fas fa-hospital-alt text-blue-600 text-2xl"></i>
+          <div class="w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-hospital-alt text-blue-600 text-3xl"></i>
           </div>
           <h3 class="text-slate-800 font-extrabold text-xl mb-3">Profiling Fasiliti</h3>
-          <p class="text-slate-500 text-sm leading-relaxed">Data lengkap hospital dan klinik — kemudahan, kelengkapan, dan status operasi direkod secara sistematik.</p>
+          <p class="text-slate-500 text-sm leading-relaxed">Data komprehensif hospital dan klinik merangkumi utiliti, kelengkapan, dan status operasi yang direkod secara berstruktur.</p>
         </div>
 
         <!-- Card 2 -->
         <div class="feature-card" data-index="1" onclick="updateCarousel(1)">
-          <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6 shrink-0">
-            <i class="fas fa-chart-bar text-indigo-600 text-2xl"></i>
+          <div class="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-chart-bar text-indigo-600 text-3xl"></i>
           </div>
           <h3 class="text-slate-800 font-extrabold text-xl mb-3">Analitik & Skor</h3>
-          <p class="text-slate-500 text-sm leading-relaxed">Skor kesediaan automatik berdasarkan kluster data — membantu kenal pasti jurang dan keutamaan tindakan.</p>
+          <p class="text-slate-500 text-sm leading-relaxed">Skor kesediaan dijana secara automatik berdasarkan input kluster, membantu kenal pasti jurang keutamaan tindakan.</p>
         </div>
 
         <!-- Card 3 -->
         <div class="feature-card" data-index="2" onclick="updateCarousel(2)">
-          <div class="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mb-6 shrink-0">
-            <i class="fas fa-users-cog text-teal-600 text-2xl"></i>
+          <div class="w-16 h-16 rounded-2xl bg-teal-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-users-cog text-teal-600 text-3xl"></i>
           </div>
           <h3 class="text-slate-800 font-extrabold text-xl mb-3">Kawalan Akses</h3>
-          <p class="text-slate-500 text-sm leading-relaxed">Peranan berbeza untuk pengguna biasa, JKN, Top Management, dan admin — akses dikawal dengan teliti.</p>
+          <p class="text-slate-500 text-sm leading-relaxed">Tahap keselamatan berperingkat dengan peranan berbeza khusus untuk Admin, Top Management dan pihak JKN.</p>
+        </div>
+
+        <!-- Card 4 (New) -->
+        <div class="feature-card" data-index="3" onclick="updateCarousel(3)">
+          <div class="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-map-marked-alt text-amber-600 text-3xl"></i>
+          </div>
+          <h3 class="text-slate-800 font-extrabold text-xl mb-3">Peta Interaktif</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">Visualisasi taburan geolokasi tepat seluruh Malaysia berserta penandaan warna bagi pemantauan status lawatan VIP.</p>
+        </div>
+
+        <!-- Card 5 (New) -->
+        <div class="feature-card" data-index="4" onclick="updateCarousel(4)">
+          <div class="w-16 h-16 rounded-2xl bg-rose-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-desktop text-rose-600 text-3xl"></i>
+          </div>
+          <h3 class="text-slate-800 font-extrabold text-xl mb-3">Pemantauan Bersepadu</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">Papan pemuka eksekutif pantas bagi memantau statistik kerosakan, purata pelawat, waktu operasi dan log logik sistem.</p>
         </div>
 
       </div>
@@ -318,14 +347,17 @@
     document.addEventListener("DOMContentLoaded", function() {
       const cards = document.querySelectorAll('.feature-card');
       const indicatorsContainer = document.getElementById('carousel-indicators');
-      let currentIndex = 1; // Mula dengan kad tengah (index 1)
+      let currentIndex = 1; // Default card (Analitik & Skor) di tengah
+      let intervalId;
 
-      // Cipta dots berdasarkan bilangan kad
+      // Cipta dots berdasarkan bilangan kad (kini ada 5)
       cards.forEach((_, index) => {
         const dot = document.createElement('div');
         dot.classList.add('carousel-dot');
-        if (index === currentIndex) dot.classList.add('active');
-        dot.addEventListener('click', () => updateCarousel(index));
+        dot.addEventListener('click', () => {
+          updateCarousel(index);
+          resetAutoSlide(); // Pause timer if user clicks manually
+        });
         indicatorsContainer.appendChild(dot);
       });
 
@@ -334,25 +366,29 @@
       // Fungsi kemaskini posisi kad & dot
       window.updateCarousel = function(index) {
         currentIndex = index;
+        const totalCards = cards.length;
 
         cards.forEach((card, i) => {
           // Buang kelas lama
-          card.classList.remove('active', 'prev', 'next');
+          card.classList.remove('active', 'prev', 'next', 'hidden-card');
           dots[i].classList.remove('active');
 
           if (i === currentIndex) {
+            // Kad Tengah
             card.classList.add('active');
             dots[i].classList.add('active');
-          } else if (i === currentIndex - 1 || (currentIndex === 0 && i === cards.length - 1)) {
-            // Kad Kiri (menyokong gelung jika perlu, walau di sini ada 3 kad)
+          } 
+          else if (i === (currentIndex - 1 + totalCards) % totalCards) {
+            // Kad Kiri (Sokong pusingan array)
             card.classList.add('prev');
-          } else if (i === currentIndex + 1 || (currentIndex === cards.length - 1 && i === 0)) {
+          } 
+          else if (i === (currentIndex + 1) % totalCards) {
             // Kad Kanan
             card.classList.add('next');
-          } else {
-            // Jika lebih dari 3 kad (disembunyikan di luar skrin)
-            card.style.opacity = '0';
-            card.style.pointerEvents = 'none';
+          } 
+          else {
+            // Kad selebihnya disorokkan di belakang
+            card.classList.add('hidden-card');
           }
         });
       }
@@ -360,11 +396,20 @@
       // Initialize paparan pertama
       updateCarousel(currentIndex);
 
-      // Auto-slide setiap 5 saat (pilihan - boleh buang jika nak statik)
-      setInterval(() => {
-        let nextIndex = (currentIndex + 1) % cards.length;
-        updateCarousel(nextIndex);
-      }, 5000);
+      // Auto-slide fungsi
+      function startAutoSlide() {
+        intervalId = setInterval(() => {
+          let nextIndex = (currentIndex + 1) % cards.length;
+          updateCarousel(nextIndex);
+        }, 4500);
+      }
+
+      function resetAutoSlide() {
+        clearInterval(intervalId);
+        startAutoSlide();
+      }
+
+      startAutoSlide();
     });
   </script>
 </body>
