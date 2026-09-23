@@ -60,19 +60,97 @@
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(37,99,235,0.4); filter: brightness(1.06); }
     .btn-primary:active { transform: translateY(0); }
 
+    /* ══════════ COVERFLOW CAROUSEL ══════════ */
+    .features-carousel {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1000px; /* Kedalaman 3D */
+      padding: 40px 0;
+      height: 380px;
+    }
+
     .feature-card {
+      position: absolute;
+      width: 320px;
+      height: 280px;
       background: #fff;
       border: 1.5px solid #e8f0fe;
-      border-radius: 20px;
-      box-shadow: 0 2px 16px rgba(37,99,235,0.06);
-      transition: all 0.25s;
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: 0 10px 40px rgba(30,58,138,0.08);
+      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: left;
     }
-    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(37,99,235,0.12); border-color: #bfdbfe; }
 
-    .stat-card {
-      background: linear-gradient(145deg, #fff, #f0f7ff);
-      border: 1.5px solid #dbeafe;
+    /* Kad Aktif (Tengah) */
+    .feature-card.active {
+      transform: translateX(0) scale(1.1);
+      z-index: 10;
+      opacity: 1;
+      border-color: #2563eb;
+      box-shadow: 0 24px 60px rgba(37,99,235,0.15), 0 0 0 1.5px #2563eb;
+    }
+
+    /* Kad Kiri */
+    .feature-card.prev {
+      transform: translateX(-65%) scale(0.85) rotateY(10deg);
+      z-index: 5;
+      opacity: 0.6;
+    }
+
+    /* Kad Kanan */
+    .feature-card.next {
+      transform: translateX(65%) scale(0.85) rotateY(-10deg);
+      z-index: 5;
+      opacity: 0.6;
+    }
+
+    /* Hover effect untuk kad yang tidak aktif */
+    .feature-card:not(.active):hover {
+      opacity: 0.9;
+    }
+
+    /* Indicators (Dots) */
+    .carousel-indicators {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
       border-radius: 20px;
+      background: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .carousel-dot.active {
+      width: 32px;
+      background: #2563eb;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    }
+
+    /* Mobile Responsive Adjustments */
+    @media (max-width: 768px) {
+      .features-carousel { height: 320px; }
+      .feature-card { width: 280px; height: 260px; padding: 24px 20px; }
+      .feature-card.prev { transform: translateX(-50%) scale(0.8); opacity: 0.4; }
+      .feature-card.next { transform: translateX(50%) scale(0.8); opacity: 0.4; }
+    }
+    @media (max-width: 480px) {
+      .feature-card.prev { transform: translateX(-40%) scale(0.75); opacity: 0; pointer-events: none; }
+      .feature-card.next { transform: translateX(40%) scale(0.75); opacity: 0; pointer-events: none; }
+      .feature-card.active { transform: translateX(0) scale(1); }
     }
   </style>
 </head>
@@ -95,19 +173,15 @@
       <a href="{% url 'login' %}"
          class="btn-primary text-white text-sm font-bold px-5 py-2.5 rounded-xl flex items-center gap-2">
         <i class="fas fa-sign-in-alt text-xs"></i>
-        Log Masuk
+        <span class="hidden sm:inline">Log Masuk</span>
       </a>
     </div>
   </nav>
 
   <!-- ══════════ HERO ══════════ -->
   <section class="min-h-screen pt-28 pb-20 flex items-center relative overflow-hidden">
-
-    <!-- Background blobs -->
-    <div class="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full pointer-events-none"
-         style="background: radial-gradient(circle, rgba(37,99,235,0.06), transparent 70%);"></div>
-    <div class="absolute bottom-0 -left-24 w-[500px] h-[500px] rounded-full pointer-events-none"
-         style="background: radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%);"></div>
+    <div class="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(37,99,235,0.06), transparent 70%);"></div>
+    <div class="absolute bottom-0 -left-24 w-[500px] h-[500px] rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(99,102,241,0.05), transparent 70%);"></div>
 
     <div class="max-w-7xl mx-auto w-full px-6">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -122,7 +196,6 @@
           <h1 class="fade-up-2 text-[2.8rem] md:text-[3.4rem] font-extrabold leading-[1.1] tracking-tight text-slate-900 mb-5">
             Timbalan Menteri Kesihatan<br>
             <span class="shimmer-text">Papan Pemuka Analitik Fasiliti Kesihatan</span><br>
-            <span class="text-slate-700"></span>
           </h1>
 
           <p class="fade-up-3 text-slate-500 text-lg leading-relaxed max-w-lg mb-8">
@@ -130,13 +203,11 @@
           </p>
 
           <div class="fade-up-4 flex flex-col sm:flex-row gap-3">
-            <a href="{% url 'login' %}"
-               class="btn-primary text-white font-bold px-8 py-4 rounded-2xl flex items-center justify-center gap-2.5 text-[15px]">
+            <a href="{% url 'login' %}" class="btn-primary text-white font-bold px-8 py-4 rounded-2xl flex items-center justify-center gap-2.5 text-[15px]">
               <i class="fas fa-sign-in-alt"></i>
               Akses Sistem
             </a>
-            <a href="#features"
-               class="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-semibold text-[15px] transition-all duration-200">
+            <a href="#features" class="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-800 font-semibold text-[15px] transition-all duration-200">
               <i class="fas fa-info-circle text-blue-400"></i>
               Ketahui Lebih Lanjut
             </a>
@@ -146,16 +217,10 @@
         <!-- Right: YBTMK Photo -->
         <div class="flex items-center justify-center fade-up-3">
           <div class="relative">
-            <!-- Glow ring -->
-            <div class="absolute -inset-4 rounded-3xl pointer-events-none"
-                 style="background: radial-gradient(circle, rgba(37,99,235,0.12), transparent 70%);"></div>
-            <div class="float-img relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white"
-                 style="box-shadow: 0 24px 64px rgba(37,99,235,0.18);">
-              <img src="{% static 'home/images/ybtmk_profile.jpeg' %}" alt="YBTMK"
-                   class="w-full max-w-sm h-auto object-cover"
-                   onerror="this.style.display='none'">
+            <div class="absolute -inset-4 rounded-3xl pointer-events-none" style="background: radial-gradient(circle, rgba(37,99,235,0.12), transparent 70%);"></div>
+            <div class="float-img relative rounded-3xl overflow-hidden shadow-2xl border-2 border-white" style="box-shadow: 0 24px 64px rgba(37,99,235,0.18);">
+              <img src="{% static 'home/images/ybtmk_profile.jpeg' %}" alt="YBTMK" class="w-full max-w-sm h-auto object-cover" onerror="this.style.display='none'">
             </div>
-            <!-- Badge -->
           </div>
         </div>
 
@@ -163,11 +228,11 @@
     </div>
   </section>
 
-  <!-- ══════════ FEATURES ══════════ -->
-  <section id="features" class="py-24 relative">
-    <div class="max-w-7xl mx-auto px-6">
+  <!-- ══════════ FEATURES (Coverflow Carousel) ══════════ -->
+  <section id="features" class="py-24 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4">
 
-      <div class="text-center mb-14">
+      <div class="text-center mb-10">
         <p class="text-blue-600 text-xs font-bold tracking-[0.2em] uppercase mb-3">Ciri-Ciri Utama</p>
         <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-tight mb-3">
           Direkabentuk untuk Kepimpinan Kesihatan
@@ -175,44 +240,51 @@
         <p class="text-slate-400 text-base max-w-xl mx-auto">Semua yang anda perlukan untuk memantau dan mengurus fasiliti kesihatan dalam satu platform.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <div class="feature-card p-8">
-          <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-5">
-            <i class="fas fa-hospital-alt text-blue-600 text-xl"></i>
+      <!-- Carousel Wrapper -->
+      <div class="features-carousel" id="coverflow">
+        
+        <!-- Card 1 -->
+        <div class="feature-card" data-index="0" onclick="updateCarousel(0)">
+          <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-hospital-alt text-blue-600 text-2xl"></i>
           </div>
-          <h3 class="text-slate-800 font-extrabold text-lg mb-2">Profiling Fasiliti</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">Data lengkap hospital dan klinik — kemudahan, kelengkapan, dan status operasi direkod secara sistematik.</p>
+          <h3 class="text-slate-800 font-extrabold text-xl mb-3">Profiling Fasiliti</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">Data lengkap hospital dan klinik — kemudahan, kelengkapan, dan status operasi direkod secara sistematik.</p>
         </div>
 
-        <div class="feature-card p-8">
-          <div class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center mb-5">
-            <i class="fas fa-chart-bar text-indigo-600 text-xl"></i>
+        <!-- Card 2 -->
+        <div class="feature-card" data-index="1" onclick="updateCarousel(1)">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-chart-bar text-indigo-600 text-2xl"></i>
           </div>
-          <h3 class="text-slate-800 font-extrabold text-lg mb-2">Analitik & Skor Kesediaan</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">Skor kesediaan automatik berdasarkan kluster data — membantu kenal pasti jurang dan keutamaan tindakan.</p>
+          <h3 class="text-slate-800 font-extrabold text-xl mb-3">Analitik & Skor</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">Skor kesediaan automatik berdasarkan kluster data — membantu kenal pasti jurang dan keutamaan tindakan.</p>
         </div>
 
-        <div class="feature-card p-8">
-          <div class="w-12 h-12 rounded-2xl bg-teal-100 flex items-center justify-center mb-5">
-            <i class="fas fa-users-cog text-teal-600 text-xl"></i>
+        <!-- Card 3 -->
+        <div class="feature-card" data-index="2" onclick="updateCarousel(2)">
+          <div class="w-14 h-14 rounded-2xl bg-teal-100 flex items-center justify-center mb-6 shrink-0">
+            <i class="fas fa-users-cog text-teal-600 text-2xl"></i>
           </div>
-          <h3 class="text-slate-800 font-extrabold text-lg mb-2">Kawalan Akses Berperingkat</h3>
-          <p class="text-slate-400 text-sm leading-relaxed">Peranan berbeza untuk pengguna biasa, JKN, Top Management, dan admin — akses dikawal dengan teliti.</p>
+          <h3 class="text-slate-800 font-extrabold text-xl mb-3">Kawalan Akses</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">Peranan berbeza untuk pengguna biasa, JKN, Top Management, dan admin — akses dikawal dengan teliti.</p>
         </div>
 
       </div>
+
+      <!-- Carousel Indicators -->
+      <div class="carousel-indicators" id="carousel-indicators">
+        <!-- Dots will be injected via JS -->
+      </div>
+
     </div>
   </section>
 
   <!-- ══════════ CTA ══════════ -->
   <section class="py-20">
     <div class="max-w-4xl mx-auto px-6">
-      <div class="rounded-3xl overflow-hidden relative p-12 text-center"
-           style="background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);">
-        <!-- Grid overlay -->
-        <div class="absolute inset-0 opacity-[0.04]"
-             style="background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px;"></div>
+      <div class="rounded-3xl overflow-hidden relative p-12 text-center" style="background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);">
+        <div class="absolute inset-0 opacity-[0.04]" style="background-image:linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px);background-size:36px 36px;"></div>
         <div class="relative z-10">
           <p class="text-blue-300 text-xs font-bold tracking-[0.2em] uppercase mb-4">Mula Sekarang</p>
           <h2 class="text-white font-extrabold text-3xl md:text-4xl tracking-tight mb-4">
@@ -221,9 +293,7 @@
           <p class="text-blue-200 text-base opacity-80 max-w-md mx-auto mb-8">
             Log masuk dengan akaun anda dan mula pantau fasiliti kesihatan di bawah kawalan anda.
           </p>
-          <a href="{% url 'login' %}"
-             class="inline-flex items-center gap-2.5 bg-white text-blue-700 hover:bg-blue-50 font-bold px-8 py-4 rounded-2xl transition-all duration-200 text-[15px]"
-             style="box-shadow: 0 8px 28px rgba(0,0,0,0.2);">
+          <a href="{% url 'login' %}" class="inline-flex items-center gap-2.5 bg-white text-blue-700 hover:bg-blue-50 font-bold px-8 py-4 rounded-2xl transition-all duration-200 text-[15px]" style="box-shadow: 0 8px 28px rgba(0,0,0,0.2);">
             <i class="fas fa-sign-in-alt"></i>
             Log Masuk ke Sistem
           </a>
@@ -237,11 +307,65 @@
     <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-7 h-7 object-contain opacity-50">
-        <p class="text-slate-400 text-sm">&copy; 2026 Kementerian Kesihatan Malaysia. Hak Cipta Terpelihara.</p>
+        <p class="text-slate-400 text-sm">&copy; {% now "Y" %} Kementerian Kesihatan Malaysia. Hak Cipta Terpelihara.</p>
       </div>
       <p class="text-slate-300 text-xs">YBTMK Dashboard v2.0</p>
     </div>
   </footer>
 
+  <!-- ══════════ SCRIPT COVERFLOW ══════════ -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const cards = document.querySelectorAll('.feature-card');
+      const indicatorsContainer = document.getElementById('carousel-indicators');
+      let currentIndex = 1; // Mula dengan kad tengah (index 1)
+
+      // Cipta dots berdasarkan bilangan kad
+      cards.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('carousel-dot');
+        if (index === currentIndex) dot.classList.add('active');
+        dot.addEventListener('click', () => updateCarousel(index));
+        indicatorsContainer.appendChild(dot);
+      });
+
+      const dots = document.querySelectorAll('.carousel-dot');
+
+      // Fungsi kemaskini posisi kad & dot
+      window.updateCarousel = function(index) {
+        currentIndex = index;
+
+        cards.forEach((card, i) => {
+          // Buang kelas lama
+          card.classList.remove('active', 'prev', 'next');
+          dots[i].classList.remove('active');
+
+          if (i === currentIndex) {
+            card.classList.add('active');
+            dots[i].classList.add('active');
+          } else if (i === currentIndex - 1 || (currentIndex === 0 && i === cards.length - 1)) {
+            // Kad Kiri (menyokong gelung jika perlu, walau di sini ada 3 kad)
+            card.classList.add('prev');
+          } else if (i === currentIndex + 1 || (currentIndex === cards.length - 1 && i === 0)) {
+            // Kad Kanan
+            card.classList.add('next');
+          } else {
+            // Jika lebih dari 3 kad (disembunyikan di luar skrin)
+            card.style.opacity = '0';
+            card.style.pointerEvents = 'none';
+          }
+        });
+      }
+
+      // Initialize paparan pertama
+      updateCarousel(currentIndex);
+
+      // Auto-slide setiap 5 saat (pilihan - boleh buang jika nak statik)
+      setInterval(() => {
+        let nextIndex = (currentIndex + 1) % cards.length;
+        updateCarousel(nextIndex);
+      }, 5000);
+    });
+  </script>
 </body>
 </html>
