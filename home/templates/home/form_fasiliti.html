@@ -736,12 +736,9 @@
 // --- NAVIGATION LOGIC ---
 const STEP_TITLES = ['Latar Belakang', 'Infrastruktur Fasiliti', 'Aset Perubatan', 'Pengurusan Sumber Manusia', 'Penyampaian Perkhidmatan', 'Kewangan, Konsesi & Perancangan', 'Lain-Lain & Arkib'];
 const TOTAL_STEPS = 7;
-// Fallback for allowedSteps to 0-6 instead of old 0-7
-let allowedSteps = {{ allowed_steps|safe }};
-allowedSteps = allowedSteps.filter(s => s < 7);
-if(allowedSteps.length === 0) allowedSteps = [0,1,2,3,4,5,6]; // Admin override
+let allowedSteps = [0, 1, 2, 3, 4, 5, 6];
 
-let currentStepIdx = 0; 
+let currentStepIdx = 0 
 
 document.addEventListener('DOMContentLoaded', function () {
     renderStep();
