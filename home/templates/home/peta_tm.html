@@ -1321,8 +1321,9 @@ function findNearbyFacilities(centerLat, centerLng, centerName, centerPk) {
             window.mapInstance.getSource('radius-source').setData(circleGeoJSON);
         } else {
             window.mapInstance.addSource('radius-source', { 'type': 'geojson', 'data': circleGeoJSON });
-            window.mapInstance.addLayer({ 'id': 'radius-fill', 'type': 'fill', 'source': 'radius-source', 'paint': { 'fill-color': '#3b82f6', 'fill-opacity': 0.1 } }, 'fasiliti-dot');
-            window.mapInstance.addLayer({ 'id': 'radius-line', 'type': 'line', 'source': 'radius-source', 'paint': { 'line-color': '#2563eb', 'line-width': 2, 'line-dasharray': [2, 2] } }, 'fasiliti-dot');
+            // Letakkan garisan radius di bawah layer 'fasiliti-point' supaya tidak menutup pin
+            window.mapInstance.addLayer({ 'id': 'radius-fill', 'type': 'fill', 'source': 'radius-source', 'paint': { 'fill-color': '#3b82f6', 'fill-opacity': 0.1 } }, 'fasiliti-point');
+            window.mapInstance.addLayer({ 'id': 'radius-line', 'type': 'line', 'source': 'radius-source', 'paint': { 'line-color': '#2563eb', 'line-width': 2, 'line-dasharray': [2, 2] } }, 'fasiliti-point');
         }
         
         // Terbangkan peta (zoom-out secara dinamik) untuk padan dengan saiz radius
@@ -1340,9 +1341,9 @@ function findNearbyFacilities(centerLat, centerLng, centerName, centerPk) {
         }
     }
 
-    // Kira jarak dan tapis
+    // KIRA JARAK DAN TAPIS (DIBAIKI: Guna ALL_FASILITI)
     let nearby = [];
-    FASILITI_DATA.forEach(f => {
+    ALL_FASILITI.forEach(f => {
         if(f.lat && f.lng && f.pk !== centerPk) {
             let dist = calculateDistance(centerLat, centerLng, f.lat, f.lng);
             if(isSemua || dist <= radiusVal) {
@@ -1375,33 +1376,10 @@ function findNearbyFacilities(centerLat, centerLng, centerName, centerPk) {
                 </div>
                 <p class="text-[10px] text-slate-500 font-semibold mb-1">${nf.jenis} • ${nf.daerah}</p>
                 <div class="flex gap-1.5 mt-1">
-                    <span style="font-size:8px; padding:2px 6px; border-radius:10px; background:${badgeColor}22; color:${badgeColor}; font-weight:800; border:1px solid ${badgeColor}55;">LAWATAN</span>
+                    <span style="font-size:8px; padding:2px 6px; border-radius:10px; background:${badgeColor}22; color:${badgeColor}; font-weight:800; border:1px solid ${badgeColor}55;"><i class="fas fa-flag mr-1"></i>LAWATAN</span>
                     <span style="font-size:8px; padding:2px 6px; border-radius:10px; background:${nf.status==='tutup'?'#fef2f2':'#f0fdf4'}; color:${nf.status==='tutup'?'#ef4444':'#16a34a'}; font-weight:800; border:1px solid ${nf.status==='tutup'?'#fca5a5':'#bbf7d0'};">${nf.status==='tutup'?'TUTUP':'AKTIF'}</span>
                 </div>
             </div>`;
-        }
-    }
-}
-
-function closeRadiusPanel() {
-    document.getElementById('radius-panel').classList.add('translate-x-full');
-    if(window.mapInstance && window.mapInstance.getLayer('radius-fill')) {
-        window.mapInstance.removeLayer('radius-fill'); 
-        window.mapInstance.removeLayer('radius-line'); 
-        window.mapInstance.removeSource('radius-source');
-    }
-}
-
-function triggerPinClick(pk) {
-    const idx = FASILITI_DATA.findIndex(x => x.pk == pk);
-    if(idx >= 0) {
-        const f = FASILITI_DATA[idx];
-        if(f.lat && f.lng) {
-            window.mapInstance.flyTo({ center: [f.lng, f.lat], zoom: 15, pitch: 45 });
-            openDrawer(f.pk);
-            document.querySelectorAll('.fac-row').forEach(r => r.classList.remove('fac-selected'));
-            const selRow = document.querySelector(`.fac-row[data-idx="${idx}"]`);
-            if (selRow) { selRow.classList.add('fac-selected'); selRow.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
         }
     }
 }
