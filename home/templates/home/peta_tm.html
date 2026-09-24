@@ -512,18 +512,28 @@
     <span class="flex items-center gap-2"><span style="width:12px;height:12px;border-radius:50%;background:#94a3b8;display:inline-block;"></span>Tutup/Kelabu</span>
 </div>
 
-<!-- PANEL RADIUS 10KM -->
+<!-- PANEL RADIUS DINAMIK -->
 <div id="radius-panel" class="translate-x-full fixed top-[70px] right-0 bottom-0 z-[1500] w-full sm:w-[320px] bg-white/95 backdrop-blur-md border-l border-slate-200 shadow-[-4px_0_20px_rgba(0,0,0,0.1)] flex flex-col transition-transform duration-300 ease-in-out">
-    <div class="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+    <div class="px-4 py-3 border-b border-slate-200 flex items-start justify-between bg-slate-50/80">
         <div>
-            <h3 class="text-sm font-extrabold text-slate-800"><i class="fas fa-bullseye text-blue-500 mr-1.5"></i> Radius 10 KM</h3>
+            <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-sm font-extrabold text-slate-800"><i class="fas fa-bullseye text-blue-500 mr-1"></i> Radius:</h3>
+                <!-- Dropdown Pilihan Radius -->
+                <select id="radius-selector" onchange="changeRadius()" class="bg-white border border-slate-300 text-blue-600 text-xs font-extrabold rounded-md px-2 py-1 outline-none cursor-pointer hover:border-blue-400">
+                    <option value="10">10 KM</option>
+                    <option value="30">30 KM</option>
+                    <option value="60">60 KM</option>
+                    <option value="90">90 KM</option>
+                    <option value="9999">SEMUA</option>
+                </select>
+            </div>
             <p class="text-[10px] font-semibold text-slate-500" id="radius-pusat-label">Pilih fasiliti di peta</p>
         </div>
         <button onclick="closeRadiusPanel()" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-red-100 hover:text-red-500 text-slate-600 flex items-center justify-center transition">
             <i class="fas fa-times text-sm"></i>
         </button>
     </div>
-    <div class="bg-blue-50 px-4 py-2 border-b border-blue-100 text-[10px] text-blue-700 font-semibold text-center">
+    <div class="bg-blue-50 px-4 py-2 border-b border-blue-100 text-[10px] text-blue-700 font-semibold text-center" id="radius-info-bar">
         Senarai fasiliti KKM terdekat
     </div>
     <div id="radius-list" class="flex-1 overflow-y-auto p-3 space-y-2">
@@ -1250,8 +1260,14 @@ function remove3DBuildings() {
 console.log('Peta TM initialized');
 
 // ==========================================
-// FUNGSI RADIUS 10 KM (JAVASCRIPT HA-VERSINE)
+// FUNGSI RADIUS DINAMIK (JAVASCRIPT HA-VERSINE)
 // ==========================================
+
+// Simpan memori fasiliti tengah untuk digunakan oleh Dropdown
+let currentCenterLat = null;
+let currentCenterLng = null;
+let currentCenterName = "";
+let currentCenterPk = null;
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; 
@@ -1274,37 +1290,82 @@ function createGeoJSONCircle(center, radiusInKm, points = 64) {
     return { "type": "Feature", "geometry": { "type": "Polygon", "coordinates": [ret] } };
 }
 
+// Fungsi apabila dropdown Radius ditukar
+function changeRadius() {
+    if(currentCenterLat && currentCenterLng) {
+        findNearbyFacilities(currentCenterLat, currentCenterLng, currentCenterName, currentCenterPk);
+    }
+}
+
 function findNearbyFacilities(centerLat, centerLng, centerName, centerPk) {
     if(!window.mapInstance) return;
     
+    // Simpan data untuk rujukan bila dropdown ditukar
+    currentCenterLat = centerLat;
+    currentCenterLng = centerLng;
+    currentCenterName = centerName;
+    currentCenterPk = centerPk;
+
+    // Ambil nilai radius dari dropdown
+    let radiusVal = parseInt(document.getElementById('radius-selector').value);
+    let isSemua = (radiusVal === 9999);
+
     document.getElementById('radius-panel').classList.remove('translate-x-full');
     document.getElementById('radius-pusat-label').textContent = "Pusat: " + centerName;
+    document.getElementById('radius-info-bar').textContent = isSemua ? "Semua fasiliti disaring mengikut jarak" : `Senarai fasiliti dalam lingkungan ${radiusVal} KM`;
 
-    // Lukis Bulatan 10KM di bawah layer pin (fasiliti-dot)
-    if (window.mapInstance.getSource('radius-source')) {
-        window.mapInstance.getSource('radius-source').setData(createGeoJSONCircle([centerLng, centerLat], 10));
+    // Lukis atau Padam Bulatan di peta
+    if(!isSemua) {
+        let circleGeoJSON = createGeoJSONCircle([centerLng, centerLat], radiusVal);
+        if (window.mapInstance.getSource('radius-source')) {
+            window.mapInstance.getSource('radius-source').setData(circleGeoJSON);
+        } else {
+            window.mapInstance.addSource('radius-source', { 'type': 'geojson', 'data': circleGeoJSON });
+            window.mapInstance.addLayer({ 'id': 'radius-fill', 'type': 'fill', 'source': 'radius-source', 'paint': { 'fill-color': '#3b82f6', 'fill-opacity': 0.1 } }, 'fasiliti-dot');
+            window.mapInstance.addLayer({ 'id': 'radius-line', 'type': 'line', 'source': 'radius-source', 'paint': { 'line-color': '#2563eb', 'line-width': 2, 'line-dasharray': [2, 2] } }, 'fasiliti-dot');
+        }
+        
+        // Terbangkan peta (zoom-out secara dinamik) untuk padan dengan saiz radius
+        let zoomLevel = 15;
+        if(radiusVal === 30) zoomLevel = 10;
+        else if(radiusVal === 60) zoomLevel = 9.2;
+        else if(radiusVal === 90) zoomLevel = 8.5;
+        
+        window.mapInstance.flyTo({ center: [centerLng, centerLat], zoom: zoomLevel, pitch: 0, duration: 1200 });
+
     } else {
-        window.mapInstance.addSource('radius-source', { 'type': 'geojson', 'data': createGeoJSONCircle([centerLng, centerLat], 10) });
-        window.mapInstance.addLayer({ 'id': 'radius-fill', 'type': 'fill', 'source': 'radius-source', 'paint': { 'fill-color': '#3b82f6', 'fill-opacity': 0.1 } }, 'fasiliti-dot');
-        window.mapInstance.addLayer({ 'id': 'radius-line', 'type': 'line', 'source': 'radius-source', 'paint': { 'line-color': '#2563eb', 'line-width': 2, 'line-dasharray': [2, 2] } }, 'fasiliti-dot');
+        // Jika 'SEMUA', sembunyikan garisan bulatan
+        if (window.mapInstance.getSource('radius-source')) {
+            window.mapInstance.getSource('radius-source').setData({ "type": "FeatureCollection", "features": [] });
+        }
     }
 
+    // Kira jarak dan tapis
     let nearby = [];
     FASILITI_DATA.forEach(f => {
         if(f.lat && f.lng && f.pk !== centerPk) {
             let dist = calculateDistance(centerLat, centerLng, f.lat, f.lng);
-            if(dist <= 10) nearby.push({ ...f, distance: dist });
+            if(isSemua || dist <= radiusVal) {
+                nearby.push({ ...f, distance: dist });
+            }
         }
     });
 
+    // Susun dari paling dekat ke paling jauh
     nearby.sort((a, b) => a.distance - b.distance);
+    
+    // Render HTML ke Panel
     const listDiv = document.getElementById('radius-list'); 
     listDiv.innerHTML = '';
     
     if(nearby.length === 0) {
-        listDiv.innerHTML = `<div class="p-4 text-center mt-5 bg-slate-50 rounded-xl border border-slate-100"><i class="fas fa-info-circle text-slate-300 text-2xl mb-2"></i><p class="text-xs text-slate-500 font-semibold">Tiada fasiliti lain dalam radius 10 KM.</p></div>`;
+        listDiv.innerHTML = `<div class="p-4 text-center mt-5 bg-slate-50 rounded-xl border border-slate-100"><i class="fas fa-info-circle text-slate-300 text-2xl mb-2"></i><p class="text-xs text-slate-500 font-semibold">Tiada fasiliti lain dikesan dalam lingkungan ${radiusVal} KM.</p></div>`;
     } else {
-        nearby.forEach(nf => {
+        // Render 200 fasiliti sahaja jika pilih SEMUA (untuk elakkan lag di panel)
+        let limit = isSemua ? 200 : nearby.length;
+        
+        for(let i=0; i<limit; i++) {
+            let nf = nearby[i];
             let badgeColor = nf.status_lawatan === 'kuning' ? '#facc15' : nf.status_lawatan === 'biru' ? '#3b82f6' : nf.status_lawatan === 'hijau' ? '#22c55e' : '#ef4444';
             listDiv.innerHTML += `
             <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-blue-300 hover:shadow-md cursor-pointer transition mb-2" onclick="triggerPinClick(${nf.pk})">
@@ -1318,7 +1379,7 @@ function findNearbyFacilities(centerLat, centerLng, centerName, centerPk) {
                     <span style="font-size:8px; padding:2px 6px; border-radius:10px; background:${nf.status==='tutup'?'#fef2f2':'#f0fdf4'}; color:${nf.status==='tutup'?'#ef4444':'#16a34a'}; font-weight:800; border:1px solid ${nf.status==='tutup'?'#fca5a5':'#bbf7d0'};">${nf.status==='tutup'?'TUTUP':'AKTIF'}</span>
                 </div>
             </div>`;
-        });
+        }
     }
 }
 
@@ -1332,16 +1393,16 @@ function closeRadiusPanel() {
 }
 
 function triggerPinClick(pk) {
-    // Gunakan ALL_FASILITI berbanding FASILITI_DATA (yang tiada dalam fail ini)
-    const f = ALL_FASILITI.find(x => x.pk == pk);
-    if(f && f.lat && f.lng) {
-        // Terbang ke lokasi
-        window.mapInstance.flyTo({ center: [f.lng, f.lat], zoom: 15, pitch: 45 });
-        
-        // Tunjuk popup maklumat kecil (showFacilityPopup)
-        setTimeout(() => {
-            showFacilityPopup(f);
-        }, 800);
+    const idx = FASILITI_DATA.findIndex(x => x.pk == pk);
+    if(idx >= 0) {
+        const f = FASILITI_DATA[idx];
+        if(f.lat && f.lng) {
+            window.mapInstance.flyTo({ center: [f.lng, f.lat], zoom: 15, pitch: 45 });
+            openDrawer(f.pk);
+            document.querySelectorAll('.fac-row').forEach(r => r.classList.remove('fac-selected'));
+            const selRow = document.querySelector(`.fac-row[data-idx="${idx}"]`);
+            if (selRow) { selRow.classList.add('fac-selected'); selRow.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+        }
     }
 }
 
