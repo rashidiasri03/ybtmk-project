@@ -1384,6 +1384,47 @@ function findNearbyFacilities(centerLat, centerLng, centerName, centerPk) {
     }
 }
 
+function closeRadiusPanel() {
+    // 1. Sembunyikan panel ke tepi kanan
+    const panel = document.getElementById('radius-panel');
+    if(panel) {
+        panel.classList.add('translate-x-full');
+    }
+    
+    // 2. Padam bulatan di peta dengan cara selamat
+    try {
+        if (window.mapInstance) {
+            if (window.mapInstance.getLayer('radius-fill')) {
+                window.mapInstance.removeLayer('radius-fill'); 
+            }
+            if (window.mapInstance.getLayer('radius-line')) {
+                window.mapInstance.removeLayer('radius-line'); 
+            }
+            if (window.mapInstance.getSource('radius-source')) {
+                window.mapInstance.removeSource('radius-source');
+            }
+        }
+    } catch (err) {
+        console.warn("Makluman: Ralat kecil semasa memadam bulatan radius", err);
+    }
+
+    // 3. Reset semula memori lokasi radius
+    currentCenterLat = null;
+    currentCenterLng = null;
+    currentCenterName = "";
+    currentCenterPk = null;
+}
+
+function triggerPinClick(pk) {
+    const f = ALL_FASILITI.find(x => x.pk == pk);
+    if(f && f.lat && f.lng) {
+        window.mapInstance.flyTo({ center: [f.lng, f.lat], zoom: 15, pitch: 45 });
+        setTimeout(() => {
+            showFacilityPopup(f);
+        }, 800);
+    }
+}
+
 </script>
 
 </body>
