@@ -12,6 +12,8 @@
     <!-- MapLibre GL JS -->
     <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <!-- TAMBAHAN: Turf.js untuk sempadan poligon kawasan -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
     <style>
         * { font-family:'Plus Jakarta Sans',sans-serif; box-sizing:border-box; }
         body { margin:0; padding:0; }
@@ -443,21 +445,29 @@
         </select>
     </div>
     
-    <div class="filter-group">
+    <div class="filter-group hidden sm:flex">
         <span class="filter-label">Daerah:</span>
         <select id="daerah-filter" class="filter-select" onchange="onDaerahChange()">
             <option value="">Semua Daerah</option>
         </select>
     </div>
-    
+
+    <!-- TAMBAHAN: PENAPIS KAWASAN PENTADBIRAN (PKD/PKK/PKB) -->
     <div class="filter-group">
+        <span class="filter-label">Kawasan:</span>
+        <select id="kawasan-filter" class="filter-select" onchange="onKawasanChange()" disabled>
+            <option value="">Pilih Negeri Dahulu</option>
+        </select>
+    </div>
+    
+    <div class="filter-group hidden lg:flex">
         <span class="filter-label">Jenis:</span>
         <select id="jenis-filter" class="filter-select">
             <option value="">Semua Jenis</option>
         </select>
     </div>
     
-    <div class="filter-group" style="flex:1; min-width:280px; max-width:400px;">
+    <div class="filter-group hidden md:flex" style="flex:1; min-width:200px; max-width:400px;">
         <span class="filter-label">Fasiliti:</span>
         <div class="searchable-wrap" style="position:relative; flex:1;">
             <input type="text" id="fasiliti-input" class="filter-select" placeholder="-- Pilih Fasiliti --" 
@@ -481,10 +491,14 @@
     </button>
     
     <div class="ml-auto flex items-center gap-3">
-        <button class="btn-3d" id="btn-3d-toggle" onclick="toggle3D()">
+        <!-- TAMBAHAN: SUIS TOGGLE SEMBUNYIKAN TITIK -->
+        <button class="btn-3d hidden sm:flex items-center" id="btn-hide-pins" onclick="toggleHidePins()" style="background:#fef2f2; color:#ef4444; border-color:#fecaca;">
+            <i class="fas fa-eye-slash mr-1"></i><span class="hidden xl:inline">Sembunyikan Pin</span>
+        </button>
+        <button class="btn-3d hidden md:block" id="btn-3d-toggle" onclick="toggle3D()">
             <i class="fas fa-cube mr-1"></i>3D
         </button>
-        <div id="count-label">{{ jumlah }} fasiliti</div>
+        <div id="count-label" class="hidden sm:block text-xs text-slate-500 font-bold whitespace-nowrap">{{ jumlah }} fasiliti</div>
     </div>
 </div>
 
@@ -553,6 +567,30 @@ let ALL_FASILITI = [];
 let FILTERED_FASILITI = [];
 let CURRENT_SELECTED = null;
 
+// =====================================
+// DATA KAWASAN PENTADBIRAN (PKD/PKK/PKB)
+// =====================================
+const KAWASAN_DATA = {
+  "Johor": [{"pejabat": "PKD", "nama": "Johor Bahru", "gred": "1", "penduduk": 1424387}, {"pejabat": "PKD", "nama": "Batu Pahat", "gred": "2", "penduduk": 428843}, {"pejabat": "PKD", "nama": "Kluang", "gred": "2", "penduduk": 306468}, {"pejabat": "PKD", "nama": "Kulai Jaya", "gred": "3", "penduduk": 258513}, {"pejabat": "PKD", "nama": "Muar", "gred": "3", "penduduk": 254719}, {"pejabat": "PKD", "nama": "Kota Tinggi", "gred": "3", "penduduk": 198479}, {"pejabat": "PKD", "nama": "Segamat", "gred": "3", "penduduk": 194997}, {"pejabat": "PKD", "nama": "Pontian", "gred": "3", "penduduk": 159783}, {"pejabat": "PKD", "nama": "Ledang", "gred": "3", "penduduk": 140584}, {"pejabat": "PKD", "nama": "Mersing", "gred": "4", "penduduk": 72827}],
+  "Kedah": [{"pejabat": "PKD", "nama": "Kuala Muda", "gred": "2", "penduduk": 468127}, {"pejabat": "PKD", "nama": "Kota Setar", "gred": "2", "penduduk": 376045}, {"pejabat": "PKD", "nama": "Kulim", "gred": "3", "penduduk": 294954}, {"pejabat": "PKD", "nama": "Kubang Pasu", "gred": "3", "penduduk": 226310}, {"pejabat": "PKD", "nama": "Baling", "gred": "3", "penduduk": 139069}, {"pejabat": "PKD", "nama": "Pendang", "gred": "4", "penduduk": 97358}, {"pejabat": "PKD", "nama": "Langkawi", "gred": "4", "penduduk": 97169}, {"pejabat": "PKD", "nama": "Yan", "gred": "4", "penduduk": 70043}, {"pejabat": "PKD", "nama": "Sik", "gred": "4", "penduduk": 69078}, {"pejabat": "PKD", "nama": "Padang Terap", "gred": "4", "penduduk": 64835}, {"pejabat": "PKD", "nama": "Bandar Baharu", "gred": "4", "penduduk": 42784}],
+  "Kelantan": [{"pejabat": "PKD", "nama": "Kota Bharu", "gred": "1", "penduduk": 490518}, {"pejabat": "PKD", "nama": "Pasir Mas", "gred": "2", "penduduk": 196884}, {"pejabat": "PKD", "nama": "Tumpat", "gred": "3", "penduduk": 158578}, {"pejabat": "PKD", "nama": "Tanah Merah", "gred": "3", "penduduk": 125132}, {"pejabat": "PKD", "nama": "Bachok", "gred": "3", "penduduk": 137351}, {"pejabat": "PKD", "nama": "Pasir Puteh", "gred": "3", "penduduk": 121516}, {"pejabat": "PKD", "nama": "Kuala Krai", "gred": "3", "penduduk": 112108}, {"pejabat": "PKD", "nama": "Gua Musang", "gred": "4", "penduduk": 94943}, {"pejabat": "PKD", "nama": "Machang", "gred": "4", "penduduk": 96739}],
+  "Melaka": [{"pejabat": "PKD", "nama": "Melaka Tengah", "gred": "1", "penduduk": 516300}, {"pejabat": "PKD", "nama": "Alor Gajah", "gred": "3", "penduduk": 178500}, {"pejabat": "PKD", "nama": "Jasin", "gred": "3", "penduduk": 139100}],
+  "Negeri Sembilan": [{"pejabat": "PKD", "nama": "Seremban", "gred": "1", "penduduk": 583400}, {"pejabat": "PKD", "nama": "Jempol", "gred": "3", "penduduk": 119500}, {"pejabat": "PKD", "nama": "Port Dickson", "gred": "3", "penduduk": 118400}, {"pejabat": "PKD", "nama": "Tampin", "gred": "4", "penduduk": 86300}, {"pejabat": "PKD", "nama": "Kuala Pilah", "gred": "4", "penduduk": 67300}, {"pejabat": "PKD", "nama": "Rembau", "gred": "4", "penduduk": 45400}, {"pejabat": "PKD", "nama": "Jelebu", "gred": "4", "penduduk": 39500}],
+  "Pahang": [{"pejabat": "PKD", "nama": "Kuantan", "gred": "1", "penduduk": 451455}, {"pejabat": "PKD", "nama": "Temerloh", "gred": "3", "penduduk": 164070}, {"pejabat": "PKD", "nama": "Bentong", "gred": "3", "penduduk": 118544}, {"pejabat": "PKD", "nama": "Bera", "gred": "4", "penduduk": 97880}, {"pejabat": "PKD", "nama": "Maran", "gred": "4", "penduduk": 116279}, {"pejabat": "PKD", "nama": "Pekan", "gred": "4", "penduduk": 110905}, {"pejabat": "PKD", "nama": "Jerantut", "gred": "4", "penduduk": 90708}, {"pejabat": "PKD", "nama": "Raub", "gred": "4", "penduduk": 95204}, {"pejabat": "PKD", "nama": "Lipis", "gred": "4", "penduduk": 89454}, {"pejabat": "PKD", "nama": "Rompin", "gred": "4", "penduduk": 115206}, {"pejabat": "PKD", "nama": "Cameron Highland", "gred": "4", "penduduk": 37628}],
+  "Perak": [{"pejabat": "PKD", "nama": "Kinta", "gred": "1", "penduduk": 778044}, {"pejabat": "PKD", "nama": "Larut Matang & Selama", "gred": "2", "penduduk": 334543}, {"pejabat": "PKD", "nama": "Manjung", "gred": "3", "penduduk": 236762}, {"pejabat": "PKD", "nama": "Hilir Perak", "gred": "3", "penduduk": 208579}, {"pejabat": "PKD", "nama": "Kerian", "gred": "3", "penduduk": 178759}, {"pejabat": "PKD", "nama": "Batang Padang", "gred": "3", "penduduk": 181977}, {"pejabat": "PKD", "nama": "Kuala Kangsar", "gred": "3", "penduduk": 158872}, {"pejabat": "PKD", "nama": "Hulu Perak", "gred": "4", "penduduk": 92398}, {"pejabat": "PKD", "nama": "Perak Tengah", "gred": "4", "penduduk": 103212}, {"pejabat": "PKD", "nama": "Kampar", "gred": "4", "penduduk": 98600}],
+  "Perlis": [{"pejabat": "PKD", "nama": "Kangar", "gred": "3", "penduduk": 240600}],
+  "Pulau Pinang": [{"pejabat": "PKD", "nama": "Timur Laut", "gred": "1", "penduduk": 526200}, {"pejabat": "PKD", "nama": "Seberang Perai Tengah", "gred": "2", "penduduk": 381600}, {"pejabat": "PKD", "nama": "Seberang Perai Utara", "gred": "3", "penduduk": 298500}, {"pejabat": "PKD", "nama": "Barat Daya", "gred": "3", "penduduk": 206400}, {"pejabat": "PKD", "nama": "Seberang Perai Selatan", "gred": "3", "penduduk": 172900}],
+  "Sabah": [{"pejabat": "PKK", "nama": "Kota Kinabalu", "gred": "1", "penduduk": 472655}, {"pejabat": "PKK", "nama": "Sandakan", "gred": "2", "penduduk": 409941}, {"pejabat": "PKK", "nama": "Tawau", "gred": "2", "penduduk": 412458}, {"pejabat": "PKD", "nama": "Lahad Datu", "gred": "3", "penduduk": 204369}, {"pejabat": "PKD", "nama": "Keningau", "gred": "3", "penduduk": 178716}, {"pejabat": "PKK", "nama": "Tuaran", "gred": "4", "penduduk": 105820}, {"pejabat": "PKK", "nama": "Semporna", "gred": "4", "penduduk": 137837}, {"pejabat": "PKD", "nama": "Penampang", "gred": "4", "penduduk": 125139}, {"pejabat": "PKK", "nama": "Papar", "gred": "4", "penduduk": 128458}, {"pejabat": "PKK", "nama": "Kinabatangan", "gred": "4", "penduduk": 150337}, {"pejabat": "PKD", "nama": "Beaufort", "gred": "4", "penduduk": 66497}, {"pejabat": "PKD", "nama": "Kudat", "gred": "4", "penduduk": 85552}, {"pejabat": "PKD", "nama": "Kota Belud", "gred": "4", "penduduk": 94191}, {"pejabat": "PKD", "nama": "Ranau", "gred": "4", "penduduk": 96942}, {"pejabat": "PKK", "nama": "Pitas", "gred": "4", "penduduk": 38814}, {"pejabat": "PKK", "nama": "Kunak", "gred": "4", "penduduk": 62867}, {"pejabat": "PKD", "nama": "Tambunan", "gred": "4", "penduduk": 36625}, {"pejabat": "PKD", "nama": "Beluran", "gred": "4", "penduduk": 108398}, {"pejabat": "PKD", "nama": "Tenom", "gred": "4", "penduduk": 56983}, {"pejabat": "PKK", "nama": "Sipitang", "gred": "4", "penduduk": 35832}, {"pejabat": "PKD", "nama": "Kuala Penyu", "gred": "4", "penduduk": 19412}, {"pejabat": "PKD", "nama": "Kota Marudu", "gred": "4", "penduduk": 68257}, {"pejabat": "PKD", "nama": "Nabawan", "gred": "4", "penduduk": 32549}, {"pejabat": "PKK", "nama": "Putatan", "gred": "4", "penduduk": 55850}, {"pejabat": "PKK", "nama": "Tongod", "gred": "4", "penduduk": 36173}],
+  "Sarawak": [{"pejabat": "PKB", "nama": "Kuching", "gred": "1", "penduduk": 625345}, {"pejabat": "PKB", "nama": "Miri", "gred": "2", "penduduk": 307374}, {"pejabat": "PKB", "nama": "Sibu", "gred": "3", "penduduk": 252119}, {"pejabat": "PKB", "nama": "Bintulu", "gred": "3", "penduduk": 223592}, {"pejabat": "PKB", "nama": "Samarahan", "gred": "4", "penduduk": 139178}, {"pejabat": "PKB", "nama": "Sri Aman", "gred": "4", "penduduk": 95105}, {"pejabat": "PKB", "nama": "Betong", "gred": "4", "penduduk": 105658}, {"pejabat": "PKB", "nama": "Sarikei", "gred": "4", "penduduk": 118431}, {"pejabat": "PKB", "nama": "Mukah", "gred": "4", "penduduk": 102558}, {"pejabat": "PKB", "nama": "Kapit", "gred": "4", "penduduk": 106429}, {"pejabat": "PKB", "nama": "Limbang", "gred": "4", "penduduk": 83457}],
+  "Selangor": [{"pejabat": "PKD", "nama": "Petaling", "gred": "1", "penduduk": 1843468}, {"pejabat": "PKD", "nama": "Hulu Langat", "gred": "1", "penduduk": 1182283}, {"pejabat": "PKD", "nama": "Klang", "gred": "1", "penduduk": 878345}, {"pejabat": "PKD", "nama": "Gombak", "gred": "2", "penduduk": 709605}, {"pejabat": "PKD", "nama": "Kuala Langat", "gred": "3", "penduduk": 230722}, {"pejabat": "PKD", "nama": "Sepang", "gred": "3", "penduduk": 218765}, {"pejabat": "PKD", "nama": "Kuala Selangor", "gred": "3", "penduduk": 217435}, {"pejabat": "PKD", "nama": "Hulu Selangor", "gred": "3", "penduduk": 204992}, {"pejabat": "PKD", "nama": "Sabak Bernam", "gred": "4", "penduduk": 107693}],
+  "Terengganu": [{"pejabat": "PKD", "nama": "Kuala Terengganu", "gred": "2", "penduduk": 352800}, {"pejabat": "PKD", "nama": "Kemaman", "gred": "3", "penduduk": 174800}, {"pejabat": "PKD", "nama": "Dungun", "gred": "3", "penduduk": 160100}, {"pejabat": "PKD", "nama": "Besut", "gred": "3", "penduduk": 144500}, {"pejabat": "PKD", "nama": "Marang", "gred": "4", "penduduk": 100700}, {"pejabat": "PKD", "nama": "Hulu Terengganu", "gred": "4", "penduduk": 75100}, {"pejabat": "PKD", "nama": "Setiu", "gred": "4", "penduduk": 57400}],
+  "W.P. Kuala Lumpur": [{"pejabat": "PKD", "nama": "Lembah Pantai", "gred": "2", "penduduk": 359143}, {"pejabat": "PKD", "nama": "Titiwangsa", "gred": "2", "penduduk": 313507}, {"pejabat": "PKD", "nama": "Cheras", "gred": "2", "penduduk": 481109}, {"pejabat": "PKD", "nama": "Kepong", "gred": "2", "penduduk": 526241}, {"pejabat": "PKD", "nama": "Putrajaya", "gred": "4", "penduduk": 80211}],
+  "W.P. Labuan": [{"pejabat": "PKD", "nama": "W.P Labuan", "gred": "4", "penduduk": 88000}]
+};
+
+let IS_PINS_HIDDEN = false;
+let CURRENT_KAWASAN = null;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     // Parse facility data
@@ -606,30 +644,52 @@ function populateJenisDropdown() {
     });
 }
 
-// On negeri change - populate daerah dropdown
+// On negeri change - populate daerah & kawasan dropdown
 function onNegeriChange() {
     const selectedNegeri = document.getElementById('negeri-filter').value;
     const daerahSelect = document.getElementById('daerah-filter');
+    const kawasanSelect = document.getElementById('kawasan-filter');
     
-    // Clear daerah dropdown
+    // Clear dropdowns
     daerahSelect.innerHTML = '<option value="">Semua Daerah</option>';
+    kawasanSelect.innerHTML = '<option value="">Semua Kawasan (PKD/PKB)</option>';
     
     if (selectedNegeri) {
-        // Get unique daerah for selected negeri
+        // 1. Populate Daerah
         const daerahSet = new Set();
         ALL_FASILITI.forEach(f => {
             if (f.negeri === selectedNegeri && f.daerah) {
                 daerahSet.add(f.daerah);
             }
         });
-        
-        const sortedDaerah = Array.from(daerahSet).sort();
-        sortedDaerah.forEach(daerah => {
+        Array.from(daerahSet).sort().forEach(daerah => {
             const option = document.createElement('option');
             option.value = daerah;
             option.textContent = daerah;
             daerahSelect.appendChild(option);
         });
+        
+        // 2. Populate Kawasan (PKD/PKK/PKB)
+        let nKey = selectedNegeri;
+        if(nKey === 'WP Kuala Lumpur' || nKey === 'Kuala Lumpur') nKey = 'W.P. Kuala Lumpur';
+        if(nKey === 'WP Labuan' || nKey === 'Labuan') nKey = 'W.P. Labuan';
+        
+        const kawasanList = KAWASAN_DATA[nKey];
+        if (kawasanList && kawasanList.length > 0) {
+            kawasanSelect.disabled = false;
+            kawasanList.forEach(k => {
+                const option = document.createElement('option');
+                option.value = `${k.pejabat}|${k.nama}|${k.gred}|${k.penduduk}`; 
+                option.textContent = `${k.pejabat} ${k.nama} (Gred ${k.gred})`;
+                kawasanSelect.appendChild(option);
+            });
+        } else {
+            kawasanSelect.disabled = true;
+            kawasanSelect.innerHTML = '<option value="">Tiada Data Pejabat Kesihatan</option>';
+        }
+    } else {
+        kawasanSelect.disabled = true;
+        kawasanSelect.innerHTML = '<option value="">Pilih Negeri Dahulu</option>';
     }
 }
 
@@ -729,6 +789,12 @@ function resetFilter() {
         document.getElementById('filter-lawatan').value = 'semua';
     }
     FILTERED_FASILITI = [...ALL_FASILITI];
+
+    document.getElementById('kawasan-filter').value = '';
+    document.getElementById('kawasan-filter').disabled = true;
+    CURRENT_KAWASAN = null;
+    if(document.getElementById('kawasan-hud')) document.getElementById('kawasan-hud').style.display = 'none';
+    drawBoundaryPolygon(); // untuk buang sempadan poligon
     
     if (window.mapInstance) {
         updateMapMarkers();
@@ -1423,6 +1489,193 @@ function triggerPinClick(pk) {
             showFacilityPopup(f);
         }, 800);
     }
+}
+
+// ==========================================
+// FUNGSI KAWASAN PENTADBIRAN, POLIGON & HUD
+// ==========================================
+
+function onKawasanChange() {
+    const val = document.getElementById('kawasan-filter').value;
+    if(val) {
+        const parts = val.split('|');
+        CURRENT_KAWASAN = { pejabat: parts[0], nama: parts[1], gred: parts[2], penduduk: parts[3] };
+        
+        // Auto-select daerah based on kawasan name to trigger map filtering
+        const dSelect = document.getElementById('daerah-filter');
+        let matched = false;
+        for (let i = 0; i < dSelect.options.length; i++) {
+            if (dSelect.options[i].value.toLowerCase().includes(CURRENT_KAWASAN.nama.toLowerCase())) {
+                dSelect.selectedIndex = i;
+                matched = true;
+                break;
+            }
+        }
+        if(!matched) dSelect.value = ''; 
+    } else {
+        CURRENT_KAWASAN = null;
+    }
+    
+    closeRadiusPanel();
+    applyFilter();
+    showKawasanHUD();
+}
+
+function toggleHidePins() {
+    const btn = document.getElementById('btn-hide-pins');
+    IS_PINS_HIDDEN = !IS_PINS_HIDDEN;
+    
+    if(IS_PINS_HIDDEN) {
+        btn.innerHTML = '<i class="fas fa-eye mr-1"></i><span class="hidden xl:inline">Tunjuk Pin</span>';
+        btn.style.background = '#f0fdf4'; btn.style.color = '#16a34a'; btn.style.borderColor = '#bbf7d0';
+        if(window.mapInstance) {
+            window.mapInstance.setLayoutProperty('fasiliti-point', 'visibility', 'none');
+            window.mapInstance.setLayoutProperty('fasiliti-glow', 'visibility', 'none');
+        }
+    } else {
+        btn.innerHTML = '<i class="fas fa-eye-slash mr-1"></i><span class="hidden xl:inline">Sembunyikan Pin</span>';
+        btn.style.background = '#fef2f2'; btn.style.color = '#ef4444'; btn.style.borderColor = '#fecaca';
+        if(window.mapInstance) {
+            window.mapInstance.setLayoutProperty('fasiliti-point', 'visibility', 'visible');
+            window.mapInstance.setLayoutProperty('fasiliti-glow', 'visibility', 'visible');
+        }
+    }
+}
+
+function drawBoundaryPolygon() {
+    if(!window.mapInstance) return;
+    
+    // Remove existing
+    if (window.mapInstance.getSource('boundary-source')) {
+        window.mapInstance.removeLayer('boundary-fill');
+        window.mapInstance.removeLayer('boundary-line');
+        window.mapInstance.removeSource('boundary-source');
+    }
+    
+    if(!CURRENT_KAWASAN || FILTERED_FASILITI.length < 3) return;
+    
+    const points = [];
+    FILTERED_FASILITI.forEach(f => {
+        if(f.lng && f.lat) points.push(turf.point([f.lng, f.lat]));
+    });
+    if(points.length < 3) return;
+    
+    const collection = turf.featureCollection(points);
+    const hull = turf.convex(collection); 
+    
+    if(hull) {
+        // Buffer polygon slightly for a nice visual margin
+        const buffered = turf.buffer(hull, 5, {units: 'kilometers'});
+        
+        window.mapInstance.addSource('boundary-source', {
+            'type': 'geojson',
+            'data': buffered
+        });
+        
+        // Add layers before the pins so pins sit on top
+        window.mapInstance.addLayer({
+            'id': 'boundary-fill',
+            'type': 'fill',
+            'source': 'boundary-source',
+            'paint': {
+                'fill-color': '#8b5cf6',
+                'fill-opacity': 0.15
+            }
+        }, 'fasiliti-point');
+        
+        window.mapInstance.addLayer({
+            'id': 'boundary-line',
+            'type': 'line',
+            'source': 'boundary-source',
+            'paint': {
+                'line-color': '#7c3aed',
+                'line-width': 3,
+                'line-dasharray': [2, 2]
+            }
+        });
+    }
+}
+
+function showKawasanHUD() {
+    let hud = document.getElementById('kawasan-hud');
+    
+    if(!CURRENT_KAWASAN) {
+        if(hud) hud.style.display = 'none';
+        drawBoundaryPolygon();
+        return;
+    }
+    
+    const total = FILTERED_FASILITI.length;
+    let dilawati = 0; let klinikk = 0; let klinikd = 0; let hosp = 0;
+    
+    FILTERED_FASILITI.forEach(f => {
+        if(f.status_lawatan === 'biru' || f.status_lawatan === 'hijau') dilawati++;
+        if(f.jenis && f.jenis.toLowerCase().includes('klinik kesihatan')) klinikk++;
+        if(f.jenis && f.jenis.toLowerCase().includes('desa')) klinikd++;
+        if(f.jenis && f.jenis.toLowerCase().includes('hospital')) hosp++;
+    });
+    
+    const pct = total > 0 ? Math.round((dilawati/total)*100) : 0;
+    const pendStr = Number(CURRENT_KAWASAN.penduduk).toLocaleString();
+
+    if(!hud) {
+        hud = document.createElement('div');
+        hud.id = 'kawasan-hud';
+        hud.className = 'fixed bottom-6 right-6 z-[1600] w-full sm:w-[300px] bg-white/95 backdrop-blur-md sm:rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.15)] sm:shadow-xl sm:border border-slate-200 overflow-hidden transform transition-transform duration-300 translate-y-full sm:translate-y-0';
+        document.body.appendChild(hud);
+    }
+    
+    hud.style.display = 'block';
+    
+    // Slide up animation for mobile
+    setTimeout(() => { hud.classList.remove('translate-y-full'); }, 50);
+
+    hud.innerHTML = `
+        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-white relative">
+            <button onclick="document.getElementById('kawasan-hud').classList.add('translate-y-full'); setTimeout(() => document.getElementById('kawasan-hud').style.display='none', 300);" class="absolute top-2 right-2 w-6 h-6 rounded bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+                <i class="fas fa-chevron-down text-xs sm:hidden"></i>
+                <i class="fas fa-times text-xs hidden sm:block"></i>
+            </button>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-violet-200 mb-0.5">${CURRENT_KAWASAN.pejabat} Gred ${CURRENT_KAWASAN.gred}</div>
+            <div class="text-base font-black leading-tight">${CURRENT_KAWASAN.nama}</div>
+        </div>
+        <div class="p-4 space-y-3 pb-8 sm:pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-violet-500"><i class="fas fa-users"></i></div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Tanggungan Penduduk</p>
+                    <p class="text-sm font-extrabold text-slate-800">${pendStr}</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 border-t border-b border-slate-100 py-3 my-2">
+                <div class="text-center">
+                    <p class="text-lg font-black text-blue-600">${hosp}</p>
+                    <p class="text-[9px] font-bold text-slate-500">HOSP</p>
+                </div>
+                <div class="text-center border-l border-r border-slate-100">
+                    <p class="text-lg font-black text-emerald-600">${klinikk}</p>
+                    <p class="text-[9px] font-bold text-slate-500">KK</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-lg font-black text-amber-500">${klinikd}</p>
+                    <p class="text-[9px] font-bold text-slate-500">KD</p>
+                </div>
+            </div>
+            
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <p class="text-[10px] font-bold text-slate-500">Kadar Selesai Lawatan YB</p>
+                    <p class="text-[10px] font-extrabold text-indigo-600">${pct}%</p>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-1.5">
+                    <div class="bg-indigo-500 h-1.5 rounded-full" style="width: ${pct}%"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    setTimeout(drawBoundaryPolygon, 500);
 }
 
 </script>
