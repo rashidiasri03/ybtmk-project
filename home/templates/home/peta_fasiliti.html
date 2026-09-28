@@ -403,47 +403,30 @@ map.on('load', () => {
     } catch(e) {}
 
     map.addSource('fasiliti', {
-        type:'geojson', data:buildGeoJSON(ALL_FEATURES.filter(Boolean)),
-        cluster:true, clusterMaxZoom:11, clusterRadius:50,
+        type:'geojson', data:buildGeoJSON(ALL_FEATURES.filter(Boolean))
+        // Tiada fungsi kluster di sini
     });
 
-    // Cluster bulatan
-    map.addLayer({
-        id:'clusters', type:'circle', source:'fasiliti',
-        filter:['has','point_count'],
-        paint:{
-            'circle-color':'#2563eb',
-            'circle-radius':['step',['get','point_count'],18,10,24,50,30],
-            'circle-stroke-width':3, 'circle-stroke-color':'#fff', 'circle-opacity':0.85,
-        }
-    });
-
-    // Cluster teks
-    map.addLayer({
-        id:'cluster-count', type:'symbol', source:'fasiliti',
-        filter:['has','point_count'],
-        layout:{ 'text-field':'{point_count_abbreviated}', 'text-size':13 },
-        paint:{ 'text-color':'#fff' }
-    });
-
-    // Glow (pin tunggal)
+    // Glow (Semua pin)
     map.addLayer({
         id:'fasiliti-glow', type:'circle', source:'fasiliti',
-        filter:['!',['has','point_count']],
         paint:{
-            'circle-radius':16, 'circle-color':['get','glow'],
-            'circle-opacity':0.18, 'circle-blur':0.8,
+            'circle-radius':12, 
+            'circle-color':['get','glow'],
+            'circle-opacity':0.2, 
+            'circle-blur':1
         }
     });
 
-    // Pin utama (tunggal)
+    // Pin utama individu (Diselaraskan dengan saiz Top Management)
     map.addLayer({
         id:'fasiliti-dot', type:'circle', source:'fasiliti',
-        filter:['!',['has','point_count']],
         paint:{
-            'circle-radius':['interpolate',['linear'],['zoom'],5,6,10,9,14,13],
+            'circle-radius':['interpolate',['linear'],['zoom'],5,3,10,5,14,7,16,10],
             'circle-color':['get','color'],
-            'circle-stroke-width':2.5, 'circle-stroke-color':'#fff', 'circle-opacity':0.95,
+            'circle-stroke-width':1.5, 
+            'circle-stroke-color':'#fff', 
+            'circle-opacity':0.95
         }
     });
 
@@ -481,18 +464,8 @@ map.on('load', () => {
         }
     });
 
-    // Klik cluster → zoom masuk
-    map.on('click','clusters',(e) => {
-        const feat = map.queryRenderedFeatures(e.point,{layers:['clusters']});
-        map.getSource('fasiliti').getClusterExpansionZoom(feat[0].properties.cluster_id,(err,zoom) => {
-            if (!err) map.easeTo({ center:feat[0].geometry.coordinates, zoom, duration:500 });
-        });
-    });
-
     map.on('mouseenter','fasiliti-dot',() => { map.getCanvas().style.cursor='pointer'; });
     map.on('mouseleave','fasiliti-dot',() => { map.getCanvas().style.cursor=''; });
-    map.on('mouseenter','clusters',()    => { map.getCanvas().style.cursor='pointer'; });
-    map.on('mouseleave','clusters',()    => { map.getCanvas().style.cursor=''; });
 });
 
 // ── Panel sisi ──

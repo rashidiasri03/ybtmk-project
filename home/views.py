@@ -366,13 +366,19 @@ def pilih_modul(request, pk):
 
 @login_required
 def peta_fasiliti(request):
-    """Peta Malaysia dengan pin lokasi semua fasiliti mengikut daerah. (Admin & Top Management sahaja)."""
-    if not (request.user.is_superuser or request.user.is_staff):
-        if is_top_management_user(request.user):
-            return redirect('home:peta_tm')
+    """Peta Malaysia dengan pin lokasi semua fasiliti mengikut daerah."""
+    
+    # 1. Jika pengguna ialah Top Management (TM), terus hantar ke peta TM
+    if is_top_management_user(request.user):
+        return redirect('home:peta_tm')
+        
+    # 2. Jika bukan Superadmin dan bukan Staff (Admin Biasa), maka akses ditolak
+    if not request.user.is_superuser and not request.user.is_staff:
         from django.contrib import messages
         messages.error(request, "Akses ditolak. Halaman ini untuk Admin sahaja.")
         return redirect('home:bahagian')
+        
+    # 3. Jika pengguna adalah Superadmin atau Admin (is_staff), paparkan peta Admin
     import json
     fps = FacilityProfile.objects.select_related('maklumat_asas').all()
     data = []
