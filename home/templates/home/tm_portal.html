@@ -267,10 +267,10 @@
 </div>
 
 <!-- ── ACCESS CARDS (float over hero) ── -->
-<div id="access-row" class="fade-up" style="animation-delay:.2s;">
+<div id="access-row" class="fade-up flex overflow-x-auto snap-x snap-mandatory pb-6 px-6 -mx-6 md:grid md:grid-cols-3 md:gap-5 md:overflow-visible md:pb-0 md:px-6 md:mx-auto" style="animation-delay:.2s; scrollbar-width: none;">
 
     <!-- Peta -->
-    <a href="{% url 'home:peta_tm' %}" class="access-card">
+    <a href="{% url 'home:peta_tm' %}" class="access-card snap-center min-w-[280px] md:min-w-0 mr-4 md:mr-0 shrink-0">
         <div class="access-card-accent bg-gradient-to-r from-emerald-400 to-teal-500"></div>
         <div class="access-card-body">
             <div class="access-icon bg-emerald-50">
@@ -287,7 +287,7 @@
     </a>
 
     <!-- Dashboard -->
-    <a href="{% url 'home:dashboard_fasiliti' %}" class="access-card">
+    <a href="{% url 'home:dashboard_fasiliti' %}" class="access-card snap-center min-w-[280px] md:min-w-0 mr-4 md:mr-0 shrink-0">
         <div class="access-card-accent bg-gradient-to-r from-sky-400 to-blue-600"></div>
         <div class="access-card-body">
             <div class="access-icon bg-sky-50">
@@ -304,7 +304,7 @@
     </a>
 
     <!-- Laporan -->
-    <a href="#laporan-section" class="access-card" onclick="smoothScroll(event,'laporan-section')">
+    <a href="#laporan-section" class="access-card snap-center min-w-[280px] md:min-w-0 mr-4 md:mr-0 shrink-0" onclick="smoothScroll(event,'laporan-section')">
         <div class="access-card-accent bg-gradient-to-r from-violet-500 to-purple-600"></div>
         <div class="access-card-body">
             <div class="access-icon bg-violet-50">
@@ -350,8 +350,8 @@
     </div>
 
     <!-- Table -->
-    <div class="tbl-wrap fade-up" style="animation-delay:.32s;">
-        <table>
+    <div class="tbl-wrap fade-up w-full overflow-x-auto" style="animation-delay:.32s;">
+        <table class="w-full min-w-[800px]">
             <thead>
                 <tr>
                     <th>#</th>

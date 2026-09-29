@@ -475,37 +475,40 @@
     </div>
     
     <!-- Filter Bar -->
-    <form method="get" class="filter-bar">
-        <div class="search-wrap">
+    <form method="get" class="filter-bar flex-col md:flex-row items-stretch md:items-center">
+        <div class="search-wrap w-full md:w-auto md:flex-1">
             <i class="fas fa-search"></i>
             <input type="text" name="carian" placeholder="Cari nama fasiliti..." value="{{ carian }}">
         </div>
         
-        <select name="negeri" class="filter-select" onchange="this.form.submit()">
-            <option value="">Semua Negeri</option>
-            {% for negeri in all_negeri %}
-            <option value="{{ negeri }}" {% if negeri_filter == negeri %}selected{% endif %}>{{ negeri }}</option>
-            {% endfor %}
-        </select>
+        <div class="flex gap-2 w-full md:w-auto">
+            <select name="negeri" class="filter-select flex-1 md:flex-none" onchange="this.form.submit()">
+                <option value="">Semua Negeri</option>
+                {% for negeri in all_negeri %}
+                <option value="{{ negeri }}" {% if negeri_filter == negeri %}selected{% endif %}>{{ negeri }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="status" class="filter-select flex-1 md:flex-none" onchange="this.form.submit()">
+                <option value="">Semua Status</option>
+                <option value="aktif" {% if status_filter == 'aktif' %}selected{% endif %}>Aktif</option>
+                <option value="tutup" {% if status_filter == 'tutup' %}selected{% endif %}>Tutup</option>
+            </select>
+        </div>
         
-        <select name="status" class="filter-select" onchange="this.form.submit()">
-            <option value="">Semua Status</option>
-            <option value="aktif" {% if status_filter == 'aktif' %}selected{% endif %}>Aktif</option>
-            <option value="tutup" {% if status_filter == 'tutup' %}selected{% endif %}>Tutup</option>
-        </select>
-        
-        <button type="submit" class="filter-btn">
-            <i class="fas fa-filter"></i> Tapis
-        </button>
-        
-        <div class="ml-auto">
-            <span style="font-size:.8rem; color:#64748b;">{{ jumlah_total }} fasiliti</span>
+        <div class="flex items-center justify-between w-full md:w-auto mt-2 md:mt-0">
+            <button type="submit" class="filter-btn w-full md:w-auto justify-center">
+                <i class="fas fa-filter"></i> Tapis
+            </button>
+            <div class="ml-4 md:ml-auto whitespace-nowrap">
+                <span style="font-size:.8rem; color:#64748b;">{{ jumlah_total }} fasiliti</span>
+            </div>
         </div>
     </form>
     
     <!-- Table -->
-    <div class="table-container">
-        <table>
+    <div class="table-container w-full overflow-x-auto">
+        <table class="w-full min-w-[800px]">
             <thead>
                 <tr>
                     <th>#</th>
