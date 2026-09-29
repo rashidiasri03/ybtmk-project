@@ -436,71 +436,115 @@
     </div>
 </nav>
 
-<!-- FILTER BAR -->
-<div class="filter-bar">
-    <div class="filter-group">
-        <span class="filter-label">Negeri:</span>
-        <select id="negeri-filter" class="filter-select" onchange="onNegeriChange()">
-            <option value="">Semua Negeri</option>
-        </select>
-    </div>
+<!-- FILTER OVERLAY (Mobile) -->
+<div id="filter-overlay" onclick="toggleMobileFilter()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[1501] hidden transition-opacity opacity-0"></div>
+
+<!-- FILTER BAR / MOBILE DRAWER -->
+<div id="filter-container" class="fixed top-[70px] left-0 right-0 z-[1502] bg-white border-b border-slate-200 px-4 py-3 shadow-sm flex flex-col md:flex-row md:items-center gap-3 transition-transform duration-300 md:translate-y-0 transform -translate-y-full md:transform-none">
     
-    <div class="filter-group hidden sm:flex">
-        <span class="filter-label">Daerah:</span>
-        <select id="daerah-filter" class="filter-select" onchange="onDaerahChange()">
-            <option value="">Semua Daerah</option>
-        </select>
+    <!-- Mobile Drag Handle -->
+    <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-2 md:hidden"></div>
+
+    <div class="flex items-center justify-between md:hidden mb-2">
+        <h3 class="text-sm font-extrabold text-slate-800"><i class="fas fa-sliders-h mr-2"></i>Penapis Peta</h3>
+        <button onclick="toggleMobileFilter()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
+            <i class="fas fa-times text-sm"></i>
+        </button>
     </div>
 
-    <!-- TAMBAHAN: PENAPIS KAWASAN PENTADBIRAN (PKD/PKK/PKB) -->
-    <div class="filter-group">
-        <span class="filter-label">Kawasan:</span>
-        <select id="kawasan-filter" class="filter-select" onchange="onKawasanChange()" disabled>
-            <option value="">Pilih Negeri Dahulu</option>
-        </select>
-    </div>
-    
-    <div class="filter-group hidden lg:flex">
-        <span class="filter-label">Jenis:</span>
-        <select id="jenis-filter" class="filter-select">
-            <option value="">Semua Jenis</option>
-        </select>
-    </div>
-    
-    <div class="filter-group hidden md:flex" style="flex:1; min-width:200px; max-width:400px;">
-        <span class="filter-label">Fasiliti:</span>
-        <div class="searchable-wrap" style="position:relative; flex:1;">
-            <input type="text" id="fasiliti-input" class="filter-select" placeholder="-- Pilih Fasiliti --" 
-                   style="width:100%; cursor:pointer;" readonly onclick="toggleFasilitiDropdown()">
-            <div id="fasiliti-dropdown" class="fasiliti-dropdown" style="display:none;">
-                <div class="dropdown-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="fasiliti-search" placeholder="Cari fasiliti..." oninput="filterFasilitiDropdown()">
+    <!-- Kumpulan Dropdown -->
+    <div class="flex flex-col md:flex-row md:items-center gap-3 flex-1 overflow-y-auto md:overflow-visible pr-1 max-h-[60vh] md:max-h-none">
+        
+        <div class="filter-group flex-col md:flex-row items-start md:items-center w-full md:w-auto">
+            <span class="filter-label mb-1 md:mb-0 text-xs">Negeri:</span>
+            <select id="negeri-filter" class="filter-select w-full md:w-auto" onchange="onNegeriChange()">
+                <option value="">Semua Negeri</option>
+            </select>
+        </div>
+        
+        <div class="filter-group flex-col md:flex-row items-start md:items-center w-full md:w-auto">
+            <span class="filter-label mb-1 md:mb-0 text-xs">Daerah:</span>
+            <select id="daerah-filter" class="filter-select w-full md:w-auto" onchange="onDaerahChange()">
+                <option value="">Semua Daerah</option>
+            </select>
+        </div>
+
+        <div class="filter-group flex-col md:flex-row items-start md:items-center w-full md:w-auto">
+            <span class="filter-label mb-1 md:mb-0 text-xs">Kawasan:</span>
+            <select id="kawasan-filter" class="filter-select w-full md:w-auto" onchange="onKawasanChange()" disabled>
+                <option value="">Pilih Negeri Dahulu</option>
+            </select>
+        </div>
+        
+        <div class="filter-group flex-col md:flex-row items-start md:items-center w-full md:w-auto">
+            <span class="filter-label mb-1 md:mb-0 text-xs">Jenis:</span>
+            <select id="jenis-filter" class="filter-select w-full md:w-auto">
+                <option value="">Semua Jenis</option>
+            </select>
+        </div>
+        
+        <div class="filter-group flex-col md:flex-row items-start md:items-center w-full md:flex-1 md:max-w-[300px]">
+            <span class="filter-label hidden lg:inline mr-2 text-xs">Fasiliti:</span>
+            <div class="searchable-wrap relative w-full">
+                <input type="text" id="fasiliti-input" class="filter-select w-full text-ellipsis pr-6" placeholder="-- Cari Fasiliti --" 
+                       readonly onclick="toggleFasilitiDropdown()">
+                <div id="fasiliti-dropdown" class="fasiliti-dropdown hidden">
+                    <div class="dropdown-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="fasiliti-search" placeholder="Cari..." oninput="filterFasilitiDropdown()">
+                    </div>
+                    <div id="fasiliti-list" class="dropdown-list max-h-48"></div>
                 </div>
-                <div id="fasiliti-list" class="dropdown-list"></div>
             </div>
+        </div>
+
+        <!-- Butang Tindakan Mobile -->
+        <div class="flex gap-2 mt-4 md:hidden w-full">
+            <button class="filter-btn flex-1 justify-center" onclick="applyFilterMobile()">
+                <i class="fas fa-search"></i> Cari
+            </button>
+            <button class="filter-btn-reset flex-1 justify-center" onclick="resetFilter()">
+                <i class="fas fa-undo"></i> Reset
+            </button>
+        </div>
+        
+        <!-- Butang Alat Peta Mobile -->
+        <div class="flex gap-2 mt-2 md:hidden w-full border-t border-slate-100 pt-4">
+            <button id="btn-hide-pins-mobile" onclick="toggleHidePins()" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-red-50 border border-red-200 text-red-600 transition">
+                <i class="fas fa-eye-slash mr-1"></i> Sembunyi Pin
+            </button>
+            <button id="btn-3d-toggle-mobile" onclick="toggle3DMobile()" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-indigo-50 border border-indigo-200 text-indigo-700 transition">
+                <i class="fas fa-cube mr-1"></i> Mod 3D
+            </button>
         </div>
     </div>
     
-    <button class="filter-btn" onclick="applyFilter()">
-        <i class="fas fa-search"></i> Cari
-    </button>
-    
-    <button class="filter-btn-reset" onclick="resetFilter()">
-        <i class="fas fa-times"></i> Reset
-    </button>
-    
-    <div class="ml-auto flex items-center gap-3">
-        <!-- TAMBAHAN: SUIS TOGGLE SEMBUNYIKAN TITIK -->
-        <button class="btn-3d hidden sm:flex items-center" id="btn-hide-pins" onclick="toggleHidePins()" style="background:#fef2f2; color:#ef4444; border-color:#fecaca;">
-            <i class="fas fa-eye-slash mr-1"></i><span class="hidden xl:inline">Sembunyikan Pin</span>
+    <!-- Butang Tindakan Desktop & Alat Kanan -->
+    <div class="hidden md:flex items-center gap-2 ml-auto shrink-0 border-l border-slate-200 pl-4">
+        <button class="filter-btn px-4 py-2" onclick="applyFilter()">
+            <i class="fas fa-search"></i>
         </button>
-        <button class="btn-3d hidden md:block" id="btn-3d-toggle" onclick="toggle3D()">
-            <i class="fas fa-cube mr-1"></i>3D
+        <button class="filter-btn-reset px-3 py-2" onclick="resetFilter()" title="Reset">
+            <i class="fas fa-times"></i>
         </button>
-        <div id="count-label" class="hidden sm:block text-xs text-slate-500 font-bold whitespace-nowrap">{{ jumlah }} fasiliti</div>
+        
+        <div class="w-px h-6 bg-slate-200 mx-1"></div>
+        
+        <button id="btn-hide-pins" onclick="toggleHidePins()" class="btn-3d px-3" style="background:#fef2f2; color:#ef4444; border-color:#fecaca;" title="Tunjuk/Sembunyi Pin">
+            <i class="fas fa-eye-slash"></i>
+        </button>
+        <button id="btn-3d-toggle" onclick="toggle3D()" class="btn-3d px-3" title="Mod 3D">
+            <i class="fas fa-cube"></i>
+        </button>
+        
+        <div id="count-label" class="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 whitespace-nowrap">{{ jumlah }} fasiliti</div>
     </div>
 </div>
+
+<!-- BUTANG PENAPIS TERAPUNG (HANYA MOBILE) -->
+<button onclick="toggleMobileFilter()" class="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[1400] bg-blue-600 text-white px-6 py-3 rounded-full shadow-[0_8px_30px_rgba(37,99,235,0.4)] font-bold text-sm flex items-center gap-2 border-2 border-white/20 active:scale-95 transition-transform">
+    <i class="fas fa-sliders-h"></i> Penapis Peta
+</button>
 
 <!-- Dropdown Filter Lawatan (Tengah Peta) -->
 <div style="position:fixed; top:135px; left:50%; transform:translateX(-50%); z-index:1000; background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); padding:8px 16px; border-radius:30px; box-shadow:0 4px 15px rgba(0,0,0,0.1); border:1px solid #e2e8f0; display:flex; align-items:center; gap:10px;">
@@ -1521,23 +1565,73 @@ function onKawasanChange() {
     showKawasanHUD();
 }
 
+// FUNGSI KAWALAN MOBILE FILTER DRAWER
+function toggleMobileFilter() {
+    const container = document.getElementById('filter-container');
+    const overlay = document.getElementById('filter-overlay');
+    
+    if (container.classList.contains('-translate-y-full')) {
+        container.classList.remove('-translate-y-full');
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+    } else {
+        container.classList.add('-translate-y-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+    }
+}
+
+function applyFilterMobile() {
+    applyFilter();
+    toggleMobileFilter(); // Tutup laci selepas filter
+}
+
 function toggleHidePins() {
-    const btn = document.getElementById('btn-hide-pins');
     IS_PINS_HIDDEN = !IS_PINS_HIDDEN;
     
+    const btnDesktop = document.getElementById('btn-hide-pins');
+    const btnMobile = document.getElementById('btn-hide-pins-mobile');
+    
     if(IS_PINS_HIDDEN) {
-        btn.innerHTML = '<i class="fas fa-eye mr-1"></i><span class="hidden xl:inline">Tunjuk Pin</span>';
-        btn.style.background = '#f0fdf4'; btn.style.color = '#16a34a'; btn.style.borderColor = '#bbf7d0';
+        if(btnDesktop) btnDesktop.innerHTML = '<i class="fas fa-eye"></i>';
+        if(btnMobile) btnMobile.innerHTML = '<i class="fas fa-eye mr-1"></i> Tunjuk Pin';
+        
+        [btnDesktop, btnMobile].forEach(b => {
+            if(b) { b.style.background = '#f0fdf4'; b.style.color = '#16a34a'; b.style.borderColor = '#bbf7d0'; }
+        });
+        
         if(window.mapInstance) {
             window.mapInstance.setLayoutProperty('fasiliti-point', 'visibility', 'none');
             window.mapInstance.setLayoutProperty('fasiliti-glow', 'visibility', 'none');
         }
     } else {
-        btn.innerHTML = '<i class="fas fa-eye-slash mr-1"></i><span class="hidden xl:inline">Sembunyikan Pin</span>';
-        btn.style.background = '#fef2f2'; btn.style.color = '#ef4444'; btn.style.borderColor = '#fecaca';
+        if(btnDesktop) btnDesktop.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        if(btnMobile) btnMobile.innerHTML = '<i class="fas fa-eye-slash mr-1"></i> Sembunyi Pin';
+        
+        [btnDesktop, btnMobile].forEach(b => {
+            if(b) { b.style.background = '#fef2f2'; b.style.color = '#ef4444'; b.style.borderColor = '#fecaca'; }
+        });
+        
         if(window.mapInstance) {
             window.mapInstance.setLayoutProperty('fasiliti-point', 'visibility', 'visible');
             window.mapInstance.setLayoutProperty('fasiliti-glow', 'visibility', 'visible');
+        }
+    }
+}
+
+// Kawalan 3D khusus untuk butang mobile
+function toggle3DMobile() {
+    toggle3D(); // panggil fungsi asal
+    const btnMobile = document.getElementById('btn-3d-toggle-mobile');
+    if(btnMobile) {
+        if (is3DEnabled) {
+            btnMobile.style.background = '#2563eb';
+            btnMobile.style.color = 'white';
+            btnMobile.style.borderColor = '#1d4ed8';
+        } else {
+            btnMobile.style.background = '#eef2ff';
+            btnMobile.style.color = '#4338ca';
+            btnMobile.style.borderColor = '#c7d2fe';
         }
     }
 }
