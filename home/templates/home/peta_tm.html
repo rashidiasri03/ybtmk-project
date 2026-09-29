@@ -180,13 +180,19 @@
         /* Map container */
         #map { 
             position:fixed !important; 
-            top:120px !important; 
+            top:70px !important; 
             left:0 !important; 
             right:0 !important; 
             bottom:0 !important; 
             width:100vw !important; 
-            height:calc(100vh - 120px) !important; 
+            height:calc(100vh - 70px) !important; 
             z-index:1 !important;
+        }
+        @media (min-width: 768px) {
+            #map { 
+                top:120px !important; 
+                height:calc(100vh - 120px) !important; 
+            }
         }
         
         /* Filter bar */
@@ -1804,13 +1810,15 @@ function showKawasanHUD() {
     setTimeout(() => { hud.classList.remove('translate-y-full'); }, 50);
 
     hud.innerHTML = `
-        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-white relative">
-            <button onclick="document.getElementById('kawasan-hud').classList.add('translate-y-full'); setTimeout(() => document.getElementById('kawasan-hud').style.display='none', 300);" class="absolute top-2 right-2 w-6 h-6 rounded bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-white relative flex justify-between items-start">
+            <div class="pr-6">
+                <div class="text-[10px] font-bold uppercase tracking-widest text-violet-200 mb-0.5">${CURRENT_KAWASAN.pejabat} Gred ${CURRENT_KAWASAN.gred}</div>
+                <div class="text-sm sm:text-base font-black leading-tight">${CURRENT_KAWASAN.nama}</div>
+            </div>
+            <button onclick="document.getElementById('kawasan-hud').classList.add('translate-y-full'); setTimeout(() => document.getElementById('kawasan-hud').style.display='none', 300);" class="shrink-0 w-6 h-6 rounded bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
                 <i class="fas fa-chevron-down text-xs sm:hidden"></i>
                 <i class="fas fa-times text-xs hidden sm:block"></i>
             </button>
-            <div class="text-[10px] font-bold uppercase tracking-widest text-violet-200 mb-0.5">${CURRENT_KAWASAN.pejabat} Gred ${CURRENT_KAWASAN.gred}</div>
-            <div class="text-base font-black leading-tight">${CURRENT_KAWASAN.nama}</div>
         </div>
         <div class="p-4 space-y-3 pb-8 sm:pb-4">
             <div class="flex items-center gap-3">

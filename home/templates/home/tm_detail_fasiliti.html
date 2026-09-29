@@ -196,20 +196,20 @@
 
     <!-- ── 1. LATAR BELAKANG ── -->
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="cluster-header bg-indigo-50 border-b border-indigo-100">
-            <div class="cluster-icon bg-indigo-200 text-indigo-700"><i class="fas fa-address-card"></i></div>
-            <div class="w-full flex justify-between items-center">
+        <div class="cluster-header bg-indigo-50 border-b border-indigo-100 flex items-start sm:items-center">
+            <div class="cluster-icon bg-indigo-200 text-indigo-700 mt-0.5 sm:mt-0"><i class="fas fa-address-card"></i></div>
+            <div class="w-full flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <div>
                     <h3 class="font-bold text-slate-800 text-sm">Bahagian 1: Latar Belakang</h3>
                     <p class="text-[11px] text-slate-500">Maklumat Responden dan Fasiliti</p>
                 </div>
                 <!-- Status Lawatan VIP -->
-                <div class="px-3 py-1 rounded-full text-xs font-bold border
+                <div class="inline-flex items-center gap-1.5 self-start sm:self-auto px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold border whitespace-nowrap
                     {% if fp.status_lawatan == 'kuning' %}bg-yellow-50 text-yellow-600 border-yellow-200
                     {% elif fp.status_lawatan == 'biru' %}bg-blue-50 text-blue-600 border-blue-200
                     {% elif fp.status_lawatan == 'hijau' %}bg-green-50 text-green-600 border-green-200
                     {% else %}bg-red-50 text-red-600 border-red-200{% endif %}">
-                    <i class="fas fa-flag"></i>
+                    <i class="fas fa-flag text-[9px]"></i>
                     {% if fp.status_lawatan == 'kuning' %}Dalam Proses
                     {% elif fp.status_lawatan == 'biru' %}Sudah Dilawati
                     {% elif fp.status_lawatan == 'hijau' %}Selesai Dilaksanakan
