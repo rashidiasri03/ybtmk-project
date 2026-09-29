@@ -125,7 +125,7 @@
 <body>
 
 <!-- ─ TOPBAR ── -->
-<nav id="topbar">
+<nav id="topbar" class="justify-between md:justify-start flex w-full sticky top-0 z-[2000] bg-slate-900 border-b border-slate-800 h-[70px] px-8">
     <div class="flex items-center gap-3">
         <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
             <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-11 h-11 object-contain">
@@ -135,8 +135,8 @@
             <p class="text-lg font-extrabold text-white leading-none">YBTMK Dashboard</p>
         </div>
         
-        <!-- Navigation Links -->
-        <nav class="nav-links">
+        <!-- Navigation Links (Desktop) -->
+        <div class="nav-links hidden md:flex ml-8">
             <a href="{% url 'home:tm_portal' %}" class="nav-link active">
                 <i class="fas fa-home"></i> Dashboard
             </a>
@@ -149,32 +149,75 @@
             <a href="{% url 'home:profil_saya' %}" class="nav-link">
                 <i class="fas fa-user-circle"></i> Profil
             </a>
-        </nav>
+        </div>
     </div>
-    <div class="flex items-center gap-2">
-        <!-- Role badge -->
-        <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-sky-300 bg-sky-950/60 border border-sky-800/50 px-3.5 py-2 rounded-lg">
+
+    <!-- User Section (Desktop) -->
+    <div class="flex items-center gap-2 hidden md:flex ml-auto">
+        <span class="inline-flex items-center gap-1.5 text-xs font-bold text-sky-300 bg-sky-950/60 border border-sky-800/50 px-3.5 py-2 rounded-lg">
             <i class="fas fa-shield-alt text-[10px]"></i> Top Management
         </span>
-        <!-- Profile -->
-        <a href="{% url 'home:profil_saya' %}"
-           class="flex items-center gap-2.5 bg-white/8 hover:bg-white/15 border border-white/12 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all">
+        <a href="{% url 'home:profil_saya' %}" class="flex items-center gap-2.5 bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all">
             <div class="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white text-xs font-extrabold shrink-0">
                 {{ request.user.username|first|upper }}
             </div>
-            <span class="hidden sm:inline text-slate-200">{{ request.user.get_full_name|default:request.user.username }}</span>
+            <span>{{ request.user.get_full_name|default:request.user.username }}</span>
         </a>
-        <!-- Logout -->
         <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button type="button" onclick="showLogoutModal(this.closest('form'))"
-                    class="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 text-sm font-bold px-4 py-2 rounded-xl transition-all">
-                <i class="fas fa-sign-out-alt text-xs"></i>
-                <span class="hidden sm:inline">Log Keluar</span>
+            <button type="button" onclick="showLogoutModal(this.closest('form'))" class="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 text-red-400 text-sm font-bold px-4 py-2 rounded-xl transition-all">
+                <i class="fas fa-sign-out-alt text-xs"></i> Log Keluar
             </button>
         </form>
     </div>
+
+    <!-- BUTANG HAMBURGER MOBILE -->
+    <button onclick="toggleMobileNav()" class="md:hidden text-white w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 active:scale-95 transition my-auto">
+        <i class="fas fa-bars text-lg"></i>
+    </button>
 </nav>
+
+<!-- NAV DRAWER MOBILE -->
+<div id="mobile-nav-overlay" onclick="toggleMobileNav()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2001] hidden transition-opacity opacity-0"></div>
+<div id="mobile-nav-drawer" class="fixed top-0 right-0 bottom-0 w-[280px] bg-slate-900 z-[2002] p-6 flex flex-col transition-transform duration-300 transform translate-x-full border-l border-slate-800 text-white">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-base">
+                {{ request.user.username|make_list|first|upper }}
+            </div>
+            <div>
+                <p class="text-xs font-bold leading-tight">{{ request.user.get_full_name|default:request.user.username }}</p>
+                <p class="text-[10px] text-sky-400 font-extrabold uppercase mt-0.5">Top Management</p>
+            </div>
+        </div>
+        <button onclick="toggleMobileNav()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+    </div>
+
+    <!-- Pautan Navigasi Mobile -->
+    <div class="flex flex-col gap-2 flex-1">
+        <a href="{% url 'home:tm_portal' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs transition shadow-lg shadow-blue-600/30">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="{% url 'home:peta_tm' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+            <i class="fas fa-map-marked-alt text-sky-400"></i> Peta Fasiliti
+        </a>
+        <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+            <i class="fas fa-list text-emerald-400"></i> Senarai Fasiliti
+        </a>
+        <a href="{% url 'home:profil_saya' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+            <i class="fas fa-user text-amber-400"></i> Profil Saya
+        </a>
+    </div>
+
+    <form method="post" action="{% url 'logout' %}" class="mt-auto border-t border-slate-800 pt-4">
+        {% csrf_token %}
+        <button type="submit" class="w-full py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 hover:bg-red-500/20 transition">
+            <i class="fas fa-sign-out-alt"></i> Log Keluar
+        </button>
+    </form>
+</div>
 
 <!-- ── HERO ── -->
 <div id="hero">
@@ -456,6 +499,21 @@
     function showLogoutModal(form) { _logoutForm = form; const m = document.getElementById('logout-modal'); m.classList.remove('hidden'); m.classList.add('flex'); }
     function hideLogoutModal() { const m = document.getElementById('logout-modal'); m.classList.add('hidden'); m.classList.remove('flex'); }
     function confirmLogout() { if (_logoutForm) _logoutForm.submit(); }
+
+    function toggleMobileNav() {
+            const drawer = document.getElementById('mobile-nav-drawer');
+            const overlay = document.getElementById('mobile-nav-overlay');
+            if (drawer.classList.contains('translate-x-full')) {
+                drawer.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                drawer.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
 </script>
 
 </body>

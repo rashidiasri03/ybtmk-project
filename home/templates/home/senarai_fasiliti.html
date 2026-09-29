@@ -371,7 +371,7 @@
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar">
+<nav class="navbar justify-between md:justify-start">
     <div class="navbar-brand">
         <img src="{% static 'home/images/jata negara.png' %}" alt="Logo" class="navbar-brand-img">
         <div class="navbar-brand-text">
@@ -380,7 +380,8 @@
         </div>
     </div>
     
-    <div class="nav-links">
+    <!-- Nav Links Desktop -->
+    <div class="nav-links hidden md:flex">
         <a href="{% url 'home:tm_portal' %}" class="nav-link">
             <i class="fas fa-home"></i> Dashboard
         </a>
@@ -395,12 +396,13 @@
         </a>
     </div>
     
-    <div class="tm-badge">
+    <div class="tm-badge hidden lg:flex">
         <i class="fas fa-shield-alt"></i>
         Top Management
     </div>
     
-    <div class="user-section">
+    <!-- User Section Desktop -->
+    <div class="user-section hidden md:flex">
         <div class="user-card">
             <div class="user-avatar">{{ request.user.username|make_list|first|upper }}</div>
             <div>
@@ -416,7 +418,54 @@
             </button>
         </form>
     </div>
+
+    <!-- BUTANG HAMBURGER MOBILE -->
+    <button onclick="toggleMobileNav()" class="md:hidden text-white w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 active:scale-95 transition">
+        <i class="fas fa-bars text-lg"></i>
+    </button>
 </nav>
+
+<!-- NAV DRAWER MOBILE -->
+<div id="mobile-nav-overlay" onclick="toggleMobileNav()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[2001] hidden transition-opacity opacity-0"></div>
+<div id="mobile-nav-drawer" class="fixed top-0 right-0 bottom-0 w-[280px] bg-slate-900 z-[2002] p-6 flex flex-col transition-transform duration-300 transform translate-x-full border-l border-slate-800 text-white">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-black text-white text-base">
+                {{ request.user.username|make_list|first|upper }}
+            </div>
+            <div>
+                <p class="text-xs font-bold leading-tight">{{ request.user.get_full_name|default:request.user.username }}</p>
+                <p class="text-[10px] text-sky-400 font-extrabold uppercase mt-0.5">Top Management</p>
+            </div>
+        </div>
+        <button onclick="toggleMobileNav()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+    </div>
+
+    <!-- Pautan Navigasi Mobile -->
+    <div class="flex flex-col gap-2 flex-1">
+        <a href="{% url 'home:tm_portal' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+            <i class="fas fa-home text-blue-400"></i> Dashboard
+        </a>
+        <a href="{% url 'home:peta_tm' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+            <i class="fas fa-map-marked-alt text-sky-400"></i> Peta Fasiliti
+        </a>
+        <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs transition shadow-lg shadow-blue-600/30">
+            <i class="fas fa-list"></i> Senarai Fasiliti
+        </a>
+        <a href="{% url 'home:profil_saya' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+            <i class="fas fa-user text-amber-400"></i> Profil Saya
+        </a>
+    </div>
+
+    <form method="post" action="{% url 'logout' %}" class="mt-auto border-t border-slate-800 pt-4">
+        {% csrf_token %}
+        <button type="submit" class="w-full py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 hover:bg-red-500/20 transition">
+            <i class="fas fa-sign-out-alt"></i> Log Keluar
+        </button>
+    </form>
+</div>
 
 <!-- MAIN CONTENT -->
 <div class="main-content">
@@ -530,6 +579,22 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+    function toggleMobileNav() {
+        const drawer = document.getElementById('mobile-nav-drawer');
+        const overlay = document.getElementById('mobile-nav-overlay');
+        if (drawer.classList.contains('translate-x-full')) {
+            drawer.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+        } else {
+            drawer.classList.add('translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+    }
+</script>
 
 </body>
 </html>

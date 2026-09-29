@@ -297,10 +297,17 @@
             font-size:.72rem;
             font-weight:700;
             color:#334155;
-            display:flex;
+            display:none; /* Sembunyi secara lalai untuk paparan Mobile */
             gap:14px;
             box-shadow:0 4px 12px rgba(0,0,0,.1);
             flex-wrap: wrap;
+        }
+
+        /* Paparkan Legend hanya pada skrin Desktop (768px ke atas) */
+        @media (min-width: 768px) {
+            #legend {
+                display: flex;
+            }
         }
         
         /* Searchable dropdown */
