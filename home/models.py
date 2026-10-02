@@ -140,9 +140,75 @@ class KlusterSumberManusia(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Autokira Peratusan Kekosongan 
+    @property
+    def peratus_kekosongan(self):
+        if self.jumlah_perjawatan and self.jumlah_perjawatan > 0:
+            kosong = self.jumlah_kekosongan or 0
+            return round((kosong / self.jumlah_perjawatan) * 100, 1)
+        return 0
+
     class Meta:
         verbose_name = "K2 – Sumber Manusia"
         verbose_name_plural = "K2 – Sumber Manusia"
+
+
+# ─────────────────────────────────────────────────────────────────
+# MODEL BAHARU: STAF FASILITI (Senarai Berenama)
+# ─────────────────────────────────────────────────────────────────
+class StafFasiliti(models.Model):
+    SKIM_CHOICES = [
+        ('pakar', 'Kumpulan Pakar (FMS/Pakar Perubatan/Pakar Pergigian)'),
+        ('perubatan', 'Kumpulan Perubatan & Pergigian (MO/Pegawai Pergigian)'),
+        ('paramedik', 'Kumpulan Paramedik & Kejururawatan (PPP/Jururawat/JM/Juruterapi)'),
+        ('farmasi', 'Kumpulan Farmasi (Pegawai Farmasi/PPF)'),
+        ('allied_health', 'Kumpulan Sains Kesihatan Bersekutu (JTMP/Juru X-Ray/Dietetik/dll)'),
+        ('sokongan', 'Kumpulan Pentadbiran, Logistik & Sokongan (PT/PPK/Pemandu/Awam)'),
+    ]
+
+    STATUS_CHOICES = [
+        ('tetap', 'Tetap'),
+        ('kontrak', 'Kontrak'),
+        ('mystep', 'MySTEP'),
+        ('pinjaman_in', 'Pinjaman Masuk (Dari Fasiliti Lain)'),
+        ('pinjaman_out', 'Pinjaman Keluar (Berkhidmat di tempat lain)'),
+    ]
+
+    # Kita pautkan (link) kepada kluster SM supaya mudah urus formset nanti
+    kluster_sm = models.ForeignKey(KlusterSumberManusia, on_delete=models.CASCADE, related_name='senarai_staf')
+    
+    nama_staf = models.CharField(max_length=200, verbose_name="Nama Penuh Staf")
+    no_pengenalan = models.CharField(max_length=50, blank=True, verbose_name="No. Kad Pengenalan / Pekerja")
+    skim = models.CharField(max_length=50, choices=SKIM_CHOICES, verbose_name="Kategori Skim Perkhidmatan")
+    gred = models.CharField(max_length=20, blank=True, verbose_name="Gred (Cth: UD41, U29, N19)")
+    status_lantikan = models.CharField(max_length=30, choices=STATUS_CHOICES, verbose_name="Status Lantikan")
+    
+    # Khas untuk amaran Kontrak / MySTEP / Pinjaman tamat
+    tarikh_tamat_perkhidmatan = models.DateField(null=True, blank=True, verbose_name="Tarikh Tamat Kontrak/MySTEP/Pinjaman")
+    
+    catatan_mobilisasi = models.CharField(max_length=250, blank=True, verbose_name="Catatan (Lokasi Pinjaman dsb.)")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.nama_staf} ({self.get_skim_display()})"
+
+    @property
+    def is_kontrak_tamat_hampir(self):
+        """Memulangkan True jika kontrak tamat dalam tempoh 90 hari."""
+        if not self.tarikh_tamat_perkhidmatan:
+            return False
+        import datetime
+        from django.utils import timezone
+        sekarang = timezone.now().date()
+        tempoh_90_hari = sekarang + datetime.timedelta(days=90)
+        return sekarang <= self.tarikh_tamat_perkhidmatan <= tempoh_90_hari
+        
+    class Meta:
+        verbose_name = "Staf Fasiliti"
+        verbose_name_plural = "Senarai Staf Fasiliti"
+        ordering = ['skim', 'nama_staf']
 
 
 # ─────────────────────────────────────────────────────────────────

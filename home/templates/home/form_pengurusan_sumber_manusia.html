@@ -61,16 +61,87 @@
 
 <div class="sec-group fade-in" style="animation-delay:.1s;">
     <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.1</div><span class="sec-label">Bilangan & Penempatan Staf</span></div>
+    
     <div class="grid grid-cols-3 gap-3 mb-3">
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Perjawatan</label><input type="number" name="jumlah_perjawatan" class="f-input" min="0" value="{{ jumlah_perjawatan|default:'' }}"></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Pengisian</label><input type="number" name="jumlah_pengisian" class="f-input" min="0" value="{{ jumlah_pengisian|default:'' }}"></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Kekosongan</label><input type="number" name="jumlah_kekosongan" class="f-input" min="0" value="{{ jumlah_kekosongan|default:'' }}"></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Warta Perjawatan</label>
+            <input type="number" id="input_perjawatan" name="jumlah_perjawatan" class="f-input font-bold" min="0" value="{{ jumlah_perjawatan|default:'' }}" oninput="kiraKekosonganUI()">
+        </div>
+        <div class="q-card bg-slate-50">
+            <label class="block text-xs font-bold text-purple-600 mb-1.5"><i class="fas fa-magic mr-1"></i> Jumlah Pengisian (Auto)</label>
+            <input type="number" id="input_pengisian" name="jumlah_pengisian" class="f-input bg-slate-100 cursor-not-allowed font-bold text-purple-700" readonly value="{{ jumlah_pengisian|default:'0' }}">
+        </div>
+        <div class="q-card bg-slate-50">
+            <label class="block text-xs font-bold text-red-500 mb-1.5"><i class="fas fa-calculator mr-1"></i> Jumlah Kekosongan (Auto)</label>
+            <input type="number" id="input_kekosongan" name="jumlah_kekosongan" class="f-input bg-slate-100 cursor-not-allowed font-bold text-red-600" readonly value="{{ jumlah_kekosongan|default:'0' }}">
+        </div>
     </div>
-    <div class="grid grid-cols-2 gap-3 mb-3">
+
+    <!-- JADUAL DINAMIK STAF BERENAMA -->
+    <div class="mt-8 border-t border-slate-100 pt-5 mb-5">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <label class="block text-sm font-extrabold text-slate-700 tracking-wide">Senarai Kakitangan Berenama</label>
+                <p class="text-[10px] text-slate-500 font-medium">Masukkan senarai staf fasiliti untuk sistem mengira pengisian secara automatik.</p>
+            </div>
+            <button type="button" onclick="tambahBarisStaf()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-sm"><i class="fas fa-user-plus mr-1.5"></i> Tambah Staf</button>
+        </div>
+        
+        <div class="overflow-x-auto border border-slate-200 rounded-xl bg-slate-50 p-2">
+            <table class="w-full text-left border-collapse min-w-[850px]">
+                <thead class="text-[10px] uppercase text-slate-500 bg-slate-100 rounded-lg">
+                    <tr>
+                        <th class="p-3 font-bold w-1/4 rounded-l-lg">Nama Penuh Staf</th>
+                        <th class="p-3 font-bold w-32">MyKad / No.Pekerja</th>
+                        <th class="p-3 font-bold w-48">Skim & Gred</th>
+                        <th class="p-3 font-bold w-40">Status Lantikan</th>
+                        <th class="p-3 font-bold">Catatan Mobilisasi</th>
+                        <th class="p-3 font-bold w-12 text-center rounded-r-lg">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="staf-tbody" class="divide-y divide-slate-200 text-xs bg-white">
+                    {% for staf in senarai_staf %}
+                    <tr class="staf-row group hover:bg-slate-50 transition">
+                        <td class="p-2"><input type="text" name="nama_staf[]" value="{{ staf.nama_staf }}" placeholder="Cth: Dr. Ahmad" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500" required oninput="kiraKekosonganUI()"></td>
+                        <td class="p-2"><input type="text" name="no_pengenalan[]" value="{{ staf.no_pengenalan }}" placeholder="No. ID" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
+                        <td class="p-2 flex gap-1.5">
+                            <select name="skim[]" class="w-2/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white">
+                                <option value="pakar" {% if staf.skim == 'pakar' %}selected{% endif %}>Pakar (FMS/Klinikal)</option>
+                                <option value="perubatan" {% if staf.skim == 'perubatan' %}selected{% endif %}>Perubatan/Pergigian (MO)</option>
+                                <option value="paramedik" {% if staf.skim == 'paramedik' %}selected{% endif %}>Paramedik/Jururawat</option>
+                                <option value="farmasi" {% if staf.skim == 'farmasi' %}selected{% endif %}>Farmasi</option>
+                                <option value="allied_health" {% if staf.skim == 'allied_health' %}selected{% endif %}>Sains Bersekutu</option>
+                                <option value="sokongan" {% if staf.skim == 'sokongan' %}selected{% endif %}>Sokongan/Tadbir</option>
+                            </select>
+                            <input type="text" name="gred[]" value="{{ staf.gred }}" placeholder="Gred" class="w-1/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 uppercase">
+                        </td>
+                        <td class="p-2">
+                            <select name="status_lantikan[]" class="w-full mb-1 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white font-semibold" onchange="toggleTarikh(this); kiraKekosonganUI();">
+                                <option value="tetap" {% if staf.status_lantikan == 'tetap' %}selected{% endif %}>Tetap</option>
+                                <option value="kontrak" {% if staf.status_lantikan == 'kontrak' %}selected{% endif %}>Kontrak</option>
+                                <option value="mystep" {% if staf.status_lantikan == 'mystep' %}selected{% endif %}>MySTEP</option>
+                                <option value="pinjaman_in" {% if staf.status_lantikan == 'pinjaman_in' %}selected{% endif %}>Pinjam Masuk (IN)</option>
+                                <option value="pinjaman_out" {% if staf.status_lantikan == 'pinjaman_out' %}selected{% endif %}>Pinjam Keluar (OUT)</option>
+                            </select>
+                            <input type="date" name="tarikh_tamat[]" value="{{ staf.tarikh_tamat_perkhidmatan|date:'Y-m-d'|default:'' }}" class="tarikh-tamat w-full p-2 border border-rose-200 bg-rose-50 text-rose-700 rounded-lg text-[10px] outline-none focus:border-rose-400 {% if staf.status_lantikan == 'tetap' or staf.status_lantikan == 'pinjaman_out' %}hidden{% endif %}" title="Tarikh Tamat Kontrak">
+                        </td>
+                        <td class="p-2"><input type="text" name="catatan_mobilisasi[]" value="{{ staf.catatan_mobilisasi }}" placeholder="Lokasi Penempatan..." class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
+                        <td class="p-2 text-center"><button type="button" onclick="padamBaris(this)" class="text-slate-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                    {% empty %}
+                    <!-- Baris Default Kosong jika tiada data -->
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- SOALAN LAMA: Pinjaman, Isu & Pertukaran -->
+    <div class="grid grid-cols-2 gap-3 mb-3 border-t border-slate-100 pt-4">
         <div class="q-card">
             <label class="block text-xs font-bold text-slate-500 mb-2">Terdapat kakitangan pinjaman fasiliti lain?</label>
             <div class="flex gap-2 mb-2">
-                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_ya" value="1" onchange="toggleNote('pinjam_nota_wrap', true)" {% if ada_kakitangan_pinjaman == True %}checked{% endif %}><label for="pinjam_ya" class="other"><i class="fas fa-check"></i> Ya (Nyatakan)</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_ya" value="1" onchange="toggleNote('pinjam_nota_wrap', true)" {% if ada_kakitangan_pinjaman == True %}checked{% endif %}><label for="pinjam_ya" class="other"><i class="fas fa-check"></i> Ya</label></div>
                 <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_tidak" value="0" onchange="toggleNote('pinjam_nota_wrap', false)" {% if ada_kakitangan_pinjaman == False %}checked{% endif %}><label for="pinjam_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
             </div>
             <div id="pinjam_nota_wrap" class="mt-2 {% if ada_kakitangan_pinjaman != True %}hidden{% endif %}"><input type="text" name="nota_kakitangan_pinjaman" class="f-input" placeholder="Cth: 1 Pegawai Perubatan..." value="{{ nota_kakitangan_pinjaman|default:'' }}"></div>
@@ -190,6 +261,84 @@
     const syncCuti = bindCheckboxGroup('f_cara_minta_cuti', 'cuti-cb', 'cuti_other_cb', 'cuti_other_text');
     const syncIsu = bindCheckboxGroup('f_isu_penempatan', 'isu-cb', 'isu_other_cb', 'isu_other_text');
     function syncAllCheckboxes() { syncShift(); syncCorak(); syncRoster(); syncCuti(); syncIsu(); }
+
+    // --- FUNGSI JADUAL DINAMIK & AUTOKIRA ---
+    function tambahBarisStaf() {
+        const tbody = document.getElementById('staf-tbody');
+        const tr = document.createElement('tr');
+        tr.className = 'staf-row group hover:bg-slate-50 transition';
+        tr.innerHTML = `
+            <td class="p-2"><input type="text" name="nama_staf[]" placeholder="Cth: Dr. Ahmad" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500" required oninput="kiraKekosonganUI()"></td>
+            <td class="p-2"><input type="text" name="no_pengenalan[]" placeholder="No. ID" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
+            <td class="p-2 flex gap-1.5">
+                <select name="skim[]" class="w-2/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white">
+                    <option value="pakar">Pakar (FMS/Klinikal)</option>
+                    <option value="perubatan">Perubatan/Pergigian (MO)</option>
+                    <option value="paramedik">Paramedik/Jururawat</option>
+                    <option value="farmasi">Farmasi</option>
+                    <option value="allied_health">Sains Bersekutu</option>
+                    <option value="sokongan">Sokongan/Tadbir</option>
+                </select>
+                <input type="text" name="gred[]" placeholder="Gred" class="w-1/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 uppercase">
+            </td>
+            <td class="p-2">
+                <select name="status_lantikan[]" class="w-full mb-1 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white font-semibold" onchange="toggleTarikh(this); kiraKekosonganUI();">
+                    <option value="tetap">Tetap</option>
+                    <option value="kontrak">Kontrak</option>
+                    <option value="mystep">MySTEP</option>
+                    <option value="pinjaman_in">Pinjam Masuk (IN)</option>
+                    <option value="pinjaman_out">Pinjam Keluar (OUT)</option>
+                </select>
+                <input type="date" name="tarikh_tamat[]" class="tarikh-tamat w-full p-2 border border-rose-200 bg-rose-50 text-rose-700 rounded-lg text-[10px] outline-none focus:border-rose-400 hidden">
+            </td>
+            <td class="p-2"><input type="text" name="catatan_mobilisasi[]" placeholder="Lokasi Penempatan..." class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
+            <td class="p-2 text-center"><button type="button" onclick="padamBaris(this)" class="text-slate-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+        kiraKekosonganUI();
+    }
+
+    function toggleTarikh(selectElement) {
+        const inputDate = selectElement.nextElementSibling;
+        // Tunjuk kotak tarikh jika Kontrak, MySTEP atau Pinjam Masuk
+        if (selectElement.value === 'kontrak' || selectElement.value === 'mystep' || selectElement.value === 'pinjaman_in') {
+            inputDate.classList.remove('hidden');
+            inputDate.required = true;
+        } else {
+            inputDate.classList.add('hidden');
+            inputDate.required = false;
+        }
+    }
+
+    function padamBaris(btn) {
+        const row = btn.closest('tr');
+        row.remove();
+        kiraKekosonganUI();
+    }
+
+    function kiraKekosonganUI() {
+        const inputPerjawatan = document.getElementById('input_perjawatan');
+        const perjawatan = parseInt(inputPerjawatan.value) || 0;
+        
+        let pengisian = 0;
+        const rows = document.querySelectorAll('.staf-row');
+        rows.forEach(row => {
+            const nama = row.querySelector('input[name="nama_staf[]"]').value.trim();
+            const status = row.querySelector('select[name="status_lantikan[]"]').value;
+            // Hanya kira yang ada nama dan BUKAN pinjaman keluar
+            if(nama !== '' && status !== 'pinjaman_out') {
+                pengisian++;
+            }
+        });
+        
+        document.getElementById('input_pengisian').value = pengisian;
+        const kekosongan = Math.max(0, perjawatan - pengisian);
+        document.getElementById('input_kekosongan').value = kekosongan;
+    }
+
+    // Call once on page load to tally existing staff
+    window.addEventListener('load', kiraKekosonganUI);
+
 </script>
 </body>
 </html>

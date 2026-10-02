@@ -2221,6 +2221,9 @@ def edit_pengurusan_sumber_manusia(request, pk):
             'cara_minta_cuti': k2.cara_minta_cuti,
             'isu_penempatan': k2.isu_penempatan,
             'status_pertukaran_staf': k2.status_pertukaran_staf,
+            
+            # DATA SENARAI STAF BERENAMA
+            'senarai_staf': k2.senarai_staf.all()
         })
 
     # Data Checkboxes
@@ -2262,19 +2265,60 @@ def _save_pengurusan_sumber_manusia(request, fp):
 
     def yesno(key):
         val = post.get(key)
-        if val == '1': return True
-        if val == '0': return False
-        return None
+        return True if val == '1' else (False if val == '0' else None)
         
     def intval(key):
         try: return int(post.get(key, ''))
         except (ValueError, TypeError): return None
 
     k2 = (fp.k_sumber_manusia if fp and fp.k_sumber_manusia else None) or KlusterSumberManusia()
+    k2.save() # Simpan awal untuk jana ID bagi pautan StafFasiliti
     
+    # --- PROSES SENARAI STAF BERENAMA & AUTOKIRA ---
+    from .models import StafFasiliti
+    k2.senarai_staf.all().delete() # Padam rekod lama jika ada untuk elak duplikasi
+    
+    nama_staf_list = post.getlist('nama_staf[]')
+    no_pengenalan_list = post.getlist('no_pengenalan[]')
+    skim_list = post.getlist('skim[]')
+    gred_list = post.getlist('gred[]')
+    status_lantikan_list = post.getlist('status_lantikan[]')
+    tarikh_tamat_list = post.getlist('tarikh_tamat[]')
+    catatan_list = post.getlist('catatan_mobilisasi[]')
+    
+    jumlah_pengisian_dikira = 0
+    
+    for i in range(len(nama_staf_list)):
+        nama = nama_staf_list[i].strip()
+        if not nama: continue
+            
+        tarikh_tamat_val = tarikh_tamat_list[i].strip() if i < len(tarikh_tamat_list) else ''
+        
+        StafFasiliti.objects.create(
+            kluster_sm=k2,
+            nama_staf=nama,
+            no_pengenalan=no_pengenalan_list[i].strip() if i < len(no_pengenalan_list) else '',
+            skim=skim_list[i] if i < len(skim_list) else 'sokongan',
+            gred=gred_list[i].strip() if i < len(gred_list) else '',
+            status_lantikan=status_lantikan_list[i] if i < len(status_lantikan_list) else 'tetap',
+            tarikh_tamat_perkhidmatan=tarikh_tamat_val if tarikh_tamat_val else None,
+            catatan_mobilisasi=catatan_list[i].strip() if i < len(catatan_list) else ''
+        )
+        # Anggap 'Pinjaman Keluar' tidak berada di fasiliti ini
+        status_kini = status_lantikan_list[i] if i < len(status_lantikan_list) else 'tetap'
+        if status_kini != 'pinjaman_out':
+            jumlah_pengisian_dikira += 1
+            
+    # Pengiraan Automatik
     k2.jumlah_perjawatan = intval('jumlah_perjawatan')
-    k2.jumlah_pengisian  = intval('jumlah_pengisian')
-    k2.jumlah_kekosongan = intval('jumlah_kekosongan')
+    k2.jumlah_pengisian  = jumlah_pengisian_dikira
+    
+    if k2.jumlah_perjawatan is not None:
+        k2.jumlah_kekosongan = max(0, k2.jumlah_perjawatan - k2.jumlah_pengisian)
+    else:
+        k2.jumlah_kekosongan = 0
+    # ---------------------------------------------
+    
     k2.ada_kakitangan_pinjaman = yesno('ada_kakitangan_pinjaman')
     k2.nota_kakitangan_pinjaman = post.get('nota_kakitangan_pinjaman', '').strip()
     
@@ -2295,7 +2339,8 @@ def _save_pengurusan_sumber_manusia(request, fp):
     fp.k_sumber_manusia = k2
     fp.save()
     
-    messages.success(request, 'Bahagian Pengurusan Sumber Manusia berjaya dikemaskini.')
+    from django.contrib import messages
+    messages.success(request, 'Bahagian Pengurusan Sumber Manusia & Senarai Staf Berenama berjaya dikemaskini.')
     return redirect('home:pilih_modul', pk=fp.pk)
 
 # ══════════════════════════════════════════════════════════════════
