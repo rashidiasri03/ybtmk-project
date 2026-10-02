@@ -346,27 +346,100 @@
                     <div class="w-9 h-9 rounded-xl bg-purple-200 flex items-center justify-center text-purple-700 text-sm"><i class="fas fa-users"></i></div>
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">Bahagian 4: Pengurusan Sumber Manusia</h3>
-                        <p class="text-[11px] text-slate-500">Kekuatan staf, penjadualan, syif, dan pertukaran</p>
+                        <p class="text-[11px] text-slate-500">Kekuatan staf, penjadualan, syif, dan status kontrak</p>
                     </div>
                 </div>
                 {% if fp.k_sumber_manusia %}
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Jumlah Perjawatan" value=fp.k_sumber_manusia.jumlah_perjawatan type="text" %}
-                    {% include 'home/_detail_row.html' with label="Jumlah Pengisian (Berkhidmat)" value=fp.k_sumber_manusia.jumlah_pengisian type="text" %}
-                    {% include 'home/_detail_row.html' with label="Jumlah Kekosongan" value=fp.k_sumber_manusia.jumlah_kekosongan type="text" %}
+                
+                <!-- KAD METRIK AUTOKIRA -->
+                <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row gap-6 items-center justify-between">
+                    <div class="flex gap-6 w-full md:w-auto justify-center md:justify-start">
+                        <div class="text-center">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Perjawatan</p>
+                            <p class="text-2xl font-black text-slate-700">{{ fp.k_sumber_manusia.jumlah_perjawatan|default:"0" }}</p>
+                        </div>
+                        <div class="text-center border-l border-slate-200 pl-6">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pengisian</p>
+                            <p class="text-2xl font-black text-purple-600">{{ fp.k_sumber_manusia.jumlah_pengisian|default:"0" }}</p>
+                        </div>
+                        <div class="text-center border-l border-slate-200 pl-6">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Kekosongan</p>
+                            <p class="text-2xl font-black text-red-500">{{ fp.k_sumber_manusia.jumlah_kekosongan|default:"0" }}</p>
+                        </div>
+                    </div>
                     
-                    {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman %}
-                        {% with pinjam_txt="Ya ("|add:fp.k_sumber_manusia.nota_kakitangan_pinjaman|add:")" %}
-                        {% include 'home/_detail_row.html' with label="Tenaga Kerja/Pinjaman Fasiliti Lain?" value=pinjam_txt type="text" %}
-                        {% endwith %}
-                    {% else %}
-                        {% include 'home/_detail_row.html' with label="Tenaga Kerja/Pinjaman Fasiliti Lain?" value=fp.k_sumber_manusia.ada_kakitangan_pinjaman type="bool" %}
-                    {% endif %}
-
-                    {% include 'home/_detail_row.html' with label="Ada Isu/Krisis Petugas?" value=fp.k_sumber_manusia.ada_isu_kakitangan type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Fasiliti/Layanan Khas Petugas?" value=fp.k_sumber_manusia.ada_fasiliti_petugas type="bool" %}
+                    <div class="bg-white px-5 py-3 rounded-xl border {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}border-red-200 shadow-red-100{% else %}border-emerald-100 shadow-emerald-50{% endif %} shadow-sm flex items-center gap-4 w-full md:w-auto justify-center">
+                        <div class="w-10 h-10 rounded-full {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}bg-red-50 text-red-500{% else %}bg-emerald-50 text-emerald-500{% endif %} flex items-center justify-center text-lg"><i class="fas fa-{% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}exclamation-triangle{% else %}check-circle{% endif %}"></i></div>
+                        <div>
+                            <p class="text-[10px] font-bold {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}text-red-400{% else %}text-emerald-500{% endif %} uppercase tracking-widest">Kadar Kekosongan</p>
+                            <p class="text-xl font-black {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}text-red-600{% else %}text-emerald-600{% endif %}">{{ fp.k_sumber_manusia.peratus_kekosongan }}%</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 divide-y divide-slate-50 border-t border-slate-50">
+
+                <!-- JADUAL BERENAMA MENGIKUT SKIM -->
+                {% if fp.k_sumber_manusia.senarai_staf.exists %}
+                <div class="p-6 border-b border-slate-100">
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-4"><i class="fas fa-clipboard-list text-purple-500 mr-2"></i>Pecahan Staf Mengikut Skim</h4>
+                    
+                    <!-- Fungsi regroup menyusun data mengikut kategori skim secara automatik -->
+                    {% regroup fp.k_sumber_manusia.senarai_staf.all by get_skim_display as skim_list %}
+                    
+                    <div class="space-y-4">
+                        {% for skim in skim_list %}
+                        <div class="border border-slate-200 rounded-xl overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-700 flex justify-between items-center">
+                                <span>{{ skim.grouper }}</span>
+                                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md">{{ skim.list|length }} Orang</span>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                {% for staf in skim.list %}
+                                <div class="px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-slate-50 transition gap-2">
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">{{ staf.nama_staf }} <span class="text-[10px] text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded ml-1">{{ staf.gred }}</span></p>
+                                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5 tracking-wide">{{ staf.no_pengenalan|default:"Tiada ID" }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-wrap sm:justify-end">
+                                        {% if staf.catatan_mobilisasi %}
+                                        <span class="text-[10px] font-semibold text-slate-500 italic pr-2 border-r border-slate-200">
+                                            {{ staf.catatan_mobilisasi }}
+                                        </span>
+                                        {% endif %}
+                                        
+                                        <span class="text-[10px] font-bold px-2 py-1 rounded-md border
+                                            {% if staf.status_lantikan == 'tetap' %}bg-emerald-50 text-emerald-600 border-emerald-100
+                                            {% elif staf.status_lantikan == 'kontrak' or staf.status_lantikan == 'mystep' %}bg-amber-50 text-amber-600 border-amber-100
+                                            {% else %}bg-sky-50 text-sky-600 border-sky-100{% endif %}">
+                                            {{ staf.get_status_lantikan_display }}
+                                        </span>
+                                        
+                                        {% if staf.is_kontrak_tamat_hampir %}
+                                        <span class="text-[10px] font-bold px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 shadow-sm" title="Tamat pada {{ staf.tarikh_tamat_perkhidmatan }}">
+                                            <i class="fas fa-clock mr-1 animate-pulse"></i> Tamat Hampir ({{ staf.tarikh_tamat_perkhidmatan|date:"d M Y" }})
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- MAKLUMAT OPERASI & ISU -->
+                <div class="grid grid-cols-1 divide-y divide-slate-50">
+                    <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Terdapat Pinjaman Staf?</p>
+                            <p class="text-sm font-bold text-slate-700">{% if fp.k_sumber_manusia.ada_kakitangan_pinjaman %}Ya ({{ fp.k_sumber_manusia.nota_kakitangan_pinjaman }}){% else %}Tidak{% endif %}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Krisis Kakitangan?</p>
+                            <p class="text-sm font-bold text-slate-700">{% if fp.k_sumber_manusia.ada_isu_kakitangan %}<span class="text-red-500">Ya, terdapat krisis</span>{% else %}<span class="text-emerald-500">Tiada Krisis</span>{% endif %}</p>
+                        </div>
+                    </div>
                     <div class="px-6 py-4">
                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Bilangan Shift Kerja</p>
                         <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.jenis_shift|default:"—"|linebreaksbr }}</p>
