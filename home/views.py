@@ -12,6 +12,7 @@ from .models import (
 )
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from .models import SoalanTambahan, JawapanSoalanTambahan
 
 def custom_login(request):
     if request.user.is_authenticated:
@@ -2213,16 +2214,12 @@ def edit_pengurusan_sumber_manusia(request, pk):
             'nota_kakitangan_pinjaman': k2.nota_kakitangan_pinjaman,
             'ada_isu_kakitangan': k2.ada_isu_kakitangan,
             'ada_fasiliti_petugas': k2.ada_fasiliti_petugas,
-            
-            # Text list untuk checkboxes
             'jenis_shift': k2.jenis_shift,
             'corak_penugasan': k2.corak_penugasan,
             'pengurusan_jadual': k2.pengurusan_jadual,
             'cara_minta_cuti': k2.cara_minta_cuti,
             'isu_penempatan': k2.isu_penempatan,
             'status_pertukaran_staf': k2.status_pertukaran_staf,
-            
-            # DATA SENARAI STAF BERENAMA
             'senarai_staf': k2.senarai_staf.all()
         })
 
@@ -2258,10 +2255,37 @@ def edit_pengurusan_sumber_manusia(request, pk):
         'Tidak Berkenaan'
     ]
 
+    # --- KOD TARIK SOALAN DINAMIK & JAWAPAN ---
+    soalan_dinamik = []
+    soalan_aktif = SoalanTambahan.objects.filter(modul='sumber_manusia', is_aktif=True)
+    
+    for s in soalan_aktif:
+        j_teks = ''
+        j_fail = None
+        if fp:
+            jawapan_obj = JawapanSoalanTambahan.objects.filter(profil_fasiliti=fp, soalan=s).first()
+            if jawapan_obj:
+                j_teks = jawapan_obj.jawapan_teks
+                j_fail = jawapan_obj.jawapan_fail
+
+        soalan_dinamik.append({
+            'id': s.id,
+            'teks_soalan': s.teks_soalan,
+            'jenis_input': s.jenis_input,
+            'is_wajib': s.is_wajib,
+            'jawapan_teks': j_teks,
+            'jawapan_fail': j_fail,
+        })
+
+    ctx['soalan_dinamik'] = soalan_dinamik
+    # ------------------------------------------
+
     return render(request, 'home/form_pengurusan_sumber_manusia.html', ctx)
+
 
 def _save_pengurusan_sumber_manusia(request, fp):
     post = request.POST
+    files = request.FILES # Wajib ditarik untuk membaca muat naik fail
 
     def yesno(key):
         val = post.get(key)
@@ -2272,11 +2296,11 @@ def _save_pengurusan_sumber_manusia(request, fp):
         except (ValueError, TypeError): return None
 
     k2 = (fp.k_sumber_manusia if fp and fp.k_sumber_manusia else None) or KlusterSumberManusia()
-    k2.save() # Simpan awal untuk jana ID bagi pautan StafFasiliti
+    k2.save() # Simpan awal
     
     # --- PROSES SENARAI STAF BERENAMA & AUTOKIRA ---
     from .models import StafFasiliti
-    k2.senarai_staf.all().delete() # Padam rekod lama jika ada untuk elak duplikasi
+    k2.senarai_staf.all().delete()
     
     nama_staf_list = post.getlist('nama_staf[]')
     no_pengenalan_list = post.getlist('no_pengenalan[]')
@@ -2304,12 +2328,10 @@ def _save_pengurusan_sumber_manusia(request, fp):
             tarikh_tamat_perkhidmatan=tarikh_tamat_val if tarikh_tamat_val else None,
             catatan_mobilisasi=catatan_list[i].strip() if i < len(catatan_list) else ''
         )
-        # Anggap 'Pinjaman Keluar' tidak berada di fasiliti ini
         status_kini = status_lantikan_list[i] if i < len(status_lantikan_list) else 'tetap'
         if status_kini != 'pinjaman_out':
             jumlah_pengisian_dikira += 1
             
-    # Pengiraan Automatik
     k2.jumlah_perjawatan = intval('jumlah_perjawatan')
     k2.jumlah_pengisian  = jumlah_pengisian_dikira
     
@@ -2317,21 +2339,17 @@ def _save_pengurusan_sumber_manusia(request, fp):
         k2.jumlah_kekosongan = max(0, k2.jumlah_perjawatan - k2.jumlah_pengisian)
     else:
         k2.jumlah_kekosongan = 0
-    # ---------------------------------------------
     
     k2.ada_kakitangan_pinjaman = yesno('ada_kakitangan_pinjaman')
     k2.nota_kakitangan_pinjaman = post.get('nota_kakitangan_pinjaman', '').strip()
-    
     k2.ada_isu_kakitangan = yesno('ada_isu_kakitangan')
     k2.ada_fasiliti_petugas = yesno('ada_fasiliti_petugas')
-    
     k2.jenis_shift = post.get('jenis_shift', '').strip()
     k2.corak_penugasan = post.get('corak_penugasan', '').strip()
     k2.pengurusan_jadual = post.get('pengurusan_jadual', '').strip()
     k2.cara_minta_cuti = post.get('cara_minta_cuti', '').strip()
     k2.isu_penempatan = post.get('isu_penempatan', '').strip()
     k2.status_pertukaran_staf = post.get('status_pertukaran_staf', '').strip()
-
     k2.save()
 
     if fp is None:
@@ -2339,8 +2357,26 @@ def _save_pengurusan_sumber_manusia(request, fp):
     fp.k_sumber_manusia = k2
     fp.save()
     
+    # --- KOD SIMPAN JAWAPAN SOALAN DINAMIK ---
+    soalan_aktif = SoalanTambahan.objects.filter(modul='sumber_manusia', is_aktif=True)
+    for s in soalan_aktif:
+        field_name = f"soalan_dyn_{s.id}"
+        jawapan_obj, created = JawapanSoalanTambahan.objects.get_or_create(
+            profil_fasiliti=fp,
+            soalan=s
+        )
+        
+        if s.jenis_input == 'fail':
+            if field_name in files:
+                jawapan_obj.jawapan_fail = files[field_name]
+                jawapan_obj.save()
+        else:
+            jawapan_obj.jawapan_teks = post.get(field_name, '').strip()
+            jawapan_obj.save()
+    # ------------------------------------------
+
     from django.contrib import messages
-    messages.success(request, 'Bahagian Pengurusan Sumber Manusia & Senarai Staf Berenama berjaya dikemaskini.')
+    messages.success(request, 'Bahagian Pengurusan Sumber Manusia & Soalan Dinamik berjaya dikemaskini.')
     return redirect('home:pilih_modul', pk=fp.pk)
 
 # ══════════════════════════════════════════════════════════════════
@@ -2569,3 +2605,45 @@ from django.shortcuts import redirect
 def custom_logout(request):
     logout(request)
     return redirect('login')  # Mengarahkan semula pengguna ke halaman login
+
+@login_required
+@user_passes_test(is_admin)
+def urus_soalan_tambahan(request):
+    """Halaman khas Admin untuk melihat, menambah, dan menukar status soalan dinamik."""
+    if request.method == 'POST':
+        modul = request.POST.get('modul', '').strip()
+        teks_soalan = request.POST.get('teks_soalan', '').strip()
+        jenis_input = request.POST.get('jenis_input', 'teks').strip()
+        pilihan_dropdown = request.POST.get('pilihan_dropdown', '').strip()
+        is_wajib = request.POST.get('is_wajib') == 'on'
+
+        if modul and teks_soalan:
+            SoalanTambahan.objects.create(
+                modul=modul,
+                teks_soalan=teks_soalan,
+                jenis_input=jenis_input,
+                pilihan_dropdown=pilihan_dropdown,
+                is_wajib=is_wajib,
+                created_by=request.user
+            )
+            messages.success(request, 'Soalan tambahan baharu berjaya ditambah!')
+        else:
+            messages.error(request, 'Sila isi modul dan teks soalan.')
+        return redirect('home:urus_soalan_tambahan')
+
+    soalan_list = SoalanTambahan.objects.all().order_by('modul', '-created_at')
+    return render(request, 'home/urus_soalan_tambahan.html', {
+        'soalan_list': soalan_list,
+        'modul_choices': SoalanTambahan.MODUL_CHOICES,
+        'jenis_choices': SoalanTambahan.JENIS_INPUT_CHOICES,
+    })
+
+@login_required
+@user_passes_test(is_admin)
+def padam_soalan_tambahan(request, pk):
+    """Padam soalan dinamik."""
+    soalan = get_object_or_404(SoalanTambahan, pk=pk)
+    teks = soalan.teks_soalan
+    soalan.delete()
+    messages.success(request, f'Soalan "{teks}" berjaya dipadam.')
+    return redirect('home:urus_soalan_tambahan')

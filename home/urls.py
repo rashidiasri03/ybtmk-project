@@ -51,4 +51,8 @@ urlpatterns = [
     path('profiling/servis/<int:pk>/edit/', views.edit_servis, name='edit_servis'),
     path('profiling/ubat/<int:pk>/edit/', views.edit_ubat, name='edit_ubat'),
     path('profiling/pesakit/<int:pk>/edit/', views.edit_pesakit, name='edit_pesakit'),
+
+    # LALUAN PENGURUSAN SOALAN DINAMIK (ADMIN)
+    path('urus-soalan-tambahan/', views.urus_soalan_tambahan, name='urus_soalan_tambahan'),
+    path('padam-soalan-tambahan/<int:pk>/', views.padam_soalan_tambahan, name='padam_soalan_tambahan'),
 ]

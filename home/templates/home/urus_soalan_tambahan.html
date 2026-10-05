@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Pengurusan Soalan Dinamik | YBTMK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>* { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-slate-50 min-h-screen antialiased">
+
+<div class="flex min-h-screen">
+    {% include 'home/_sidebar.html' with active_page='urus_soalan_tambahan' %}
+
+    <div class="ml-64 flex-1 p-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-800">Pembina Soalan Profiling Dinamik</h1>
+                <p class="text-xs text-slate-500 mt-1">Tambah atau urus soalan profiling baharu mengikut modul tanpa perlu mengubah kod.</p>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="p-4 rounded-xl mb-4 text-xs font-bold {% if msg.tags == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-200{% else %}bg-rose-50 text-rose-700 border border-rose-200{% endif %}">
+            {{ msg }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- BORANG TAMBAH SOALAN -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit">
+                <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+                    <i class="fas fa-plus-circle text-purple-600 mr-2"></i>Tambah Soalan Baharu
+                </h2>
+
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Pilih Modul / Bahagian</label>
+                        <select name="modul" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-purple-600 bg-slate-50" required>
+                            {% for key, val in modul_choices %}
+                            <option value="{{ key }}">{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Teks Soalan</label>
+                        <textarea name="teks_soalan" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs outline-none focus:border-purple-600" placeholder="Cth: Adakah fasiliti mempunyai bilik kaunseling khas?" required rows="3"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Input Jawapan</label>
+                        <select name="jenis_input" id="jenis_input_select" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-purple-600 bg-slate-50" onchange="toggleDropdownOpt(this.value)">
+                            {% for key, val in jenis_choices %}
+                            <option value="{{ key }}">{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="dropdown_opt_wrap" class="hidden">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Pilihan Dropdown (Asingkan Koma)</label>
+                        <input type="text" name="pilihan_dropdown" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs outline-none focus:border-purple-600" placeholder="Pilihan A, Pilihan B, Pilihan C">
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2">
+                        <input type="checkbox" name="is_wajib" id="is_wajib" class="accent-purple-600 w-4 h-4">
+                        <label for="is_wajib" class="text-xs font-bold text-slate-700">Wajib Diisi oleh Pengguna?</label>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-purple-200 transition">
+                        Simpan Soalan Baharu
+                    </button>
+                </form>
+            </div>
+
+            <!-- SENARAI SOALAN SEDIA ADA -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h2 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-3">
+                    <i class="fas fa-list-ul text-purple-600 mr-2"></i>Senarai Soalan Dinamik Sedia Ada
+                </h2>
+
+                <div class="space-y-3">
+                    {% for s in soalan_list %}
+                    <div class="p-4 border border-slate-200 rounded-xl flex items-start justify-between bg-slate-50/50 hover:bg-white transition">
+                        <div class="pr-4">
+                            <span class="inline-block px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-[10px] font-bold uppercase mb-1">
+                                {{ s.get_modul_display }}
+                            </span>
+                            <p class="text-xs font-bold text-slate-800">{{ s.teks_soalan }}</p>
+                            <p class="text-[10px] text-slate-400 mt-1">
+                                Jenis: <strong class="text-slate-600">{{ s.get_jenis_input_display }}</strong> 
+                                {% if s.is_wajib %}&bull; <span class="text-rose-500 font-bold">Wajib</span>{% endif %}
+                            </p>
+                        </div>
+                        <a href="{% url 'home:padam_soalan_tambahan' s.pk %}" onclick="return confirm('Adakah anda pasti mahu memadam soalan ini?')" class="text-slate-300 hover:text-red-500 p-2 rounded-lg transition">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-slate-400 italic text-center py-8">Tiada soalan tambahan dicipta lagi.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDropdownOpt(val) {
+        const wrap = document.getElementById('dropdown_opt_wrap');
+        if(val === 'dropdown') wrap.classList.remove('hidden');
+        else wrap.classList.add('hidden');
+    }
+</script>
+</body>
+</html>

@@ -613,3 +613,57 @@ def create_user_profile(sender, instance, created, **kwargs):
     """Auto-create a UserProfile when a new User is saved."""
     if created:
         UserProfile.objects.get_or_create(user=instance)
+
+# ─────────────────────────────────────────────────────────────────
+# MODEL SOALAN & JAWAPAN DINAMIK (Dicipta Oleh Admin)
+# ─────────────────────────────────────────────────────────────────
+class SoalanTambahan(models.Model):
+    MODUL_CHOICES = [
+        ('latar_belakang', 'Bahagian 1: Latar Belakang'),
+        ('infrastruktur', 'Bahagian 2: Infrastruktur Fasiliti'),
+        ('aset', 'Bahagian 3: Aset Perubatan'),
+        ('sumber_manusia', 'Bahagian 4: Pengurusan Sumber Manusia'),
+        ('perkhidmatan', 'Bahagian 5: Penyampaian Perkhidmatan'),
+        ('kewangan', 'Bahagian 6: Kewangan & Perancangan'),
+        ('lain_lain', 'Bahagian 7: Lain-lain'),
+    ]
+
+    JENIS_INPUT_CHOICES = [
+        ('teks', 'Teks Ringkas'),
+        ('textarea', 'Teks Panjang / Huraian'),
+        ('nombor', 'Nombor'),
+        ('ya_tidak', 'Pilihan Ya / Tidak'),
+        ('dropdown', 'Pilihan Dropdown (Asingkan pilihan dengan koma)'),
+        ('fail', 'Muat Naik Fail / Dokumen'),
+    ]
+
+    modul = models.CharField(max_length=50, choices=MODUL_CHOICES, verbose_name="Modul / Bahagian")
+    teks_soalan = models.CharField(max_length=300, verbose_name="Teks Soalan")
+    jenis_input = models.CharField(max_length=20, choices=JENIS_INPUT_CHOICES, default='teks', verbose_name="Jenis Input")
+    pilihan_dropdown = models.TextField(blank=True, verbose_name="Pilihan Dropdown (Asingkan dengan koma: Pilihan A, Pilihan B)")
+    is_wajib = models.BooleanField(default=False, verbose_name="Wajib Diisi?")
+    is_aktif = models.BooleanField(default=True, verbose_name="Soalan Aktif?")
+    
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"[{self.get_modul_display()}] {self.teks_soalan}"
+
+    class Meta:
+        verbose_name = "Soalan Tambahan Dinamik"
+        verbose_name_plural = "Soalan Tambahan Dinamik"
+
+
+class JawapanSoalanTambahan(models.Model):
+    profil_fasiliti = models.ForeignKey(FacilityProfile, on_delete=models.CASCADE, related_name='jawapan_tambahan')
+    soalan = models.ForeignKey(SoalanTambahan, on_delete=models.CASCADE, related_name='jawapan_set')
+    jawapan_teks = models.TextField(blank=True, verbose_name="Jawapan Teks / Pilihan")
+    jawapan_fail = models.FileField(upload_to='jawapan_tambahan_files/', null=True, blank=True, verbose_name="Fail Lampiran")
+    
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Jawapan Soalan Tambahan"
+        verbose_name_plural = "Jawapan Soalan Tambahan"
+        unique_together = ('profil_fasiliti', 'soalan')
