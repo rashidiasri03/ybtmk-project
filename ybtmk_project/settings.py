@@ -48,7 +48,9 @@ else:
     # TETAPAN BLUEHOST (Production / Live)
     # -----------------------------------------
     # Simbol '*' diletakkan agar anda tidak mendapat ralat ketika menguji sistem di Bluehost
-    ALLOWED_HOSTS = ['digitalreadiness.michma.org', 'healomic.org', '129.121.121.11', 'localhost', '127.0.0.1', '*']
+    ALLOWED_HOSTS = ['ybtmk.michma.com', 'healomic.com', 'localhost', '127.0.0.1']
+
+    CSRF_TRUSTED_ORIGINS = ['https://ybtmk.michma.com', 'https://healomic.com']
     
     # Pangkalan data MySQL Bluehost
     DATABASES = {
