@@ -88,12 +88,11 @@
            {% if active_page == 'peta_fasiliti' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
             <i class="fas fa-map-marked-alt w-4 text-center"></i> Peta Fasiliti
         </a>
-        <!-- Dalam _sidebar.html (di bawah Peta Fasiliti) -->
         <a href="{% url 'home:aset_kenderaan_list' %}"
-        class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
-        {% if active_page == 'aset_kenderaan' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors
+            {% if active_page == 'aset_kenderaan' %}bg-white bg-opacity-10 text-white{% else %}text-blue-300 hover:bg-white hover:bg-opacity-10 hover:text-white{% endif %}">
             <i class="fas fa-ambulance w-4 text-center"></i> Aset Kenderaan
-        </a>
+        </a>    
         {% if request.user.is_superuser or request.user.is_staff or request.user.profile.is_jkn %}
         <a href="{% url 'home:tambah_fasiliti' %}"
            class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors

@@ -2648,23 +2648,20 @@ def padam_soalan_tambahan(request, pk):
     messages.success(request, f'Soalan "{teks}" berjaya dipadam.')
     return redirect('home:urus_soalan_tambahan')
 
-# Tambah fungsi ini di dalam views.py
-
 @login_required
 def aset_kenderaan_list(request):
     """
     Pemuka Aset Kenderaan (Fleet Readiness Dashboard)
     Mempunyai kawalan data mengikut jenis pengguna.
     """
-    from .models import AsetKenderaan, FacilityProfile
+    from .models import AsetKenderaan
     
     user = request.user
     
-    # 1. Tarik semua kenderaan berasaskan akses JKN / Superadmin
+    # 1. Tarik semua kenderaan berasaskan akses
     if user.is_superuser or is_top_management_user(user):
         kenderaan = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
     elif is_jkn_user(user):
-        # JKN hanya melihat aset bagi fasiliti di bawah seliaan mereka
         assigned_names = user.profile.assigned_facility_names
         kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
     else:
@@ -2675,7 +2672,6 @@ def aset_kenderaan_list(request):
     jumlah_ambulan = kenderaan.filter(jenis_kenderaan='ambulan').count()
     ambulan_aktif = kenderaan.filter(jenis_kenderaan='ambulan', status='aktif').count()
     
-    # Kadar Kesiagaan (Readiness Rate) untuk Ambulan sahaja
     kadar_kesiagaan = int((ambulan_aktif / jumlah_ambulan * 100)) if jumlah_ambulan > 0 else 0
     
     context = {
@@ -2684,7 +2680,7 @@ def aset_kenderaan_list(request):
         'ambulan_aktif': ambulan_aktif,
         'kadar_kesiagaan': kadar_kesiagaan,
         'active_page': 'aset_kenderaan',
-        'is_tm': is_top_management_user(user), # TM tidak boleh klik butang "Edit"
+        'is_tm': is_top_management_user(user), 
         'is_jkn': is_jkn_user(user)
     }
     
