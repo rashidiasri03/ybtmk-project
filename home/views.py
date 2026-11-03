@@ -2652,17 +2652,23 @@ def padam_soalan_tambahan(request, pk):
 def aset_kenderaan_list(request):
     """
     Pemuka Aset Kenderaan (Fleet Readiness Dashboard)
-    Mempunyai kawalan data mengikut jenis pengguna.
     """
     from .models import AsetKenderaan
     
     user = request.user
     
+    # Semakan peranan langsung dari profil pengguna
+    is_tm = False
+    is_jkn = False
+    if hasattr(user, 'profile'):
+        is_tm = user.profile.is_top_management
+        is_jkn = user.profile.is_jkn
+    
     # 1. Tarik semua kenderaan berasaskan akses
-    if user.is_superuser or is_top_management_user(user):
+    if user.is_superuser or is_tm:
         kenderaan = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
-    elif is_jkn_user(user):
-        assigned_names = user.profile.assigned_facility_names
+    elif is_jkn:
+        assigned_names = user.profile.assigned_facility_names if hasattr(user.profile, 'assigned_facility_names') else []
         kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
     else:
         # Admin Biasa / Peringkat Daerah
@@ -2680,8 +2686,8 @@ def aset_kenderaan_list(request):
         'ambulan_aktif': ambulan_aktif,
         'kadar_kesiagaan': kadar_kesiagaan,
         'active_page': 'aset_kenderaan',
-        'is_tm': is_top_management_user(user), 
-        'is_jkn': is_jkn_user(user)
+        'is_tm': is_tm, 
+        'is_jkn': is_jkn
     }
     
     return render(request, 'home/aset_kenderaan_list.html', context)
