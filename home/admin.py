@@ -10,7 +10,9 @@ from .models import (
     KlusterPerancangan,
     KlusterKonsesi,
     FacilityProfile,
-    UserProfile
+    UserProfile,
+    SyarikatServisKenderaan,  
+    AsetKenderaan
 )
 
 class StafFasilitiInline(admin.TabularInline):
@@ -44,3 +46,5 @@ admin.site.register(KlusterFasiliti)
 admin.site.register(KlusterPerancangan)
 admin.site.register(KlusterKonsesi)
 admin.site.register(UserProfile)
+admin.site.register(SyarikatServisKenderaan)
+admin.site.register(AsetKenderaan)

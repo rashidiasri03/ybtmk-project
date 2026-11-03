@@ -667,3 +667,65 @@ class JawapanSoalanTambahan(models.Model):
         verbose_name = "Jawapan Soalan Tambahan"
         verbose_name_plural = "Jawapan Soalan Tambahan"
         unique_together = ('profil_fasiliti', 'soalan')
+
+# Tambah kod ini di bahagian bawah fail models.py untuk aset kenderaan
+
+class SyarikatServisKenderaan(models.Model):
+    nama_syarikat = models.CharField(max_length=200, verbose_name="Nama Syarikat Servis")
+    tempoh_kontrak = models.CharField(max_length=100, verbose_name="Tempoh Kontrak (Contoh: 3 Tahun)")
+    tarikh_mula = models.DateField(verbose_name="Tarikh Mula Kontrak")
+    tarikh_tamat = models.DateField(verbose_name="Tarikh Tamat Kontrak")
+    
+    def __str__(self):
+        return self.nama_syarikat
+        
+    @property
+    def status_kontrak(self):
+        import datetime
+        sekarang = datetime.date.today()
+        baki_hari = (self.tarikh_tamat - sekarang).days
+        if baki_hari < 0:
+            return 'tamat'
+        elif baki_hari <= 60:
+            return 'hampir_tamat' # Amaran kuning/merah
+        return 'aktif'
+
+class AsetKenderaan(models.Model):
+    JENIS_KENDERAAN_CHOICES = [
+        ('kereta', 'Kereta'),
+        ('van', 'Van'),
+        ('ambulan', 'Ambulan'),
+        ('bas', 'Bas'),
+        ('lori', 'Lori'),
+    ]
+    STATUS_KENDERAAN_CHOICES = [
+        ('aktif', 'Aktif (Beroperasi)'),
+        ('rosak', 'Rosak / Sedang Diselenggara'),
+        ('lupus', 'Telah Dilupuskan / Syor Lupus'),
+    ]
+    
+    # Hubungkan kepada fasiliti
+    profil_fasiliti = models.ForeignKey(FacilityProfile, on_delete=models.CASCADE, related_name='senarai_kenderaan')
+    
+    jenis_kenderaan = models.CharField(max_length=20, choices=JENIS_KENDERAAN_CHOICES)
+    model_kenderaan = models.CharField(max_length=150, verbose_name="Model (Cth: Toyota Hiace)")
+    no_pendaftaran = models.CharField(max_length=20, verbose_name="No. Plat Pendaftaran")
+    no_chasis = models.CharField(max_length=100, blank=True, verbose_name="Nombor Chasis")
+    
+    tahun_diterima = models.IntegerField(verbose_name="Tahun Diterima")
+    status = models.CharField(max_length=20, choices=STATUS_KENDERAAN_CHOICES, default='aktif')
+    
+    syarikat_servis = models.ForeignKey(SyarikatServisKenderaan, on_delete=models.SET_NULL, null=True, blank=True, related_name='kenderaan_diselenggara')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.no_pendaftaran} - {self.get_jenis_kenderaan_display()}"
+        
+    @property
+    def umur_kenderaan(self):
+        # Pengiraan tahun automatik (seperti yang anda cadangkan)
+        import datetime
+        tahun_semasa = datetime.date.today().year
+        return tahun_semasa - self.tahun_diterima

@@ -55,4 +55,7 @@ urlpatterns = [
     # LALUAN PENGURUSAN SOALAN DINAMIK (ADMIN)
     path('urus-soalan-tambahan/', views.urus_soalan_tambahan, name='urus_soalan_tambahan'),
     path('padam-soalan-tambahan/<int:pk>/', views.padam_soalan_tambahan, name='padam_soalan_tambahan'),
+
+    # Laluan Aset Kenderaan
+    path('aset-kenderaan/', views.aset_kenderaan_list, name='aset_kenderaan_list'),
 ]
