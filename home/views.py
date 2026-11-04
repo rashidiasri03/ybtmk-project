@@ -2703,20 +2703,28 @@ def aset_kenderaan_list(request):
 
 @login_required
 def tambah_kenderaan(request):
-    if hasattr(request.user, 'profile') and request.user.profile.is_top_management:
-        messages.error(request, 'Top Management hanya mempunyai akses baca sahaja.')
-        return redirect('home:aset_kenderaan_list')
-        
-    if request.method == 'POST':
-        form = AsetKenderaanForm(request.POST, user=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Rekod kenderaan baharu berjaya didaftarkan.')
+    import traceback
+    try:
+        if hasattr(request.user, 'profile') and request.user.profile.is_top_management:
+            messages.error(request, 'Top Management hanya mempunyai akses baca sahaja.')
             return redirect('home:aset_kenderaan_list')
-    else:
-        form = AsetKenderaanForm(user=request.user)
+            
+        if request.method == 'POST':
+            form = AsetKenderaanForm(request.POST, user=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Rekod kenderaan baharu berjaya didaftarkan.')
+                return redirect('home:aset_kenderaan_list')
+        else:
+            form = AsetKenderaanForm(user=request.user)
+            
+        return render(request, 'home/form_kenderaan.html', {'form': form, 'mode': 'tambah'})
         
-    return render(request, 'home/form_kenderaan.html', {'form': form, 'mode': 'tambah'})
+    except Exception as e:
+        from django.http import HttpResponse
+        # Paparkan ralat secara terus pada skrin
+        error_msg = f"Ralat Eksekusi (Tambah Kenderaan): {str(e)}<br><pre>{traceback.format_exc()}</pre>"
+        return HttpResponse(error_msg, status=500)
 
 @login_required
 def edit_kenderaan(request, pk):
