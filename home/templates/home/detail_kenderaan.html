@@ -1,0 +1,274 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Butiran Kenderaan | YBTMK Fleet</title>
+    <link rel="icon" type="image/png" href="{% static 'home/images/jata negara.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        .vehicle-graphic { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .vehicle-graphic:hover { transform: scale(1.02); }
+        /* Corak grid ala logistik */
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header / Nav -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'home:aset_kenderaan_list' %}" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">{{ kenderaan.no_pendaftaran }}</h1>
+                    {% if kenderaan.status == 'aktif' %}
+                        <span class="px-2 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider">Beroperasi</span>
+                    {% elif kenderaan.status == 'rosak' %}
+                        <span class="px-2 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-bold uppercase tracking-wider">Diselenggara</span>
+                    {% else %}
+                        <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-wider">Lupus</span>
+                    {% endif %}
+                </div>
+                <p class="text-xs font-semibold text-slate-500">{{ kenderaan.get_jenis_kenderaan_display }} • {{ kenderaan.model_kenderaan }}</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi Semasa</p>
+                <p class="text-sm font-bold text-slate-700">{{ kenderaan.profil_fasiliti.maklumat_asas.nama_fasiliti }}</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 p-6 max-w-7xl mx-auto w-full flex flex-col gap-6">
+        
+        <!-- VISUAL KENDERAAN (Atas) -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 bg-grid-pattern relative overflow-hidden flex items-center justify-center min-h-[300px]">
+            
+            <div class="absolute top-6 left-6 flex flex-col gap-4">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Enjin / Chasis</p>
+                    <p class="text-sm font-extrabold text-slate-800 bg-white/80 px-3 py-1.5 rounded-lg border border-slate-200 backdrop-blur-sm">{{ kenderaan.no_chasis|default:"Tidak dinyatakan" }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Usia Aset</p>
+                    <p class="text-sm font-extrabold text-slate-800 bg-white/80 px-3 py-1.5 rounded-lg border border-slate-200 backdrop-blur-sm">{{ kenderaan.umur_kenderaan }} Tahun <span class="text-[10px] text-slate-500 font-semibold">(Sejak {{ kenderaan.tahun_diterima }})</span></p>
+                </div>
+            </div>
+
+            <!-- Dinamik Grafik Kenderaan -->
+            <div class="vehicle-graphic flex items-center justify-center relative z-10 w-full max-w-2xl mt-8">
+                {% if kenderaan.jenis_kenderaan == 'ambulan' %}
+                    <!-- Visual Ambulans (Kargo Perubatan) -->
+                    <div class="w-full flex items-end justify-center">
+                        <div class="w-32 h-40 bg-white border-4 border-slate-800 rounded-l-3xl rounded-tr-xl flex flex-col justify-between p-3 relative z-20">
+                            <div class="w-full h-12 bg-sky-100 border-2 border-slate-800 rounded-t-xl rounded-bl-sm"></div>
+                            <div class="w-8 h-8 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-4 right-4"></div>
+                        </div>
+                        <div class="w-96 h-48 bg-slate-50 border-4 border-slate-800 rounded-r-xl rounded-tl-xl p-4 flex gap-2 relative z-10 -ml-2 shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.05)]">
+                            <!-- Kargo 1 (Oksigen) -->
+                            <div class="flex-1 bg-violet-600 rounded-lg flex flex-col items-center justify-center text-white p-2">
+                                <i class="fas fa-lungs text-2xl mb-1 opacity-80"></i>
+                                <span class="text-[10px] font-bold">Oksigen</span>
+                                <span class="text-xs font-black">{{ kenderaan.profil_fasiliti.k_perkhidmatan.keperluan_oksigen|default:"Tersedia"|truncatechars:10 }}</span>
+                            </div>
+                            <!-- Kargo 2 (Peralatan) -->
+                            <div class="flex-1 bg-slate-100 rounded-lg flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-300 p-2">
+                                <i class="fas fa-medkit text-2xl mb-1"></i>
+                                <span class="text-[10px] font-bold uppercase">Kelengkapan</span>
+                                <span class="text-xs font-black text-slate-700">Lengkap</span>
+                            </div>
+                            <!-- Kargo 3 (Aset) -->
+                            <div class="flex-1 bg-slate-100 rounded-lg flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-300 p-2">
+                                <i class="fas fa-heartbeat text-2xl mb-1"></i>
+                                <span class="text-[10px] font-bold uppercase">Keadaan</span>
+                                <span class="text-[10px] font-black text-slate-700 text-center leading-tight">{{ kenderaan.profil_fasiliti.k_aset.keadaan_ambulans|default:"Baik"|truncatechars:20 }}</span>
+                            </div>
+                            <div class="w-8 h-8 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-4 left-10"></div>
+                            <div class="w-8 h-8 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-4 right-10"></div>
+                        </div>
+                    </div>
+
+                {% elif kenderaan.jenis_kenderaan == 'lori' %}
+                    <!-- Visual Lori -->
+                    <div class="w-full flex items-end justify-center">
+                        <div class="w-24 h-40 bg-white border-4 border-slate-800 rounded-l-2xl rounded-tr-md flex flex-col justify-between p-2 relative z-20">
+                            <div class="w-full h-16 bg-sky-100 border-2 border-slate-800 rounded-t-lg"></div>
+                            <div class="w-10 h-10 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-5 right-2"></div>
+                        </div>
+                        <div class="w-[450px] h-48 bg-slate-800 rounded-r-sm p-4 flex gap-2 relative z-10 -ml-1">
+                            <div class="flex-1 border-2 border-dashed border-slate-600 rounded flex items-center justify-center text-slate-500"><i class="fas fa-box text-3xl"></i></div>
+                            <div class="flex-1 bg-blue-600 border border-blue-500 rounded flex items-center justify-center text-white"><i class="fas fa-boxes text-3xl"></i></div>
+                            <div class="w-10 h-10 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-5 left-16"></div>
+                            <div class="w-10 h-10 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-5 right-16"></div>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Visual Kereta/Van -->
+                    <div class="text-center p-8">
+                        <i class="fas {% if kenderaan.jenis_kenderaan == 'van' %}fa-shuttle-van{% else %}fa-car-side{% endif %} text-[120px] text-slate-800 drop-shadow-xl"></i>
+                        <div class="mt-4 inline-flex items-center gap-4 bg-white/80 px-4 py-2 rounded-xl border border-slate-200 backdrop-blur-sm">
+                            <div class="text-left">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Kapasiti</p>
+                                <p class="text-sm font-extrabold text-slate-700">Standard</p>
+                            </div>
+                            <div class="w-px h-6 bg-slate-300"></div>
+                            <div class="text-left">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Fungsi</p>
+                                <p class="text-sm font-extrabold text-slate-700">Kenderaan Penumpang</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+        </div>
+
+        <!-- PETA & JADUAL (Bawah) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Peta Lokasi (Kiri) -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                    <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-location-arrow text-blue-500 mr-2"></i> Peta Semasa</h3>
+                </div>
+                <div id="map" class="flex-1 w-full bg-slate-100 relative"></div>
+                <div class="p-4 bg-white text-xs font-semibold text-slate-500 border-t border-slate-100">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span> {{ kenderaan.profil_fasiliti.maklumat_asas.nama_fasiliti }}
+                </div>
+            </div>
+
+            <!-- Jadual Sejarah / Kontrak (Kanan) -->
+            <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[400px]">
+                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                    <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-clipboard-list text-emerald-500 mr-2"></i> Profil Penyelenggaraan</h3>
+                    <button class="text-slate-400 hover:text-slate-600"><i class="fas fa-ellipsis-v"></i></button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-6">
+                    {% if kenderaan.syarikat_servis %}
+                    <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 text-lg">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Syarikat Konsesi</p>
+                                    <p class="text-sm font-extrabold text-slate-800">{{ kenderaan.syarikat_servis.nama_syarikat }}</p>
+                                </div>
+                            </div>
+                            {% if kenderaan.syarikat_servis.status_kontrak == 'aktif' %}
+                                <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase">Kontrak Aktif</span>
+                            {% elif kenderaan.syarikat_servis.status_kontrak == 'hampir_tamat' %}
+                                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">Hampir Tamat</span>
+                            {% else %}
+                                <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold uppercase">Kontrak Tamat</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white p-3 rounded-xl border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tarikh Mula</p>
+                                <p class="text-xs font-black text-slate-700"><i class="far fa-calendar-check text-green-500 mr-1.5"></i>{{ kenderaan.syarikat_servis.tarikh_mula|date:"d M Y" }}</p>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Tarikh Tamat</p>
+                                <p class="text-xs font-black text-slate-700"><i class="far fa-calendar-times text-red-500 mr-1.5"></i>{{ kenderaan.syarikat_servis.tarikh_tamat|date:"d M Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center p-8 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
+                        <i class="fas fa-file-contract text-3xl text-slate-300 mb-2"></i>
+                        <p class="text-xs font-semibold text-slate-500">Tiada maklumat syarikat penyelenggaraan direkodkan.</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Jadual Ringkas Status Aset (Berdasarkan Profil KKM) -->
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">
+                                <th class="pb-3">Kriteria Penilaian</th>
+                                <th class="pb-3 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs font-semibold text-slate-700">
+                            <tr class="border-b border-slate-50">
+                                <td class="py-3">Keadaan Aset (Keseluruhan)</td>
+                                <td class="py-3 text-center">
+                                    {% if kenderaan.profil_fasiliti.k_aset.keadaan_aset %}
+                                        <span class="text-slate-600">{{ kenderaan.profil_fasiliti.k_aset.keadaan_aset|truncatechars:30 }}</span>
+                                    {% else %}
+                                        <span class="text-slate-300">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr class="border-b border-slate-50">
+                                <td class="py-3">Aset Ikut Spesifikasi KKM?</td>
+                                <td class="py-3 text-center">
+                                    {% if kenderaan.profil_fasiliti.k_aset.aset_tidak_ikut_spec %}
+                                        <i class="fas fa-times-circle text-red-500"></i> Tidak
+                                    {% else %}
+                                        <i class="fas fa-check-circle text-green-500"></i> Ya
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="py-3">Kelengkapan Pakai Buang (Disposable)</td>
+                                <td class="py-3 text-center">
+                                    {% if kenderaan.profil_fasiliti.k_aset.disposable_mencukupi %}
+                                        <span class="px-2 py-1 rounded bg-green-50 text-green-600 font-bold text-[10px]">Mencukupi</span>
+                                    {% else %}
+                                        <span class="px-2 py-1 rounded bg-red-50 text-red-600 font-bold text-[10px]">Tidak Mencukupi</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Init Peta MapLibre -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var lat = {{ lat }};
+            var lng = {{ lng }};
+            
+            var map = new maplibregl.Map({
+                container: 'map',
+                style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=m8ZusvSLqsIdxaj1Ptrf', 
+                center: [lng, lat],
+                zoom: 14,
+                pitch: 45
+            });
+
+            map.addControl(new maplibregl.NavigationControl());
+
+            new maplibregl.Marker({color: "#3b82f6"})
+                .setLngLat([lng, lat])
+                .addTo(map);
+        });
+    </script>
+</body>
+</html>
