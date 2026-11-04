@@ -25,9 +25,9 @@
         /* ── NAVBAR LINKS ── */
         .nav-links { display:flex; align-items:center; gap:4px; margin-left:32px; }
         .nav-link {
-            padding:8px 16px; border-radius:10px; font-size:.78rem; font-weight:600;
+            padding:8px 12px; border-radius:10px; font-size:.78rem; font-weight:600;
             color:#94a3b8; text-decoration:none; transition:all .2s;
-            display:flex; align-items:center; gap:6px;
+            display:flex; align-items:center; gap:5px;
         }
         .nav-link:hover { background:rgba(255,255,255,.08); color:#e2e8f0; }
         .nav-link.active { background:rgba(56,189,248,.15); color:#38bdf8; }
@@ -149,8 +149,8 @@
             <a href="{% url 'home:aset_kenderaan_list' %}" class="nav-link">
                 <i class="fas fa-ambulance"></i> Aset Kenderaan
             </a>
-            <a href="{% url 'home:profil_saya' %}" class="nav-link">
-                <i class="fas fa-user-circle"></i> Profil
+            <a href="{% url 'home:profil_saya' %}" class="nav-link" title="Profil">
+            <i class="fas fa-user text-lg"></i>
             </a>
         </div>
     </div>
