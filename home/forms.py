@@ -20,15 +20,15 @@ class AsetKenderaanForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super(AsetKenderaanForm, self).__init__(*args, **kwargs)
         
-        # Tapisan dropdown Fasiliti mengikut peranan pengguna
+        # Tapisan dropdown Fasiliti dengan pengoptimuman memori (select_related)
         if user:
             if user.is_superuser or (hasattr(user, 'profile') and user.profile.is_top_management):
-                self.fields['profil_fasiliti'].queryset = FacilityProfile.objects.all()
+                self.fields['profil_fasiliti'].queryset = FacilityProfile.objects.select_related('maklumat_asas').all()
             elif hasattr(user, 'profile') and user.profile.is_jkn:
                 self.fields['profil_fasiliti'].queryset = FacilityProfile.objects.filter(
                     maklumat_asas__nama_fasiliti__in=user.profile.assigned_facility_names
-                )
+                ).select_related('maklumat_asas')
             else:
-                self.fields['profil_fasiliti'].queryset = FacilityProfile.objects.filter(submitted_by=user)
+                self.fields['profil_fasiliti'].queryset = FacilityProfile.objects.filter(submitted_by=user).select_related('maklumat_asas')
                 
         self.fields['profil_fasiliti'].label_from_instance = lambda obj: obj.maklumat_asas.nama_fasiliti if obj.maklumat_asas else f"Fasiliti ID {obj.id}"
