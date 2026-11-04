@@ -146,6 +146,9 @@
             <a href="{% url 'home:senarai_fasiliti' %}" class="nav-link">
                 <i class="fas fa-list"></i> Senarai Fasiliti
             </a>
+            <a href="{% url 'home:aset_kenderaan_list' %}" class="nav-link">
+                <i class="fas fa-ambulance"></i> Aset Kenderaan
+            </a>
             <a href="{% url 'home:profil_saya' %}" class="nav-link">
                 <i class="fas fa-user-circle"></i> Profil
             </a>
@@ -205,6 +208,9 @@
         </a>
         <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
             <i class="fas fa-list text-emerald-400"></i> Senarai Fasiliti
+        </a>
+        <a href="{% url 'home:aset_kenderaan_list' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+            <i class="fas fa-ambulance text-amber-500"></i> Aset Kenderaan
         </a>
         <a href="{% url 'home:profil_saya' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
             <i class="fas fa-user text-amber-400"></i> Profil Saya
