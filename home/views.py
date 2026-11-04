@@ -13,6 +13,8 @@ from .models import (
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import SoalanTambahan, JawapanSoalanTambahan
+from .forms import AsetKenderaanForm
+from .models import AsetKenderaan
 
 def custom_login(request):
     if request.user.is_authenticated:
@@ -2694,3 +2696,55 @@ def aset_kenderaan_list(request):
         # Paparkan ralat secara terus pada skrin (Hanya untuk tujuan debugging)
         error_msg = f"Ralat Eksekusi: {str(e)}<br><pre>{traceback.format_exc()}</pre>"
         return HttpResponse(error_msg, status=500)
+
+#--------------------------------------------------#
+#                form aset kenderaan               #
+#--------------------------------------------------#
+
+@login_required
+def tambah_kenderaan(request):
+    if hasattr(request.user, 'profile') and request.user.profile.is_top_management:
+        messages.error(request, 'Top Management hanya mempunyai akses baca sahaja.')
+        return redirect('home:aset_kenderaan_list')
+        
+    if request.method == 'POST':
+        form = AsetKenderaanForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Rekod kenderaan baharu berjaya didaftarkan.')
+            return redirect('home:aset_kenderaan_list')
+    else:
+        form = AsetKenderaanForm(user=request.user)
+        
+    return render(request, 'home/form_kenderaan.html', {'form': form, 'mode': 'tambah'})
+
+@login_required
+def edit_kenderaan(request, pk):
+    if hasattr(request.user, 'profile') and request.user.profile.is_top_management:
+        messages.error(request, 'Top Management hanya mempunyai akses baca sahaja.')
+        return redirect('home:aset_kenderaan_list')
+        
+    kenderaan = get_object_or_404(AsetKenderaan, pk=pk)
+    
+    if request.method == 'POST':
+        form = AsetKenderaanForm(request.POST, instance=kenderaan, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Rekod kenderaan berjaya dikemaskini.')
+            return redirect('home:aset_kenderaan_list')
+    else:
+        form = AsetKenderaanForm(instance=kenderaan, user=request.user)
+        
+    return render(request, 'home/form_kenderaan.html', {'form': form, 'mode': 'edit', 'kenderaan': kenderaan})
+
+@login_required
+def padam_kenderaan(request, pk):
+    if hasattr(request.user, 'profile') and request.user.profile.is_top_management:
+        messages.error(request, 'Top Management tidak dibenarkan memadam rekod.')
+        return redirect('home:aset_kenderaan_list')
+        
+    kenderaan = get_object_or_404(AsetKenderaan, pk=pk)
+    if request.method == 'POST':
+        kenderaan.delete()
+        messages.success(request, 'Rekod kenderaan berjaya dipadam.')
+    return redirect('home:aset_kenderaan_list')
