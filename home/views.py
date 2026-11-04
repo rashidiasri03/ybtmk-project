@@ -2724,6 +2724,7 @@ def tambah_kenderaan(request):
         from django.http import HttpResponse
         # Paparkan ralat secara terus pada skrin
         error_msg = f"Ralat Eksekusi (Tambah Kenderaan): {str(e)}<br><pre>{traceback.format_exc()}</pre>"
+        
         return HttpResponse(error_msg, status=500)
 
 @login_required
