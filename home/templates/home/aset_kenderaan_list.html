@@ -153,7 +153,9 @@
                                         {% else %}<i class="fas fa-car"></i>{% endif %}
                                     </div>
                                     <div>
-                                        <p class="text-sm font-black text-slate-800">{{ k.no_pendaftaran }}</p>
+                                        <a href="{% url 'home:detail_kenderaan' k.pk %}" class="text-sm font-black text-blue-600 hover:text-blue-800 transition block">
+                                            {{ k.no_pendaftaran }} <i class="fas fa-external-link-alt text-[10px] ml-1"></i>
+                                        </a>
                                         <p class="text-[10px] text-slate-400 uppercase tracking-wide">{{ k.model_kenderaan }} • {{ k.no_chasis }}</p>
                                     </div>
                                 </div>
@@ -196,13 +198,18 @@
                                 {% endif %}
                             </td>
                             <!-- Tindakan -->
-                            {% if not is_tm %}
                             <td class="p-4 text-right">
-                                <a href="{% url 'home:edit_kenderaan' k.pk %}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-blue-600 border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition opacity-0 group-hover:opacity-100" title="Kemaskini">
-                                    <i class="fas fa-pen text-xs"></i>
-                                </a>
+                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <a href="{% url 'home:detail_kenderaan' k.pk %}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-800 transition" title="Lihat Terperinci">
+                                        <i class="fas fa-eye text-xs"></i>
+                                    </a>
+                                    {% if not is_tm %}
+                                    <a href="{% url 'home:edit_kenderaan' k.pk %}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-50 text-blue-600 border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition" title="Kemaskini">
+                                        <i class="fas fa-pen text-xs"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
                             </td>
-                            {% endif %}
                         </tr>
                         {% empty %}
                         <tr>

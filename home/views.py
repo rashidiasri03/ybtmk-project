@@ -2724,7 +2724,7 @@ def tambah_kenderaan(request):
         from django.http import HttpResponse
         # Paparkan ralat secara terus pada skrin
         error_msg = f"Ralat Eksekusi (Tambah Kenderaan): {str(e)}<br><pre>{traceback.format_exc()}</pre>"
-        
+
         return HttpResponse(error_msg, status=500)
 
 @login_required
@@ -2757,3 +2757,45 @@ def padam_kenderaan(request, pk):
         kenderaan.delete()
         messages.success(request, 'Rekod kenderaan berjaya dipadam.')
     return redirect('home:aset_kenderaan_list')
+
+@login_required
+def detail_kenderaan(request, pk):
+    """
+    Paparan terperinci ala "Logistics Dashboard" untuk satu aset kenderaan spesifik.
+    """
+    kenderaan = get_object_or_404(
+        AsetKenderaan.objects.select_related(
+            'profil_fasiliti__maklumat_asas',
+            'profil_fasiliti__k_aset',
+            'syarikat_servis'
+        ), pk=pk
+    )
+
+    is_tm = False
+    is_jkn = False
+    if hasattr(request.user, 'profile'):
+        is_tm = request.user.profile.is_top_management
+        is_jkn = request.user.profile.is_jkn
+
+    # Sekuriti: Halang pengguna biasa jika ini bukan di bawah pentadbiran fasiliti mereka
+    if not request.user.is_superuser and not is_tm and not is_jkn:
+        if kenderaan.profil_fasiliti.submitted_by != request.user:
+            messages.error(request, 'Akses Ditolak: Kenderaan ini bukan di bawah pentadbiran anda.')
+            return redirect('home:aset_kenderaan_list')
+    elif is_jkn and not request.user.is_superuser:
+        if kenderaan.profil_fasiliti.maklumat_asas.nama_fasiliti not in request.user.profile.assigned_facility_names:
+            messages.error(request, 'Akses Ditolak: Kenderaan ini bukan di bawah pentadbiran JKN anda.')
+            return redirect('home:aset_kenderaan_list')
+
+    # Koordinat Peta (MapLibre fallback)
+    lat = kenderaan.profil_fasiliti.maklumat_asas.latitud or 3.1390
+    lng = kenderaan.profil_fasiliti.maklumat_asas.longitud or 101.6869
+
+    context = {
+        'kenderaan': kenderaan,
+        'lat': lat,
+        'lng': lng,
+        'is_tm': is_tm,
+    }
+    
+    return render(request, 'home/detail_kenderaan.html', context)

@@ -58,6 +58,7 @@ urlpatterns = [
 
     # Laluan Aset Kenderaan
     path('aset-kenderaan/', views.aset_kenderaan_list, name='aset_kenderaan_list'),
+    path('aset-kenderaan/<int:pk>/detail/', views.detail_kenderaan, name='detail_kenderaan'),
     path('aset-kenderaan/tambah/', views.tambah_kenderaan, name='tambah_kenderaan'),
     path('aset-kenderaan/<int:pk>/edit/', views.edit_kenderaan, name='edit_kenderaan'),
     path('aset-kenderaan/<int:pk>/padam/', views.padam_kenderaan, name='padam_kenderaan'),
