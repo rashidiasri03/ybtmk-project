@@ -2654,40 +2654,43 @@ def aset_kenderaan_list(request):
     Pemuka Aset Kenderaan (Fleet Readiness Dashboard)
     """
     from .models import AsetKenderaan
+    import traceback # Tambah ini
     
-    user = request.user
-    
-    # Semakan peranan langsung dari profil pengguna
-    is_tm = False
-    is_jkn = False
-    if hasattr(user, 'profile'):
-        is_tm = user.profile.is_top_management
-        is_jkn = user.profile.is_jkn
-    
-    # 1. Tarik semua kenderaan berasaskan akses
-    if user.is_superuser or is_tm:
-        kenderaan = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
-    elif is_jkn:
-        assigned_names = user.profile.assigned_facility_names if hasattr(user.profile, 'assigned_facility_names') else []
-        kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
-    else:
-        # Admin Biasa / Peringkat Daerah
-        kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__submitted_by=user).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
+    try:
+        user = request.user
         
-    # 2. Metrik Dashboard
-    jumlah_ambulan = kenderaan.filter(jenis_kenderaan='ambulan').count()
-    ambulan_aktif = kenderaan.filter(jenis_kenderaan='ambulan', status='aktif').count()
-    
-    kadar_kesiagaan = int((ambulan_aktif / jumlah_ambulan * 100)) if jumlah_ambulan > 0 else 0
-    
-    context = {
-        'kenderaan': kenderaan,
-        'jumlah_ambulan': jumlah_ambulan,
-        'ambulan_aktif': ambulan_aktif,
-        'kadar_kesiagaan': kadar_kesiagaan,
-        'active_page': 'aset_kenderaan',
-        'is_tm': is_tm, 
-        'is_jkn': is_jkn
-    }
-    
-    return render(request, 'home/aset_kenderaan_list.html', context)
+        is_tm = False
+        is_jkn = False
+        if hasattr(user, 'profile'):
+            is_tm = user.profile.is_top_management
+            is_jkn = user.profile.is_jkn
+        
+        if user.is_superuser or is_tm:
+            kenderaan = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
+        elif is_jkn:
+            assigned_names = user.profile.assigned_facility_names if hasattr(user.profile, 'assigned_facility_names') else []
+            kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
+        else:
+            kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__submitted_by=user).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
+            
+        jumlah_ambulan = kenderaan.filter(jenis_kenderaan='ambulan').count()
+        ambulan_aktif = kenderaan.filter(jenis_kenderaan='ambulan', status='aktif').count()
+        kadar_kesiagaan = int((ambulan_aktif / jumlah_ambulan * 100)) if jumlah_ambulan > 0 else 0
+        
+        context = {
+            'kenderaan': kenderaan,
+            'jumlah_ambulan': jumlah_ambulan,
+            'ambulan_aktif': ambulan_aktif,
+            'kadar_kesiagaan': kadar_kesiagaan,
+            'active_page': 'aset_kenderaan',
+            'is_tm': is_tm, 
+            'is_jkn': is_jkn
+        }
+        
+        return render(request, 'home/aset_kenderaan_list.html', context)
+        
+    except Exception as e:
+        from django.http import HttpResponse
+        # Paparkan ralat secara terus pada skrin (Hanya untuk tujuan debugging)
+        error_msg = f"Ralat Eksekusi: {str(e)}<br><pre>{traceback.format_exc()}</pre>"
+        return HttpResponse(error_msg, status=500)
