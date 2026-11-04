@@ -2656,7 +2656,7 @@ def aset_kenderaan_list(request):
     Pemuka Aset Kenderaan (Fleet Readiness Dashboard)
     """
     from .models import AsetKenderaan
-    import traceback # Tambah ini
+    import traceback 
     
     try:
         user = request.user
@@ -2675,6 +2675,33 @@ def aset_kenderaan_list(request):
         else:
             kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__submitted_by=user).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
             
+        # ── LOGIK MASTER-DETAIL UNTUK TM & JKN ──
+        if is_tm or is_jkn:
+            # Ambil ID dari URL (jika pengguna klik dari jadual bawah)
+            k_id = request.GET.get('id')
+            if k_id:
+                selected_k = kenderaan.filter(pk=k_id).first()
+            else:
+                # Jika baru masuk, pilih kenderaan pertama secara automatik
+                selected_k = kenderaan.first()
+                
+            lat = selected_k.profil_fasiliti.maklumat_asas.latitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.latitud else 3.1390
+            lng = selected_k.profil_fasiliti.maklumat_asas.longitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.longitud else 101.6869
+            
+            context = {
+                'kenderaan': kenderaan,
+                'selected_k': selected_k,
+                'lat': lat,
+                'lng': lng,
+                'active_page': 'aset_kenderaan',
+                'is_tm': is_tm, 
+                'is_jkn': is_jkn
+            }
+            # Terus paparkan UI Visual "MOVE&ON"
+            return render(request, 'home/aset_kenderaan_visual.html', context)
+        # ────────────────────────────────────────
+
+        # ── LOGIK ASAL UNTUK SUPERADMIN / ADMIN (Jadual Biasa) ──
         jumlah_ambulan = kenderaan.filter(jenis_kenderaan='ambulan').count()
         ambulan_aktif = kenderaan.filter(jenis_kenderaan='ambulan', status='aktif').count()
         kadar_kesiagaan = int((ambulan_aktif / jumlah_ambulan * 100)) if jumlah_ambulan > 0 else 0
@@ -2693,7 +2720,6 @@ def aset_kenderaan_list(request):
         
     except Exception as e:
         from django.http import HttpResponse
-        # Paparkan ralat secara terus pada skrin (Hanya untuk tujuan debugging)
         error_msg = f"Ralat Eksekusi: {str(e)}<br><pre>{traceback.format_exc()}</pre>"
         return HttpResponse(error_msg, status=500)
 

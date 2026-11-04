@@ -1,0 +1,269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Visual Aset Kenderaan | YBTMK</title>
+    <link rel="icon" type="image/png" href="{% static 'home/images/jata negara.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        
+        /* TM Topbar Styles */
+        #topbar { background:#0f172a; border-bottom:1px solid rgba(255,255,255,.06); padding:0 32px; height:70px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+        .nav-links { display:flex; align-items:center; gap:4px; margin-left:32px; }
+        .nav-link { padding:8px 12px; border-radius:10px; font-size:.78rem; font-weight:600; color:#94a3b8; text-decoration:none; transition:all .2s; display:flex; align-items:center; gap:5px; }
+        .nav-link:hover { background:rgba(255,255,255,.08); color:#e2e8f0; }
+        .nav-link.active { background:rgba(56,189,248,.15); color:#38bdf8; }
+        
+        .vehicle-graphic { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .vehicle-graphic:hover { transform: scale(1.02); }
+        .bg-grid-pattern { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    {% if is_tm %}
+    <!-- TOPBAR UNTUK TOP MANAGEMENT -->
+    <nav id="topbar">
+        <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center overflow-hidden shrink-0">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-11 h-11 object-contain">
+            </div>
+            <div>
+                <p class="text-xs font-bold tracking-[.18em] text-sky-400 uppercase leading-none mb-1">KKM · YBTMK</p>
+                <p class="text-lg font-extrabold text-white leading-none">YBTMK Dashboard</p>
+            </div>
+            <div class="nav-links hidden md:flex">
+                <a href="{% url 'home:tm_portal' %}" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="{% url 'home:peta_tm' %}" class="nav-link"><i class="fas fa-map"></i> Peta Fasiliti</a>
+                <a href="{% url 'home:senarai_fasiliti' %}" class="nav-link"><i class="fas fa-list"></i> Senarai Fasiliti</a>
+                <a href="{% url 'home:aset_kenderaan_list' %}" class="nav-link active"><i class="fas fa-ambulance"></i> Aset Kenderaan</a>
+                <a href="{% url 'home:profil_saya' %}" class="nav-link" title="Profil"><i class="fas fa-user text-lg"></i></a>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 hidden md:flex ml-auto">
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-sky-300 bg-sky-950/60 border border-sky-800/50 px-3.5 py-2 rounded-lg"><i class="fas fa-shield-alt text-[10px]"></i> Top Management</span>
+            <a href="{% url 'home:profil_saya' %}" class="flex items-center gap-2.5 bg-white/10 border border-white/10 text-white text-sm font-semibold px-4 py-2 rounded-xl">
+                <div class="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-xs font-extrabold">{{ request.user.username|first|upper }}</div>
+                <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+            </a>
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+                <button type="submit" class="flex items-center gap-2 bg-red-500/10 text-red-400 text-sm font-bold px-4 py-2 rounded-xl"><i class="fas fa-sign-out-alt"></i> Log Keluar</button>
+            </form>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="flex flex-1">
+        {% if not is_tm %}
+            <!-- SIDEBAR UNTUK JKN -->
+            {% include 'home/_sidebar.html' with active_page='aset_kenderaan' %}
+        {% endif %}
+
+        <main class="flex-1 p-6 w-full flex flex-col gap-6 {% if not is_tm %}ml-64{% endif %}">
+            
+            {% if not selected_k %}
+            <div class="bg-white rounded-3xl p-10 text-center shadow-sm">
+                <i class="fas fa-truck-loading text-4xl text-slate-300 mb-3"></i>
+                <h2 class="text-lg font-bold text-slate-600">Tiada Rekod Kenderaan</h2>
+                <p class="text-sm text-slate-400">Sila pastikan fasiliti anda telah mendaftarkan aset.</p>
+            </div>
+            {% else %}
+
+            <!-- VISUAL KENDERAAN (Atas) -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 bg-grid-pattern relative overflow-hidden flex flex-col items-center justify-center min-h-[360px]">
+                
+                <!-- Maklumat Pemandu / Spesifikasi (Terapung Kiri) -->
+                <div class="absolute top-8 left-8 flex flex-col gap-5 z-20">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Identiti Utama</p>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">{{ selected_k.no_pendaftaran }}</h2>
+                        <span class="inline-block mt-1 px-2 py-0.5 rounded {% if selected_k.status == 'aktif' %}bg-green-100 text-green-700{% elif selected_k.status == 'rosak' %}bg-red-100 text-red-700{% else %}bg-slate-200 text-slate-600{% endif %} text-[10px] font-bold uppercase tracking-wider">
+                            {{ selected_k.get_status_display }}
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Enjin / Chasis</p>
+                        <p class="text-sm font-extrabold text-slate-700">{{ selected_k.no_chasis|default:"Tidak dinyatakan" }}</p>
+                    </div>
+                </div>
+
+                <!-- Maklumat Utiliti (Terapung Kanan) -->
+                <div class="absolute top-8 right-8 flex flex-col gap-4 text-right z-20">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lokasi Base</p>
+                        <p class="text-sm font-extrabold text-slate-700">{{ selected_k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Usia Aset</p>
+                        <p class="text-sm font-extrabold text-slate-700">{{ selected_k.umur_kenderaan }} Tahun (Terima {{ selected_k.tahun_diterima }})</p>
+                    </div>
+                </div>
+
+                <!-- Dinamik Grafik Kenderaan -->
+                <div class="vehicle-graphic flex items-center justify-center relative z-10 w-full max-w-3xl mt-12">
+                    {% if selected_k.jenis_kenderaan == 'ambulan' %}
+                        <!-- Visual Ambulans (Kargo Perubatan) -->
+                        <div class="w-full flex items-end justify-center">
+                            <div class="w-40 h-48 bg-white border-4 border-slate-800 rounded-l-3xl rounded-tr-xl flex flex-col justify-between p-3 relative z-20">
+                                <div class="w-full h-16 bg-sky-100 border-2 border-slate-800 rounded-t-xl rounded-bl-sm flex items-center justify-center"><i class="fas fa-user-nurse text-sky-300"></i></div>
+                                <div class="w-10 h-10 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-5 right-4 shadow-md"></div>
+                            </div>
+                            <div class="w-[500px] h-56 bg-slate-50 border-4 border-slate-800 rounded-r-xl rounded-tl-xl p-4 flex gap-3 relative z-10 -ml-2 shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.05)]">
+                                <div class="flex-1 bg-violet-600 rounded-lg flex flex-col items-center justify-center text-white p-2 shadow-inner">
+                                    <i class="fas fa-lungs text-3xl mb-2 opacity-80"></i>
+                                    <span class="text-[10px] font-bold">Oksigen</span>
+                                    <span class="text-xs font-black text-center">{{ selected_k.profil_fasiliti.k_perkhidmatan.keperluan_oksigen|default:"Tersedia"|truncatechars:12 }}</span>
+                                </div>
+                                <div class="flex-1 bg-white rounded-lg flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-300 p-2 shadow-sm">
+                                    <i class="fas fa-medkit text-3xl mb-2"></i>
+                                    <span class="text-[10px] font-bold uppercase">Kelengkapan</span>
+                                    <span class="text-xs font-black text-slate-700">Mencukupi</span>
+                                </div>
+                                <div class="flex-1 bg-white rounded-lg flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-300 p-2 shadow-sm">
+                                    <i class="fas fa-heartbeat text-3xl mb-2 text-emerald-500"></i>
+                                    <span class="text-[10px] font-bold uppercase">Keadaan</span>
+                                    <span class="text-[10px] font-black text-slate-700 text-center leading-tight">{{ selected_k.profil_fasiliti.k_aset.keadaan_ambulans|default:"Baik"|truncatechars:15 }}</span>
+                                </div>
+                                <div class="w-10 h-10 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-5 left-12 shadow-md"></div>
+                                <div class="w-10 h-10 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-5 right-12 shadow-md"></div>
+                            </div>
+                        </div>
+
+                    {% elif selected_k.jenis_kenderaan == 'lori' %}
+                        <!-- Visual Lori -->
+                        <div class="w-full flex items-end justify-center">
+                            <div class="w-32 h-48 bg-white border-4 border-slate-800 rounded-l-2xl rounded-tr-md flex flex-col justify-between p-2 relative z-20">
+                                <div class="w-full h-20 bg-sky-100 border-2 border-slate-800 rounded-t-lg"></div>
+                                <div class="w-12 h-12 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-6 right-2"></div>
+                            </div>
+                            <div class="w-[500px] h-56 bg-slate-800 rounded-r-sm p-4 flex gap-3 relative z-10 -ml-1">
+                                <div class="flex-1 border-2 border-dashed border-slate-600 rounded flex flex-col items-center justify-center text-slate-500"><i class="fas fa-box text-4xl mb-2"></i><span class="text-xs font-bold uppercase">Kargo Biasa</span></div>
+                                <div class="flex-1 bg-blue-600 border border-blue-500 rounded flex flex-col items-center justify-center text-white"><i class="fas fa-boxes text-4xl mb-2"></i><span class="text-xs font-bold uppercase">Logistik KKM</span></div>
+                                <div class="w-12 h-12 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-6 left-16"></div>
+                                <div class="w-12 h-12 rounded-full border-4 border-slate-800 bg-slate-300 absolute -bottom-6 right-16"></div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Visual Kereta/Van -->
+                        <div class="text-center p-8 bg-white border-4 border-slate-800 rounded-3xl w-[500px] shadow-[inset_-10px_-10px_30px_rgba(0,0,0,0.05)]">
+                            <i class="fas {% if selected_k.jenis_kenderaan == 'van' %}fa-shuttle-van{% else %}fa-car-side{% endif %} text-[140px] text-slate-800 drop-shadow-lg"></i>
+                            <div class="mt-6 flex items-center justify-center gap-6">
+                                <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Kapasiti</p><p class="text-sm font-extrabold text-slate-700">Standard</p></div>
+                                <div class="w-px h-6 bg-slate-300"></div>
+                                <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Fungsi</p><p class="text-sm font-extrabold text-slate-700">Penumpang/Tugas Am</p></div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- PETA & JADUAL LIST (Bawah) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Peta Lokasi (Kiri) -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[450px]">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                        <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-location-arrow text-emerald-500 mr-2"></i> Kordinat Base</h3>
+                    </div>
+                    <div id="map" class="flex-1 w-full bg-slate-100 relative"></div>
+                    <div class="p-4 bg-white text-xs font-semibold text-slate-600 border-t border-slate-100 flex flex-col gap-1">
+                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span> {{ selected_k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</span>
+                        <span class="text-[10px] text-slate-400 ml-5">{{ selected_k.profil_fasiliti.maklumat_asas.alamat }}</span>
+                    </div>
+                </div>
+
+                <!-- Senarai Kenderaan / "Order List" (Kanan) -->
+                <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[450px]">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                        <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-list text-blue-500 mr-2"></i> Senarai Aset (Pilih untuk papar)</h3>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-400">{{ kenderaan.count }} Unit</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 overflow-y-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-white sticky top-0 border-b border-slate-100 shadow-sm z-10">
+                                <tr class="text-[10px] font-bold text-slate-400 uppercase">
+                                    <th class="p-4">Identiti & Fasiliti</th>
+                                    <th class="p-4">Kontrak Servis</th>
+                                    <th class="p-4">Status</th>
+                                    {% if is_jkn %}<th class="p-4 text-right">Tindakan</th>{% endif %}
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs font-semibold text-slate-700 divide-y divide-slate-50">
+                                {% for k in kenderaan %}
+                                <!-- KLIK BARIS UNTUK TUKAR VISUAL ATAS -->
+                                <tr class="hover:bg-blue-50 transition-colors cursor-pointer {% if selected_k.pk == k.pk %}bg-blue-50/50 border-l-4 border-blue-500{% else %}border-l-4 border-transparent{% endif %}" onclick="window.location.href='?id={{ k.pk }}'">
+                                    <td class="p-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                                                {% if k.jenis_kenderaan == 'ambulan' %}<i class="fas fa-ambulance"></i>{% elif k.jenis_kenderaan == 'van' %}<i class="fas fa-shuttle-van"></i>{% else %}<i class="fas fa-car"></i>{% endif %}
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-black {% if selected_k.pk == k.pk %}text-blue-600{% else %}text-slate-800{% endif %}">{{ k.no_pendaftaran }}</p>
+                                                <p class="text-[10px] text-slate-400 uppercase truncate max-w-[200px]">{{ k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4">
+                                        {% if k.syarikat_servis %}
+                                            <p class="text-slate-700 font-bold truncate max-w-[150px]" title="{{ k.syarikat_servis.nama_syarikat }}">{{ k.syarikat_servis.nama_syarikat }}</p>
+                                            <p class="text-[10px] text-slate-400">Tamat: {{ k.syarikat_servis.tarikh_tamat|date:"d M Y" }}</p>
+                                        {% else %}
+                                            <p class="text-slate-400 italic">Tiada Rekod</p>
+                                        {% endif %}
+                                    </td>
+                                    <td class="p-4">
+                                        {% if k.status == 'aktif' %}
+                                            <span class="text-green-600 font-bold"><i class="fas fa-circle text-[8px] mr-1"></i> Beroperasi</span>
+                                        {% elif k.status == 'rosak' %}
+                                            <span class="text-red-500 font-bold"><i class="fas fa-wrench text-[10px] mr-1"></i> Servis</span>
+                                        {% else %}
+                                            <span class="text-slate-400 font-bold">Dilupus</span>
+                                        {% endif %}
+                                    </td>
+                                    {% if is_jkn %}
+                                    <td class="p-4 text-right" onclick="event.stopPropagation();">
+                                        <a href="{% url 'home:edit_kenderaan' k.pk %}" class="w-7 h-7 inline-flex items-center justify-center rounded bg-white border border-slate-200 text-blue-500 hover:bg-blue-50 transition" title="Kemaskini Status">
+                                            <i class="fas fa-pen text-[10px]"></i>
+                                        </a>
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            </div>
+            {% endif %}
+        </main>
+    </div>
+
+    <!-- Init Peta MapLibre -->
+    {% if selected_k %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var lat = {{ lat }};
+            var lng = {{ lng }};
+            var map = new maplibregl.Map({
+                container: 'map',
+                style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=m8ZusvSLqsIdxaj1Ptrf', 
+                center: [lng, lat], zoom: 15, pitch: 45
+            });
+            map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
+            new maplibregl.Marker({color: "#10b981"}).setLngLat([lng, lat]).addTo(map);
+        });
+    </script>
+    {% endif %}
+</body>
+</html>
