@@ -23,7 +23,14 @@
         
         .vehicle-graphic { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .vehicle-graphic:hover { transform: scale(1.02); }
-        .bg-grid-pattern { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px); }
+        /* Grid yang lebih soft untuk latar belakang */
+        .bg-grid-pattern { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px); }
+        
+        /* Custom scrollbar untuk jadual */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -69,7 +76,7 @@
         <main class="flex-1 p-6 w-full flex flex-col gap-6 {% if not is_tm %}ml-64{% endif %} pb-12">
             
             {% if not selected_k %}
-            <div class="bg-white rounded-xl p-10 text-center shadow-sm">
+            <div class="bg-white rounded-xl p-10 text-center shadow-sm border border-slate-200">
                 <i class="fas fa-truck-loading text-4xl text-slate-300 mb-3"></i>
                 <h2 class="text-lg font-bold text-slate-600">Tiada Rekod Kenderaan</h2>
                 <p class="text-sm text-slate-400">Sila pastikan fasiliti anda telah mendaftarkan aset.</p>
@@ -77,60 +84,62 @@
             {% else %}
 
             <!-- VISUAL KENDERAAN (Atas) -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8 bg-grid-pattern relative overflow-hidden flex flex-col items-center justify-center min-h-[400px]">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-8 bg-grid-pattern relative overflow-hidden flex flex-col items-center justify-center min-h-[420px]">
                 
-                <!-- Maklumat Pemandu / Spesifikasi (Terapung Kiri) -->
-                <div class="absolute top-8 left-8 flex flex-col gap-5 z-20">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Identiti Utama</p>
-                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">{{ selected_k.no_pendaftaran }}</h2>
-                        <span class="inline-block mt-1 px-2 py-0.5 rounded-md {% if selected_k.status == 'aktif' %}bg-green-100 text-green-700{% elif selected_k.status == 'rosak' %}bg-red-100 text-red-700{% else %}bg-slate-200 text-slate-600{% endif %} text-[10px] font-bold uppercase tracking-wider">
-                            {{ selected_k.get_status_display }}
+                <!-- HUD Kiri: Identiti & Spesifikasi -->
+                <div class="absolute top-8 left-8 z-20 w-64 bg-white/80 backdrop-blur-md border border-slate-200/60 p-5 rounded-xl shadow-sm">
+                    <div class="border-b border-slate-200/60 pb-4 mb-4">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Identiti Utama</p>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight leading-none mb-2">{{ selected_k.no_pendaftaran }}</h2>
+                        <span class="inline-block px-2.5 py-1 rounded bg-slate-100 border border-slate-200 text-slate-700 text-[9px] font-extrabold uppercase tracking-wider">
+                            {% if selected_k.status == 'aktif' %}<i class="fas fa-circle text-green-500 mr-1"></i> Beroperasi
+                            {% elif selected_k.status == 'rosak' %}<i class="fas fa-wrench text-red-500 mr-1"></i> Diselenggara
+                            {% else %}<i class="fas fa-archive text-slate-500 mr-1"></i> Lupus{% endif %}
                         </span>
                     </div>
                     <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Enjin / Chasis</p>
-                        <p class="text-sm font-extrabold text-slate-700">{{ selected_k.no_chasis|default:"Tidak dinyatakan" }}</p>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">No. Enjin / Chasis</p>
+                        <p class="text-sm font-bold text-slate-700">{{ selected_k.no_chasis|default:"Tidak dinyatakan" }}</p>
                     </div>
                 </div>
 
-                <!-- Maklumat Utiliti (Terapung Kanan) -->
-                <div class="absolute top-8 right-8 flex flex-col gap-4 text-right z-20">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lokasi Base</p>
-                        <p class="text-sm font-extrabold text-slate-700">{{ selected_k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</p>
+                <!-- HUD Kanan: Maklumat Lokasi & Usia -->
+                <div class="absolute top-8 right-8 z-20 w-72 bg-white/80 backdrop-blur-md border border-slate-200/60 p-5 rounded-xl shadow-sm text-right">
+                    <div class="border-b border-slate-200/60 pb-4 mb-4">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Lokasi Semasa (Base)</p>
+                        <p class="text-base font-extrabold text-slate-800 leading-tight">{{ selected_k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</p>
                     </div>
                     <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Usia Aset</p>
-                        <p class="text-sm font-extrabold text-slate-700">{{ selected_k.umur_kenderaan }} Tahun (Terima {{ selected_k.tahun_diterima }})</p>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Usia Aset Berdaftar</p>
+                        <p class="text-sm font-bold text-slate-700">{{ selected_k.umur_kenderaan }} Tahun <span class="text-[10px] text-slate-500 font-medium">(Mula rekod {{ selected_k.tahun_diterima }})</span></p>
                     </div>
                 </div>
 
                 <!-- Dinamik Grafik Gambar Kenderaan Sebenar -->
-                <div class="vehicle-graphic flex flex-col items-center justify-center relative z-10 w-full max-w-4xl mt-12">
+                <div class="vehicle-graphic flex flex-col items-center justify-center relative z-10 w-full max-w-4xl mt-6">
                     
                     {% if selected_k.jenis_kenderaan == 'ambulan' %}
                         <!-- GAMBAR AMBULAN -->
                         <img src="{% static 'home/images/ambulan-kkm-tp.jpg' %}" alt="Ambulan KKM" class="h-[220px] object-contain drop-shadow-xl z-20 mix-blend-multiply" onerror="this.src='https://via.placeholder.com/600x300?text=Ambulan+KKM'">
                         
                         <!-- Panel Spesifikasi Ambulan (Bawah Gambar) -->
-                        <div class="mt-6 flex items-center justify-center gap-4 bg-white/90 px-6 py-4 rounded-lg border border-slate-200 backdrop-blur-sm shadow-sm w-[600px]">
-                            <div class="flex-1 flex flex-col items-center">
-                                <i class="fas fa-lungs text-xl text-violet-500 mb-1"></i>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase">Oksigen</p>
-                                <p class="text-xs font-extrabold text-slate-700">{{ selected_k.profil_fasiliti.k_perkhidmatan.keperluan_oksigen|default:"Tersedia"|truncatechars:15 }}</p>
+                        <div class="mt-6 flex items-center justify-center gap-6 bg-white border border-slate-200 px-6 py-4 rounded-xl shadow-sm w-full max-w-2xl">
+                            <div class="flex-1 flex flex-col items-center text-center">
+                                <i class="fas fa-lungs text-xl text-violet-500 mb-1.5 bg-violet-50 p-2 rounded-lg"></i>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide">Bekalan Oksigen</p>
+                                <p class="text-xs font-bold text-slate-700 mt-0.5">{{ selected_k.profil_fasiliti.k_perkhidmatan.keperluan_oksigen|default:"Tersedia"|truncatechars:15 }}</p>
                             </div>
-                            <div class="w-px h-10 bg-slate-200"></div>
-                            <div class="flex-1 flex flex-col items-center">
-                                <i class="fas fa-medkit text-xl text-blue-500 mb-1"></i>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase">Kelengkapan</p>
-                                <p class="text-xs font-extrabold text-slate-700">Mencukupi</p>
+                            <div class="w-px h-12 bg-slate-100"></div>
+                            <div class="flex-1 flex flex-col items-center text-center">
+                                <i class="fas fa-medkit text-xl text-blue-500 mb-1.5 bg-blue-50 p-2 rounded-lg"></i>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide">Kelengkapan Medikal</p>
+                                <p class="text-xs font-bold text-slate-700 mt-0.5">Mencukupi</p>
                             </div>
-                            <div class="w-px h-10 bg-slate-200"></div>
-                            <div class="flex-1 flex flex-col items-center">
-                                <i class="fas fa-heartbeat text-xl text-emerald-500 mb-1"></i>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase">Keadaan</p>
-                                <p class="text-xs font-extrabold text-slate-700 text-center">{{ selected_k.profil_fasiliti.k_aset.keadaan_ambulans|default:"Baik"|truncatechars:15 }}</p>
+                            <div class="w-px h-12 bg-slate-100"></div>
+                            <div class="flex-1 flex flex-col items-center text-center">
+                                <i class="fas fa-heartbeat text-xl text-emerald-500 mb-1.5 bg-emerald-50 p-2 rounded-lg"></i>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wide">Keadaan Fizikal</p>
+                                <p class="text-xs font-bold text-slate-700 mt-0.5">{{ selected_k.profil_fasiliti.k_aset.keadaan_ambulans|default:"Memuaskan"|truncatechars:15 }}</p>
                             </div>
                         </div>
 
@@ -138,32 +147,49 @@
                         <!-- GAMBAR VAN -->
                         <img src="{% static 'home/images/van-kkm-tp.png' %}" alt="Van KKM" class="h-[220px] object-contain drop-shadow-xl z-20" onerror="this.src='https://via.placeholder.com/600x300?text=Van+KKM'">
                         
-                        <!-- Panel Spesifikasi Standard -->
-                        <div class="mt-6 flex items-center justify-center gap-6 bg-white/90 px-6 py-3 rounded-lg border border-slate-200 backdrop-blur-sm shadow-sm">
-                            <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Kapasiti</p><p class="text-sm font-extrabold text-slate-700">Standard / Kargo Kecil</p></div>
-                            <div class="w-px h-8 bg-slate-300"></div>
-                            <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Fungsi</p><p class="text-sm font-extrabold text-slate-700">Utiliti Klinik</p></div>
+                        <div class="mt-6 flex items-center justify-center gap-8 bg-white border border-slate-200 px-8 py-4 rounded-xl shadow-sm">
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Kapasiti Muatan</p>
+                                <p class="text-sm font-bold text-slate-700">Standard / Kargo Kecil</p>
+                            </div>
+                            <div class="w-px h-8 bg-slate-200"></div>
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Fungsi Kegunaan</p>
+                                <p class="text-sm font-bold text-slate-700">Utiliti & Operasi Klinik</p>
+                            </div>
                         </div>
 
                     {% elif selected_k.jenis_kenderaan == 'bas' %}
                         <!-- GAMBAR BAS -->
                         <img src="{% static 'home/images/bas-kkm-tp.png' %}" alt="Bas KKM" class="h-[200px] object-contain drop-shadow-xl z-20" onerror="this.src='https://via.placeholder.com/600x300?text=Bas+KKM'">
                         
-                        <!-- Panel Spesifikasi Standard -->
-                        <div class="mt-6 flex items-center justify-center gap-6 bg-white/90 px-6 py-3 rounded-lg border border-slate-200 backdrop-blur-sm shadow-sm">
-                            <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Kapasiti</p><p class="text-sm font-extrabold text-slate-700">Penumpang Ramai</p></div>
-                            <div class="w-px h-8 bg-slate-300"></div>
-                            <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Fungsi</p><p class="text-sm font-extrabold text-slate-700">Perubatan Bergerak / Logistik</p></div>
+                        <div class="mt-8 flex items-center justify-center gap-8 bg-white border border-slate-200 px-8 py-4 rounded-xl shadow-sm">
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Kapasiti Penumpang</p>
+                                <p class="text-sm font-bold text-slate-700">Skala Besar (Kumpulan)</p>
+                            </div>
+                            <div class="w-px h-8 bg-slate-200"></div>
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Fungsi Kegunaan</p>
+                                <p class="text-sm font-bold text-slate-700">Perubatan Bergerak / Logistik</p>
+                            </div>
                         </div>
 
                     {% elif selected_k.jenis_kenderaan == 'lori' %}
-                        <!-- VISUAL LORI -->
-                        <div class="text-center p-8 bg-white border border-slate-200 rounded-xl w-[500px] shadow-sm z-20">
+                        <!-- GAMBAR LORI (Fallback ikon jika tiada gambar lori) -->
+                        <div class="text-center py-6">
                             <i class="fas fa-truck-moving text-[120px] text-slate-700 drop-shadow-md"></i>
-                            <div class="mt-6 flex items-center justify-center gap-6">
-                                <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Kargo</p><p class="text-sm font-extrabold text-slate-700">Kapasiti Tinggi</p></div>
-                                <div class="w-px h-6 bg-slate-300"></div>
-                                <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Fungsi</p><p class="text-sm font-extrabold text-slate-700">Logistik Perubatan Besar</p></div>
+                        </div>
+                        
+                        <div class="mt-6 flex items-center justify-center gap-8 bg-white border border-slate-200 px-8 py-4 rounded-xl shadow-sm z-20">
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Kapasiti Kargo</p>
+                                <p class="text-sm font-bold text-slate-700">Muatan Tinggi (Heavy Duty)</p>
+                            </div>
+                            <div class="w-px h-8 bg-slate-200"></div>
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Fungsi Kegunaan</p>
+                                <p class="text-sm font-bold text-slate-700">Logistik Perubatan Besar</p>
                             </div>
                         </div>
 
@@ -171,11 +197,16 @@
                         <!-- GAMBAR KERETA -->
                         <img src="{% static 'home/images/kereta-kkm-tp.png' %}" alt="Kereta KKM" class="h-[180px] object-contain drop-shadow-xl z-20" onerror="this.src='https://via.placeholder.com/600x300?text=Kereta+KKM'">
                         
-                        <!-- Panel Spesifikasi Standard -->
-                        <div class="mt-6 flex items-center justify-center gap-6 bg-white/90 px-6 py-3 rounded-lg border border-slate-200 backdrop-blur-sm shadow-sm">
-                            <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Kapasiti</p><p class="text-sm font-extrabold text-slate-700">Standard</p></div>
-                            <div class="w-px h-8 bg-slate-300"></div>
-                            <div class="text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">Fungsi</p><p class="text-sm font-extrabold text-slate-700">Penumpang/Tugas Am</p></div>
+                        <div class="mt-8 flex items-center justify-center gap-8 bg-white border border-slate-200 px-8 py-4 rounded-xl shadow-sm">
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Kapasiti</p>
+                                <p class="text-sm font-bold text-slate-700">Kenderaan Ringan (Standard)</p>
+                            </div>
+                            <div class="w-px h-8 bg-slate-200"></div>
+                            <div class="text-center">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Fungsi Kegunaan</p>
+                                <p class="text-sm font-bold text-slate-700">Kenderaan Tugas Am / Penumpang</p>
+                            </div>
                         </div>
                     {% endif %}
                 </div>
@@ -184,98 +215,98 @@
             <!-- PETA & JADUAL LIST (Bawah) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                <!-- Peta Lokasi (Kiri) - Petak -->
+                <!-- Peta Lokasi (Kiri) -->
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[450px]">
                     <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                        <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-location-arrow text-emerald-500 mr-2"></i> Kordinat Base</h3>
+                        <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-location-arrow text-emerald-500 mr-2"></i> Koordinat Peta</h3>
                     </div>
                     <div id="map" class="flex-1 w-full bg-slate-100 relative"></div>
-                    <div class="p-4 bg-white text-xs font-semibold text-slate-600 border-t border-slate-100 flex flex-col gap-1">
-                        <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span> {{ selected_k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</span>
-                        <span class="text-[10px] text-slate-400 ml-5">{{ selected_k.profil_fasiliti.maklumat_asas.alamat }}</span>
+                    <div class="p-5 bg-white border-t border-slate-100 flex flex-col gap-1.5">
+                        <span class="text-xs font-bold text-slate-700"><span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span> {{ selected_k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</span>
+                        <span class="text-[10px] font-medium text-slate-500 ml-5 leading-relaxed">{{ selected_k.profil_fasiliti.maklumat_asas.alamat }}</span>
                     </div>
                 </div>
 
-                <!-- Senarai Kenderaan / "Order List" (Kanan) - Petak -->
+                <!-- Senarai Kenderaan / Filter Bar (Kanan) -->
                 <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[450px]">
                     
                     <!-- Header & Filter Bar -->
                     <div class="px-6 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between bg-slate-50 gap-3">
                         <div class="flex items-center gap-2">
-                            <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-list text-blue-500 mr-2"></i> Senarai Aset</h3>
-                            <span class="text-[10px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded-md">{{ kenderaan.count }} Unit</span>
+                            <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-list text-blue-500 mr-2"></i> Senarai Aset Kenderaan</h3>
+                            <span class="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-md">{{ kenderaan.count }} Unit</span>
                         </div>
                         
                         <!-- Borang Carian & Penapis -->
                         <form method="get" action="" class="flex items-center gap-2 w-full sm:w-auto">
                             <!-- Dropdown Fasiliti -->
-                            <select name="fasiliti" class="text-[10px] font-semibold bg-white border border-slate-200 text-slate-600 rounded-lg px-2 py-1.5 outline-none focus:border-blue-400 w-full sm:w-40" onchange="this.form.submit()">
-                                <option value="">Semua Fasiliti</option>
+                            <select name="fasiliti" class="text-[10px] font-semibold bg-white border border-slate-200 text-slate-600 rounded-lg px-2 py-1.5 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 w-full sm:w-44" onchange="this.form.submit()">
+                                <option value="">Keseluruhan Fasiliti</option>
                                 {% for f in fasiliti_list %}
-                                <option value="{{ f }}" {% if f == fasiliti_semasa %}selected{% endif %}>{{ f|truncatechars:25 }}</option>
+                                <option value="{{ f }}" {% if f == fasiliti_semasa %}selected{% endif %}>{{ f|truncatechars:35 }}</option>
                                 {% endfor %}
                             </select>
                             
                             <!-- Kotak Carian No Plat -->
-                            <div class="relative w-full sm:w-32">
-                                <i class="fas fa-search absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
-                                <input type="text" name="q" value="{{ carian_semasa }}" placeholder="No. Plat..." class="pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold w-full outline-none focus:border-blue-400 transition">
+                            <div class="relative w-full sm:w-36">
+                                <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                                <input type="text" name="q" value="{{ carian_semasa }}" placeholder="Cari No. Plat..." class="pl-7 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold w-full outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition">
                             </div>
                             
-                            <!-- Butang Submit / Reset (Kelihatan jika carian aktif) -->
+                            <!-- Butang Submit / Reset -->
                             <button type="submit" class="hidden"></button>
                             {% if carian_semasa or fasiliti_semasa %}
-                            <a href="{% url 'home:aset_kenderaan_list' %}" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-500 flex items-center justify-center transition shrink-0" title="Set Semula">
+                            <a href="{% url 'home:aset_kenderaan_list' %}" class="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 border border-red-100 flex items-center justify-center transition shrink-0" title="Set Semula">
                                 <i class="fas fa-times text-[10px]"></i>
                             </a>
                             {% endif %}
                         </form>
                     </div>
                     
-                    <div class="flex-1 overflow-y-auto">
+                    <div class="flex-1 overflow-y-auto custom-scrollbar">
                         <table class="w-full text-left">
-                            <thead class="bg-white sticky top-0 border-b border-slate-100 shadow-sm z-10">
-                                <tr class="text-[10px] font-bold text-slate-400 uppercase">
-                                    <th class="p-4">Identiti & Fasiliti</th>
-                                    <th class="p-4">Kontrak Servis</th>
-                                    <th class="p-4">Status</th>
+                            <thead class="bg-white sticky top-0 border-b border-slate-200 shadow-sm z-10">
+                                <tr class="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-50/80 backdrop-blur-md">
+                                    <th class="p-4">Identiti & Lokasi Fasiliti</th>
+                                    <th class="p-4">Status Kontrak Servis</th>
+                                    <th class="p-4">Status Operasi</th>
                                     {% if is_jkn %}<th class="p-4 text-right">Tindakan</th>{% endif %}
                                 </tr>
                             </thead>
-                            <tbody class="text-xs font-semibold text-slate-700 divide-y divide-slate-50">
+                            <tbody class="text-xs font-semibold text-slate-700 divide-y divide-slate-100">
                                 {% for k in kenderaan %}
-                                <tr class="hover:bg-blue-50 transition-colors cursor-pointer {% if selected_k.pk == k.pk %}bg-blue-50/50 border-l-4 border-blue-500{% else %}border-l-4 border-transparent{% endif %}" onclick="window.location.href='?id={{ k.pk }}{% if carian_semasa %}&q={{ carian_semasa }}{% endif %}{% if fasiliti_semasa %}&fasiliti={{ fasiliti_semasa }}{% endif %}'">
+                                <tr class="hover:bg-blue-50/50 transition-colors cursor-pointer {% if selected_k.pk == k.pk %}bg-blue-50/80 border-l-4 border-blue-500{% else %}border-l-4 border-transparent{% endif %}" onclick="window.location.href='?id={{ k.pk }}{% if carian_semasa %}&q={{ carian_semasa }}{% endif %}{% if fasiliti_semasa %}&fasiliti={{ fasiliti_semasa }}{% endif %}'">
                                     <td class="p-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                                            <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0 shadow-sm">
                                                 {% if k.jenis_kenderaan == 'ambulan' %}<i class="fas fa-ambulance"></i>{% elif k.jenis_kenderaan == 'van' %}<i class="fas fa-shuttle-van"></i>{% elif k.jenis_kenderaan == 'bas' %}<i class="fas fa-bus"></i>{% else %}<i class="fas fa-car"></i>{% endif %}
                                             </div>
                                             <div>
-                                                <p class="text-sm font-black {% if selected_k.pk == k.pk %}text-blue-600{% else %}text-slate-800{% endif %}">{{ k.no_pendaftaran }}</p>
-                                                <p class="text-[10px] text-slate-400 uppercase truncate max-w-[200px]">{{ k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</p>
+                                                <p class="text-sm font-extrabold {% if selected_k.pk == k.pk %}text-blue-600{% else %}text-slate-800{% endif %}">{{ k.no_pendaftaran }}</p>
+                                                <p class="text-[10px] text-slate-500 uppercase tracking-wide truncate max-w-[200px]">{{ k.profil_fasiliti.maklumat_asas.nama_fasiliti }}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="p-4">
                                         {% if k.syarikat_servis %}
                                             <p class="text-slate-700 font-bold truncate max-w-[150px]" title="{{ k.syarikat_servis.nama_syarikat }}">{{ k.syarikat_servis.nama_syarikat }}</p>
-                                            <p class="text-[10px] text-slate-400">Tamat: {{ k.syarikat_servis.tarikh_tamat|date:"d M Y" }}</p>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">Tamat: {{ k.syarikat_servis.tarikh_tamat|date:"d M Y" }}</p>
                                         {% else %}
-                                            <p class="text-slate-400 italic">Tiada Rekod</p>
+                                            <p class="text-slate-400 italic text-[11px]">Tiada Maklumat</p>
                                         {% endif %}
                                     </td>
                                     <td class="p-4">
                                         {% if k.status == 'aktif' %}
-                                            <span class="text-green-600 font-bold"><i class="fas fa-circle text-[8px] mr-1"></i> Beroperasi</span>
+                                            <span class="text-green-600 font-bold text-[11px]"><i class="fas fa-circle text-[8px] mr-1.5"></i>Beroperasi</span>
                                         {% elif k.status == 'rosak' %}
-                                            <span class="text-red-500 font-bold"><i class="fas fa-wrench text-[10px] mr-1"></i> Servis</span>
+                                            <span class="text-red-500 font-bold text-[11px]"><i class="fas fa-wrench text-[10px] mr-1.5"></i>Servis</span>
                                         {% else %}
-                                            <span class="text-slate-400 font-bold">Dilupus</span>
+                                            <span class="text-slate-500 font-bold text-[11px]">Lupus</span>
                                         {% endif %}
                                     </td>
                                     {% if is_jkn %}
                                     <td class="p-4 text-right" onclick="event.stopPropagation();">
-                                        <a href="{% url 'home:edit_kenderaan' k.pk %}" class="w-7 h-7 inline-flex items-center justify-center rounded bg-white border border-slate-200 text-blue-500 hover:bg-blue-50 transition" title="Kemaskini Status">
+                                        <a href="{% url 'home:edit_kenderaan' k.pk %}" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-blue-500 hover:bg-blue-50 transition shadow-sm" title="Kemaskini Aset">
                                             <i class="fas fa-pen text-[10px]"></i>
                                         </a>
                                     </td>
@@ -283,9 +314,12 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="p-10 text-center text-slate-400">
-                                        <i class="fas fa-search-minus text-3xl mb-3 opacity-30 block"></i>
-                                        <p>Tiada kenderaan ditemui untuk carian ini.</p>
+                                    <td colspan="4" class="p-12 text-center text-slate-400">
+                                        <div class="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto mb-3">
+                                            <i class="fas fa-search text-xl text-slate-300"></i>
+                                        </div>
+                                        <p class="font-bold text-slate-500">Tiada kenderaan ditemui</p>
+                                        <p class="text-xs mt-1">Sila cuba kriteria carian yang lain.</p>
                                     </td>
                                 </tr>
                                 {% endfor %}
