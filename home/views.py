@@ -2657,6 +2657,7 @@ def aset_kenderaan_list(request):
     """
     from .models import AsetKenderaan
     import traceback 
+    from django.db.models import Q
     
     try:
         user = request.user
@@ -2667,23 +2668,41 @@ def aset_kenderaan_list(request):
             is_tm = user.profile.is_top_management
             is_jkn = user.profile.is_jkn
         
+        # Asas Queryset
         if user.is_superuser or is_tm:
-            kenderaan = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
+            base_qs = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
         elif is_jkn:
             assigned_names = user.profile.assigned_facility_names if hasattr(user.profile, 'assigned_facility_names') else []
-            kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
+            base_qs = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
         else:
-            kenderaan = AsetKenderaan.objects.filter(profil_fasiliti__submitted_by=user).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
+            base_qs = AsetKenderaan.objects.filter(profil_fasiliti__submitted_by=user).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
             
         # ── LOGIK MASTER-DETAIL UNTUK TM & JKN ──
         if is_tm or is_jkn:
-            # Ambil ID dari URL (jika pengguna klik dari jadual bawah)
+            # Ambil nilai penapis dari URL
             k_id = request.GET.get('id')
+            carian_plat = request.GET.get('q', '').strip()
+            filter_fasiliti = request.GET.get('fasiliti', '').strip()
+            
+            # Aplikasikan penapis pada queryset utama
+            kenderaan = base_qs
+            if carian_plat:
+                kenderaan = kenderaan.filter(no_pendaftaran__icontains=carian_plat)
+            if filter_fasiliti:
+                kenderaan = kenderaan.filter(profil_fasiliti__maklumat_asas__nama_fasiliti=filter_fasiliti)
+            
+            # Pilih kenderaan untuk dipaparkan pada Visual Atas
+            selected_k = None
             if k_id:
+                # Jika ID spesifik diklik dari jadual
                 selected_k = kenderaan.filter(pk=k_id).first()
-            else:
-                # Jika baru masuk, pilih kenderaan pertama secara automatik
+            
+            if not selected_k:
+                # Jika tiada ID (baru masuk, atau baru buat carian), pilih yang pertama dari hasil tapisan
                 selected_k = kenderaan.first()
+                
+            # Tarik senarai fasiliti unik HANYA yang ada kenderaan berdaftar (untuk dropdown)
+            fasiliti_list = base_qs.values_list('profil_fasiliti__maklumat_asas__nama_fasiliti', flat=True).distinct().order_by('profil_fasiliti__maklumat_asas__nama_fasiliti')
                 
             lat = selected_k.profil_fasiliti.maklumat_asas.latitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.latitud else 3.1390
             lng = selected_k.profil_fasiliti.maklumat_asas.longitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.longitud else 101.6869
@@ -2695,13 +2714,17 @@ def aset_kenderaan_list(request):
                 'lng': lng,
                 'active_page': 'aset_kenderaan',
                 'is_tm': is_tm, 
-                'is_jkn': is_jkn
+                'is_jkn': is_jkn,
+                'fasiliti_list': fasiliti_list,
+                'carian_semasa': carian_plat,
+                'fasiliti_semasa': filter_fasiliti,
             }
             # Terus paparkan UI Visual "MOVE&ON"
             return render(request, 'home/aset_kenderaan_visual.html', context)
         # ────────────────────────────────────────
 
         # ── LOGIK ASAL UNTUK SUPERADMIN / ADMIN (Jadual Biasa) ──
+        kenderaan = base_qs
         jumlah_ambulan = kenderaan.filter(jenis_kenderaan='ambulan').count()
         ambulan_aktif = kenderaan.filter(jenis_kenderaan='ambulan', status='aktif').count()
         kadar_kesiagaan = int((ambulan_aktif / jumlah_ambulan * 100)) if jumlah_ambulan > 0 else 0

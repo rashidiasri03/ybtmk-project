@@ -198,11 +198,38 @@
 
                 <!-- Senarai Kenderaan / "Order List" (Kanan) - Petak -->
                 <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[450px]">
-                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                        <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-list text-blue-500 mr-2"></i> Senarai Aset (Pilih untuk papar)</h3>
+                    
+                    <!-- Header & Filter Bar -->
+                    <div class="px-6 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between bg-slate-50 gap-3">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-slate-400">{{ kenderaan.count }} Unit</span>
+                            <h3 class="text-xs font-extrabold text-slate-700 uppercase tracking-wider"><i class="fas fa-list text-blue-500 mr-2"></i> Senarai Aset</h3>
+                            <span class="text-[10px] font-bold text-slate-400 bg-slate-200 px-2 py-0.5 rounded-md">{{ kenderaan.count }} Unit</span>
                         </div>
+                        
+                        <!-- Borang Carian & Penapis -->
+                        <form method="get" action="" class="flex items-center gap-2 w-full sm:w-auto">
+                            <!-- Dropdown Fasiliti -->
+                            <select name="fasiliti" class="text-[10px] font-semibold bg-white border border-slate-200 text-slate-600 rounded-lg px-2 py-1.5 outline-none focus:border-blue-400 w-full sm:w-40" onchange="this.form.submit()">
+                                <option value="">Semua Fasiliti</option>
+                                {% for f in fasiliti_list %}
+                                <option value="{{ f }}" {% if f == fasiliti_semasa %}selected{% endif %}>{{ f|truncatechars:25 }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                            <!-- Kotak Carian No Plat -->
+                            <div class="relative w-full sm:w-32">
+                                <i class="fas fa-search absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                                <input type="text" name="q" value="{{ carian_semasa }}" placeholder="No. Plat..." class="pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold w-full outline-none focus:border-blue-400 transition">
+                            </div>
+                            
+                            <!-- Butang Submit / Reset (Kelihatan jika carian aktif) -->
+                            <button type="submit" class="hidden"></button>
+                            {% if carian_semasa or fasiliti_semasa %}
+                            <a href="{% url 'home:aset_kenderaan_list' %}" class="w-7 h-7 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-500 flex items-center justify-center transition shrink-0" title="Set Semula">
+                                <i class="fas fa-times text-[10px]"></i>
+                            </a>
+                            {% endif %}
+                        </form>
                     </div>
                     
                     <div class="flex-1 overflow-y-auto">
@@ -217,7 +244,7 @@
                             </thead>
                             <tbody class="text-xs font-semibold text-slate-700 divide-y divide-slate-50">
                                 {% for k in kenderaan %}
-                                <tr class="hover:bg-blue-50 transition-colors cursor-pointer {% if selected_k.pk == k.pk %}bg-blue-50/50 border-l-4 border-blue-500{% else %}border-l-4 border-transparent{% endif %}" onclick="window.location.href='?id={{ k.pk }}'">
+                                <tr class="hover:bg-blue-50 transition-colors cursor-pointer {% if selected_k.pk == k.pk %}bg-blue-50/50 border-l-4 border-blue-500{% else %}border-l-4 border-transparent{% endif %}" onclick="window.location.href='?id={{ k.pk }}{% if carian_semasa %}&q={{ carian_semasa }}{% endif %}{% if fasiliti_semasa %}&fasiliti={{ fasiliti_semasa }}{% endif %}'">
                                     <td class="p-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded bg-white border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
@@ -253,6 +280,13 @@
                                         </a>
                                     </td>
                                     {% endif %}
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="p-10 text-center text-slate-400">
+                                        <i class="fas fa-search-minus text-3xl mb-3 opacity-30 block"></i>
+                                        <p>Tiada kenderaan ditemui untuk carian ini.</p>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
