@@ -270,7 +270,7 @@
                                     <th class="p-4">Identiti & Lokasi Fasiliti</th>
                                     <th class="p-4">Status Kontrak Servis</th>
                                     <th class="p-4">Status Operasi</th>
-                                    {% if is_jkn %}<th class="p-4 text-right">Tindakan</th>{% endif %}
+                                    {% if not is_tm %}<th class="p-4 text-right">Tindakan</th>{% endif %}
                                 </tr>
                             </thead>
                             <tbody class="text-xs font-semibold text-slate-700 divide-y divide-slate-100">
@@ -304,11 +304,13 @@
                                             <span class="text-slate-500 font-bold text-[11px]">Lupus</span>
                                         {% endif %}
                                     </td>
-                                    {% if is_jkn %}
+                                    {% if not is_tm %}
                                     <td class="p-4 text-right" onclick="event.stopPropagation();">
+                                        {% if is_admin or k.profil_fasiliti.maklumat_asas.nama_fasiliti in assigned_names %}
                                         <a href="{% url 'home:edit_kenderaan' k.pk %}" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-white border border-slate-200 text-blue-500 hover:bg-blue-50 transition shadow-sm" title="Kemaskini Aset">
                                             <i class="fas fa-pen text-[10px]"></i>
                                         </a>
+                                        {% endif %}
                                     </td>
                                     {% endif %}
                                 </tr>

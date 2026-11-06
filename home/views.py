@@ -2657,89 +2657,71 @@ def aset_kenderaan_list(request):
     """
     from .models import AsetKenderaan
     import traceback 
-    from django.db.models import Q
     
     try:
         user = request.user
-        
-        is_tm = False
-        is_jkn = False
-        if hasattr(user, 'profile'):
-            is_tm = user.profile.is_top_management
-            is_jkn = user.profile.is_jkn
-        
-        # Asas Queryset
-        if user.is_superuser or is_tm:
-            base_qs = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
-        elif is_jkn:
-            assigned_names = user.profile.assigned_facility_names if hasattr(user.profile, 'assigned_facility_names') else []
-            base_qs = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
-        else:
-            base_qs = AsetKenderaan.objects.filter(profil_fasiliti__submitted_by=user).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
-            
-        # ── LOGIK MASTER-DETAIL UNTUK TM & JKN ──
-        if is_tm or is_jkn:
-            # Ambil nilai penapis dari URL
-            k_id = request.GET.get('id')
-            carian_plat = request.GET.get('q', '').strip()
-            filter_fasiliti = request.GET.get('fasiliti', '').strip()
-            
-            # Aplikasikan penapis pada queryset utama
-            kenderaan = base_qs
-            if carian_plat:
-                kenderaan = kenderaan.filter(no_pendaftaran__icontains=carian_plat)
-            if filter_fasiliti:
-                kenderaan = kenderaan.filter(profil_fasiliti__maklumat_asas__nama_fasiliti=filter_fasiliti)
-            
-            # Pilih kenderaan untuk dipaparkan pada Visual Atas
-            selected_k = None
-            if k_id:
-                # Jika ID spesifik diklik dari jadual
-                selected_k = kenderaan.filter(pk=k_id).first()
-            
-            if not selected_k:
-                # Jika tiada ID (baru masuk, atau baru buat carian), pilih yang pertama dari hasil tapisan
-                selected_k = kenderaan.first()
-                
-            # Tarik senarai fasiliti unik HANYA yang ada kenderaan berdaftar (untuk dropdown)
-            fasiliti_list = base_qs.values_list('profil_fasiliti__maklumat_asas__nama_fasiliti', flat=True).distinct().order_by('profil_fasiliti__maklumat_asas__nama_fasiliti')
-                
-            lat = selected_k.profil_fasiliti.maklumat_asas.latitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.latitud else 3.1390
-            lng = selected_k.profil_fasiliti.maklumat_asas.longitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.longitud else 101.6869
+        is_tm = getattr(user.profile, 'is_top_management', False) if hasattr(user, 'profile') else False
+        is_jkn = getattr(user.profile, 'is_jkn', False) if hasattr(user, 'profile') else False
+        is_admin = user.is_superuser or user.is_staff
+        assigned_names = user.profile.assigned_facility_names if hasattr(user.profile, 'assigned_facility_names') else []
+
+        # 1. SUPERADMIN & ADMIN: Halakan ke paparan Jadual (List)
+        if is_admin:
+            kenderaan = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
+            jumlah_ambulan = kenderaan.filter(jenis_kenderaan='ambulan').count()
+            ambulan_aktif = kenderaan.filter(jenis_kenderaan='ambulan', status='aktif').count()
+            kadar_kesiagaan = int((ambulan_aktif / jumlah_ambulan * 100)) if jumlah_ambulan > 0 else 0
             
             context = {
                 'kenderaan': kenderaan,
-                'selected_k': selected_k,
-                'lat': lat,
-                'lng': lng,
+                'jumlah_ambulan': jumlah_ambulan,
+                'ambulan_aktif': ambulan_aktif,
+                'kadar_kesiagaan': kadar_kesiagaan,
                 'active_page': 'aset_kenderaan',
                 'is_tm': is_tm, 
                 'is_jkn': is_jkn,
-                'fasiliti_list': fasiliti_list,
-                'carian_semasa': carian_plat,
-                'fasiliti_semasa': filter_fasiliti,
+                'is_admin': is_admin,
             }
-            # Terus paparkan UI Visual "MOVE&ON"
-            return render(request, 'home/aset_kenderaan_visual.html', context)
-        # ────────────────────────────────────────
+            return render(request, 'home/aset_kenderaan_list.html', context)
 
-        # ── LOGIK ASAL UNTUK SUPERADMIN / ADMIN (Jadual Biasa) ──
+        # 2. TOP MANAGEMENT & JKN: Halakan ke paparan Visual Master-Detail
+        if is_tm:
+            base_qs = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
+        else:
+            # JKN Hanya Nampak Fasiliti Seliaan Mereka Sahaja
+            base_qs = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
+            
+        k_id = request.GET.get('id')
+        carian_plat = request.GET.get('q', '').strip()
+        filter_fasiliti = request.GET.get('fasiliti', '').strip()
+        
         kenderaan = base_qs
-        jumlah_ambulan = kenderaan.filter(jenis_kenderaan='ambulan').count()
-        ambulan_aktif = kenderaan.filter(jenis_kenderaan='ambulan', status='aktif').count()
-        kadar_kesiagaan = int((ambulan_aktif / jumlah_ambulan * 100)) if jumlah_ambulan > 0 else 0
+        if carian_plat:
+            kenderaan = kenderaan.filter(no_pendaftaran__icontains=carian_plat)
+        if filter_fasiliti:
+            kenderaan = kenderaan.filter(profil_fasiliti__maklumat_asas__nama_fasiliti=filter_fasiliti)
+        
+        selected_k = kenderaan.filter(pk=k_id).first() if k_id else kenderaan.first()
+        fasiliti_list = base_qs.values_list('profil_fasiliti__maklumat_asas__nama_fasiliti', flat=True).distinct().order_by('profil_fasiliti__maklumat_asas__nama_fasiliti')
+            
+        lat = selected_k.profil_fasiliti.maklumat_asas.latitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.latitud else 3.1390
+        lng = selected_k.profil_fasiliti.maklumat_asas.longitud if selected_k and selected_k.profil_fasiliti.maklumat_asas.longitud else 101.6869
         
         context = {
             'kenderaan': kenderaan,
-            'jumlah_ambulan': jumlah_ambulan,
-            'ambulan_aktif': ambulan_aktif,
-            'kadar_kesiagaan': kadar_kesiagaan,
+            'selected_k': selected_k,
+            'lat': lat,
+            'lng': lng,
             'active_page': 'aset_kenderaan',
             'is_tm': is_tm, 
-            'is_jkn': is_jkn
+            'is_jkn': is_jkn,
+            'is_admin': is_admin,
+            'fasiliti_list': fasiliti_list,
+            'carian_semasa': carian_plat,
+            'fasiliti_semasa': filter_fasiliti,
+            'assigned_names': assigned_names,
         }
-        
-        return render(request, 'home/aset_kenderaan_list.html', context)
+        return render(request, 'home/aset_kenderaan_visual.html', context)
         
     except Exception as e:
         from django.http import HttpResponse
@@ -2778,12 +2760,27 @@ def tambah_kenderaan(request):
 
 @login_required
 def edit_kenderaan(request, pk):
-    if hasattr(request.user, 'profile') and request.user.profile.is_top_management:
+    from .models import AsetKenderaan
+    from .forms import AsetKenderaanForm
+    from django.contrib import messages
+    
+    is_tm = getattr(request.user.profile, 'is_top_management', False) if hasattr(request.user, 'profile') else False
+    is_jkn = getattr(request.user.profile, 'is_jkn', False) if hasattr(request.user, 'profile') else False
+    is_admin = request.user.is_superuser or request.user.is_staff
+    
+    if is_tm:
         messages.error(request, 'Top Management hanya mempunyai akses baca sahaja.')
         return redirect('home:aset_kenderaan_list')
         
     kenderaan = get_object_or_404(AsetKenderaan, pk=pk)
     
+    # BACKEND SECURITY JKN: Halang mereka "teka" URL ID dari fasiliti lain
+    if is_jkn and not is_admin:
+        assigned = request.user.profile.assigned_facility_names if hasattr(request.user.profile, 'assigned_facility_names') else []
+        if kenderaan.profil_fasiliti.maklumat_asas.nama_fasiliti not in assigned:
+            messages.error(request, 'Akses Ditolak: Anda hanya dibenarkan mengemaskini aset bagi fasiliti seliaan anda sahaja.')
+            return redirect('home:aset_kenderaan_list')
+            
     if request.method == 'POST':
         form = AsetKenderaanForm(request.POST, instance=kenderaan, user=request.user)
         if form.is_valid():
@@ -2795,13 +2792,29 @@ def edit_kenderaan(request, pk):
         
     return render(request, 'home/form_kenderaan.html', {'form': form, 'mode': 'edit', 'kenderaan': kenderaan})
 
+
 @login_required
 def padam_kenderaan(request, pk):
-    if hasattr(request.user, 'profile') and request.user.profile.is_top_management:
+    from .models import AsetKenderaan
+    from django.contrib import messages
+    
+    is_tm = getattr(request.user.profile, 'is_top_management', False) if hasattr(request.user, 'profile') else False
+    is_jkn = getattr(request.user.profile, 'is_jkn', False) if hasattr(request.user, 'profile') else False
+    is_admin = request.user.is_superuser or request.user.is_staff
+    
+    if is_tm:
         messages.error(request, 'Top Management tidak dibenarkan memadam rekod.')
         return redirect('home:aset_kenderaan_list')
         
     kenderaan = get_object_or_404(AsetKenderaan, pk=pk)
+    
+    # BACKEND SECURITY JKN: Halang mereka "teka" URL ID dari fasiliti lain
+    if is_jkn and not is_admin:
+        assigned = request.user.profile.assigned_facility_names if hasattr(request.user.profile, 'assigned_facility_names') else []
+        if kenderaan.profil_fasiliti.maklumat_asas.nama_fasiliti not in assigned:
+            messages.error(request, 'Akses Ditolak: Anda hanya dibenarkan memadam aset bagi fasiliti seliaan anda sahaja.')
+            return redirect('home:aset_kenderaan_list')
+            
     if request.method == 'POST':
         kenderaan.delete()
         messages.success(request, 'Rekod kenderaan berjaya dipadam.')
@@ -2810,41 +2823,45 @@ def padam_kenderaan(request, pk):
 @login_required
 def detail_kenderaan(request, pk):
     """
-    Paparan terperinci ala "Logistics Dashboard" untuk satu aset kenderaan spesifik.
+    Paparan terperinci ala "Logistics Dashboard".
+    Ini digunakan apabila Superadmin / Admin klik nombor plat dari jadual.
     """
-    kenderaan = get_object_or_404(
-        AsetKenderaan.objects.select_related(
-            'profil_fasiliti__maklumat_asas',
-            'profil_fasiliti__k_aset',
-            'syarikat_servis'
-        ), pk=pk
-    )
+    from .models import AsetKenderaan
+    user = request.user
+    is_tm = getattr(user.profile, 'is_top_management', False) if hasattr(user, 'profile') else False
+    is_jkn = getattr(user.profile, 'is_jkn', False) if hasattr(user, 'profile') else False
+    is_admin = user.is_superuser or user.is_staff
+    assigned_names = user.profile.assigned_facility_names if hasattr(user.profile, 'assigned_facility_names') else []
 
-    is_tm = False
-    is_jkn = False
-    if hasattr(request.user, 'profile'):
-        is_tm = request.user.profile.is_top_management
-        is_jkn = request.user.profile.is_jkn
+    selected_k = get_object_or_404(AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis'), pk=pk)
 
-    # Sekuriti: Halang pengguna biasa jika ini bukan di bawah pentadbiran fasiliti mereka
-    if not request.user.is_superuser and not is_tm and not is_jkn:
-        if kenderaan.profil_fasiliti.submitted_by != request.user:
-            messages.error(request, 'Akses Ditolak: Kenderaan ini bukan di bawah pentadbiran anda.')
-            return redirect('home:aset_kenderaan_list')
-    elif is_jkn and not request.user.is_superuser:
-        if kenderaan.profil_fasiliti.maklumat_asas.nama_fasiliti not in request.user.profile.assigned_facility_names:
-            messages.error(request, 'Akses Ditolak: Kenderaan ini bukan di bawah pentadbiran JKN anda.')
+    # Sekatan URL JKN (Jika mereka cuba curi-curi masuk URL plat fasiliti lain)
+    if is_jkn and not is_admin:
+        if selected_k.profil_fasiliti.maklumat_asas.nama_fasiliti not in assigned_names:
+            from django.contrib import messages
+            messages.error(request, 'Akses Ditolak: Anda hanya dibenarkan melihat kenderaan fasiliti seliaan anda sahaja.')
             return redirect('home:aset_kenderaan_list')
 
-    # Koordinat Peta (MapLibre fallback)
-    lat = kenderaan.profil_fasiliti.maklumat_asas.latitud or 3.1390
-    lng = kenderaan.profil_fasiliti.maklumat_asas.longitud or 101.6869
+    # Senarai penuh untuk jadual kecil di bawah
+    if is_admin or is_tm:
+        base_qs = AsetKenderaan.objects.select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis').all()
+    else:
+        base_qs = AsetKenderaan.objects.filter(profil_fasiliti__maklumat_asas__nama_fasiliti__in=assigned_names).select_related('profil_fasiliti__maklumat_asas', 'syarikat_servis')
+
+    fasiliti_list = base_qs.values_list('profil_fasiliti__maklumat_asas__nama_fasiliti', flat=True).distinct().order_by('profil_fasiliti__maklumat_asas__nama_fasiliti')
+    lat = selected_k.profil_fasiliti.maklumat_asas.latitud if selected_k.profil_fasiliti.maklumat_asas.latitud else 3.1390
+    lng = selected_k.profil_fasiliti.maklumat_asas.longitud if selected_k.profil_fasiliti.maklumat_asas.longitud else 101.6869
 
     context = {
-        'kenderaan': kenderaan,
-        'lat': lat,
-        'lng': lng,
-        'is_tm': is_tm,
+        'kenderaan': base_qs,
+        'selected_k': selected_k,
+        'lat': lat, 'lng': lng,
+        'active_page': 'aset_kenderaan',
+        'is_tm': is_tm, 'is_jkn': is_jkn, 'is_admin': is_admin,
+        'fasiliti_list': fasiliti_list,
+        'carian_semasa': '', 'fasiliti_semasa': '',
+        'assigned_names': assigned_names,
     }
     
-    return render(request, 'home/detail_kenderaan.html', context)
+    # Guna template visual yang sama!
+    return render(request, 'home/aset_kenderaan_visual.html', context)
