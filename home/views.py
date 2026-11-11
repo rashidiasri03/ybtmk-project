@@ -19,6 +19,7 @@ from .models import AsetKenderaan
 from django.http import HttpResponse
 from django.db import connection
 import traceback
+from .models import KlusterInfrastruktur, KlusterAsetPerubatan, KlusterKewangan, KlusterDigital
 
 def custom_login(request):
     if request.user.is_authenticated:
@@ -2374,32 +2375,24 @@ def detail_kenderaan(request, pk):
     return render(request, 'home/aset_kenderaan_visual.html', context)
 
 def auto_fix_db(request):
-    """Suntik lajur-lajur baharu ke dalam jadual MaklumatAsas secara paksa"""
+    """Bina semula jadual yang hilang secara paksa menggunakan Schema Editor Django"""
     try:
-        with connection.cursor() as c:
-            # Dapatkan senarai lajur sedia ada dalam jadual MaklumatAsas
-            c.execute("SHOW COLUMNS FROM home_maklumatasas")
-            lajur_sedia_ada = [row[0] for row in c.fetchall()]
+        jadual_dicipta = []
+        # Gunakan Schema Editor untuk cipta jadual fizikal dengan tepat
+        with connection.schema_editor() as schema_editor:
+            models_to_check = [KlusterInfrastruktur, KlusterAsetPerubatan, KlusterKewangan, KlusterDigital]
             
-            # Senarai lajur baharu yang perlu disuntik jika belum wujud
-            lajur_baru = {
-                'kod_fasiliti': 'varchar(255) NULL',
-                'kategori_fasiliti': 'varchar(255) NULL',
-                'ketua_fasiliti': 'varchar(255) NULL',
-                'nama_responden': 'varchar(255) NULL',
-                'jawatan_responden': 'varchar(255) NULL',
-                'no_telefon_responden': 'varchar(255) NULL',
-                'emel_responden': 'varchar(255) NULL',
-            }
-            
-            # Suntik satu per satu jika tiada
-            lajur_disuntik = []
-            for nama_lajur, jenis_data in lajur_baru.items():
-                if nama_lajur not in lajur_sedia_ada:
-                    c.execute(f"ALTER TABLE home_maklumatasas ADD COLUMN {nama_lajur} {jenis_data}")
-                    lajur_disuntik.append(nama_lajur)
-            
-        pesanan = ", ".join(lajur_disuntik) if lajur_disuntik else "Tiada (Semua sudah wujud)"
-        return HttpResponse(f"<h1>BERJAYA SUNTIK MAKLUMAT ASAS!</h1><p>Lajur yang baru ditambah: {pesanan}</p><p>Anda boleh semak peta TM sekarang.</p>")
+            with connection.cursor() as c:
+                c.execute("SHOW TABLES")
+                existing_tables = [row[0] for row in c.fetchall()]
+                
+                for model in models_to_check:
+                    table_name = model._meta.db_table
+                    if table_name not in existing_tables:
+                        schema_editor.create_model(model)
+                        jadual_dicipta.append(table_name)
+                        
+        pesanan = ", ".join(jadual_dicipta) if jadual_dicipta else "Tiada (Semua jadual sudah wujud)"
+        return HttpResponse(f"<h1>BERJAYA BINA JADUAL FIZIKAL!</h1><p>Jadual baharu yang dicipta: {pesanan}</p><p>Sila semak Senarai Fasiliti sekarang.</p>")
     except Exception as e:
         return HttpResponse(f"<h1>GAGAL</h1><p>Ralat: {str(e)}</p><pre>{traceback.format_exc()}</pre>")
