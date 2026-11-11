@@ -531,7 +531,7 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td><strong>{{ fp.maklumat_asas.nama_fasiliti }}</strong></td>
-                    <td style="font-family:monospace;">{{ fp.k_kejuruteraan.kod_fasiliti|default:"-" }}</td>
+                    <td style="font-family:monospace;">{{ fp.maklumat_asas.kod_fasiliti|default:"-" }}</td>
                     <td>{{ fp.maklumat_asas.get_jenis_fasiliti_display|default:"-" }}</td>
                     <td>{{ fp.maklumat_asas.get_negeri_display|default:"-" }}</td>
                     <td>
