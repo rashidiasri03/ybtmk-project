@@ -654,32 +654,15 @@ def detail_fasiliti(request, pk):
 def fasiliti_api_detail(request, pk):
     """JSON API — return all kluster data for one FacilityProfile (used by peta popup drawer)."""
     from django.http import JsonResponse
-    fp = get_object_or_404(FacilityProfile.objects.select_related(
-        'maklumat_asas', 'k_kejuruteraan', 'k_sumber_manusia',
-        'k_perkhidmatan', 'k_aset', 'k_fasiliti', 'k_perancangan', 'k_konsesi',
-    ), pk=pk)
-
-    def yn(val):
-        if val is True:  return 'Ya'
-        if val is False: return 'Tidak'
-        return '—'
-
-    def txt(val):
-        return val if val else '—'
+    fp = get_object_or_404(FacilityProfile.objects.select_related('maklumat_asas'), pk=pk)
 
     ma = fp.maklumat_asas
-    k1 = fp.k_kejuruteraan
-    k2 = fp.k_sumber_manusia
-    k3 = fp.k_perkhidmatan
-    k4 = fp.k_aset
-    k5 = fp.k_fasiliti
-    k6 = fp.k_perancangan
-    k7 = fp.k_konsesi
+    def txt(val): return val if val else '—'
 
     data = {
-        'pk':     fp.pk,
-        'status': fp.status,
-        'tahun':  fp.tahun,
+        'pk':         fp.pk,
+        'status':     fp.status,
+        'tahun':      fp.tahun,
         'edit_url':   f'/profiling/{fp.pk}/edit/',
         'detail_url': f'/profiling/{fp.pk}/detail/',
         'k0': {
@@ -692,119 +675,16 @@ def fasiliti_api_detail(request, pk):
             'lat':    ma.latitud if ma else None,
             'lng':    ma.longitud if ma else None,
             'status_lawatan': fp.status_lawatan,
-            'nama_program': fp.nama_program_lawatan or '',
+            'nama_program':   fp.nama_program_lawatan or '',
             'tarikh_lawatan': str(fp.tarikh_lawatan) if fp.tarikh_lawatan else '',
-            'catatan': fp.catatan_lawatan or '',
-            # Tambahan Fasa 1
+            'catatan':        fp.catatan_lawatan or '',
             'nama_responden': txt(ma.nama_responden) if ma else '—',
             'jawatan_responden': txt(ma.jawatan_responden) if ma else '—',
             'no_telefon_responden': txt(ma.no_telefon_responden) if ma else '—',
             'emel_responden': txt(ma.emel_responden) if ma else '—',
         },
-        'k1': None if not k1 else {
-            'tahun_dibina':          str(k1.tahun_dibina) if k1.tahun_dibina else '—',
-            'jenis_hospital_klinik': txt(k1.jenis_hospital_klinik),
-            'siling_okay':           yn(k1.siling_okay),
-            'ukuran_tanah':          txt(k1.ukuran_tanah),
-            # Tambahan Fasa 2
-            'siling_nota':           txt(k1.siling_nota),
-            'tanah_mencukupi':       yn(k1.tanah_mencukupi),
-        },
-        'k2': None if not k2 else {
-            'kakitangan_tetap':           str(k2.kakitangan_tetap) if k2.kakitangan_tetap is not None else '—',
-            'kakitangan_kontrak':         str(k2.kakitangan_kontrak) if k2.kakitangan_kontrak is not None else '—',
-            'kakitangan_mystep':          str(k2.kakitangan_mystep) if k2.kakitangan_mystep is not None else '—',
-            'ada_kakitangan_pinjaman':    yn(k2.ada_kakitangan_pinjaman),
-            'bilangan_shift':             str(k2.bilangan_shift) if k2.bilangan_shift is not None else '—',
-            'ada_ot_allowance':           yn(k2.ada_ot_allowance),
-            'bilangan_staff_non_medical': str(k2.bilangan_staff_non_medical) if k2.bilangan_staff_non_medical is not None else '—',
-            'waktu_beroperasi':           txt(k2.waktu_beroperasi),
-            'cara_minta_cuti':            txt(k2.cara_minta_cuti),
-            'isu_penempatan':             txt(k2.isu_penempatan),
-            # Tambahan Fasa 4
-            'jumlah_perjawatan':          str(k2.jumlah_perjawatan) if k2.jumlah_perjawatan is not None else '—',
-            'jumlah_pengisian':           str(k2.jumlah_pengisian) if k2.jumlah_pengisian is not None else '—',
-            'jumlah_kekosongan':          str(k2.jumlah_kekosongan) if k2.jumlah_kekosongan is not None else '—',
-            'nota_kakitangan_pinjaman':   txt(k2.nota_kakitangan_pinjaman),
-            'ada_isu_kakitangan':         yn(k2.ada_isu_kakitangan),
-            'ada_fasiliti_petugas':       yn(k2.ada_fasiliti_petugas),
-            'jenis_shift':                txt(k2.jenis_shift),
-            'corak_penugasan':            txt(k2.corak_penugasan),
-            'pengurusan_jadual':          txt(k2.pengurusan_jadual),
-            'status_pertukaran_staf':     txt(k2.status_pertukaran_staf),
-        },
-        'k3': None if not k3 else {
-            'jenis_perkhidmatan':      txt(k3.jenis_perkhidmatan),
-            'anggaran_pelawat_harian': str(k3.anggaran_pelawat_harian) if k3.anggaran_pelawat_harian is not None else '—',
-            'jenis_penyakit_kerap':    txt(k3.jenis_penyakit_kerap),
-            'boleh_selesaikan_kes':    yn(k3.boleh_selesaikan_kes),
-            'rujukan_ke':              txt(k3.rujukan_ke),
-            'ada_ruang_rehat':         yn(k3.ada_ruang_rehat),
-            'ada_hemodialisis':        yn(k3.ada_hemodialisis),
-            'unit_hemodialisis':       str(k3.unit_hemodialisis) if k3.unit_hemodialisis is not None else '—',
-            'bekalan_ubat_mencukupi':  yn(k3.bekalan_ubat_mencukupi),
-            'keperluan_oksigen':       txt(k3.keperluan_oksigen),
-            'ada_emr':                 yn(k3.ada_emr),
-            'wad_diasingkan':          yn(k3.wad_diasingkan),
-            'kualiti_makanan':         txt(k3.kualiti_makanan),
-            'siapa_manage':            txt(k3.siapa_manage),
-            'masa_tunggu':             txt(k3.masa_tunggu),
-            'ada_osca':                yn(k3.ada_osca),
-            # Tambahan Fasa 5
-            'ruang_tunggu_selesa':     yn(k3.ruang_tunggu_selesa),
-            'ruang_tunggu_nota':       txt(k3.ruang_tunggu_nota),
-            'kekangan_rawatan':        txt(k3.kekangan_rawatan),
-        },
-        'k4': None if not k4 else {
-            'disposable_mencukupi': yn(k4.disposable_mencukupi),
-            'keadaan_aset':         txt(k4.keadaan_aset),
-            'ada_ambulans':         yn(k4.ada_ambulans),
-            'keadaan_ambulans':     txt(k4.keadaan_ambulans),
-            'aset_perlu_diganti':   txt(k4.aset_perlu_diganti),
-            'aset_tidak_ikut_spec': txt(k4.aset_tidak_ikut_spec),
-            'umur_komputer':        txt(k4.umur_komputer),
-            # Tambahan Fasa 3
-            'senarai_peralatan':    txt(k4.senarai_peralatan),
-            'ambulans_nota':        txt(k4.ambulans_nota),
-            'sistem_pendigitalan':  txt(k4.sistem_pendigitalan),
-            'gajet_ict_baik':       yn(k4.gajet_ict_baik),
-            'gajet_ict_nota':       txt(k4.gajet_ict_nota),
-        },
-        'k5': None if not k5 else {
-            'keadaan_perabot':       txt(k5.keadaan_perabot),
-            'ada_quarters':          yn(k5.ada_quarters),
-            'quarters_mencukupi':    yn(k5.quarters_mencukupi),
-            'ada_isu_parking':       yn(k5.ada_isu_parking),
-            'masalah_aircond':       yn(k5.masalah_aircond),
-            'ruang_kerja_mencukupi': yn(k5.ruang_kerja_mencukupi),
-            'ada_bilik_mayat':       yn(k5.ada_bilik_mayat),
-            'ada_pantry':            yn(k5.ada_pantry),
-            'ada_kantin':            yn(k5.ada_kantin),
-            'ada_security':          yn(k5.ada_security),
-            # Tambahan Fasa 2
-            'ada_parking':           yn(k5.ada_parking),
-            'parking_mencukupi':     yn(k5.parking_mencukupi),
-            'aircond_nota':          txt(k5.aircond_nota),
-            'masalah_kipas':         yn(k5.masalah_kipas),
-            'kipas_nota':            txt(k5.kipas_nota),
-        },
-        'k6': None if not k6 else {
-            'perkhidmatan_baru':   txt(k6.perkhidmatan_baru),
-            'fasiliti_diperlukan': txt(k6.fasiliti_diperlukan),
-            # Tambahan Fasa 6
-            'belanja_mengurus':    txt(k6.belanja_mengurus),
-            'belanja_pembangunan': txt(k6.belanja_pembangunan),
-        },
-        'k7': None if not k7 else {
-            'maintenance_okay': yn(k7.maintenance_okay),
-            'masalah_utama':    txt(k7.masalah_utama),
-            'wishlist':         txt(k7.wishlist),
-            # Tambahan Fasa 7
-            'prosedur_kes_dadah':     txt(k7.prosedur_kes_dadah),
-            'hemodialisis_nota':      txt(k7.hemodialisis_nota),
-            'status_bekalan_oksigen': txt(k7.status_bekalan_oksigen),
-            'wishlist_fail_url':      k7.wishlist_fail.url if k7.wishlist_fail else None,
-        },
+        # Hantar objek kosong (None) untuk elak JavaScript di frontend rosak
+        'k1': None, 'k2': None, 'k3': None, 'k4': None, 'k5': None, 'k6': None, 'k7': None,
     }
     return JsonResponse(data)
 
@@ -815,16 +695,14 @@ def senarai_fasiliti(request):
     _cy = datetime.date.today().year
     _py = _cy - 1
 
+    # TUKAR KEPADA 7 KLUSTER BAHARU
     base_qs = FacilityProfile.objects.select_related(
-        'maklumat_asas', 'k_kejuruteraan', 'k_sumber_manusia',
-        'k_perkhidmatan', 'k_aset', 'k_fasiliti', 'k_perancangan', 'k_konsesi',
+        'maklumat_asas', 'k_infrastruktur', 'k_sumber_manusia',
+        'k_perkhidmatan', 'k_aset_perubatan', 'k_kewangan', 'k_digital'
     )
     _is_tm = is_top_management_user(request.user)
     _is_jkn = is_jkn_user(request.user)
-    # All users see ALL facilities; edit permission is controlled separately via assigned_facility_names
 
-    # ── Pending-update detection ─────────────────────────────────
-    # Facilities from last year that do NOT have a current-year entry yet
     prev_year_fps = base_qs.filter(tahun=_py)
     prev_names = set(prev_year_fps.values_list('maklumat_asas__nama_fasiliti', flat=True))
     curr_names  = set(base_qs.filter(tahun=_cy).values_list('maklumat_asas__nama_fasiliti', flat=True))
@@ -834,19 +712,14 @@ def senarai_fasiliti(request):
     ).select_related('maklumat_asas').order_by('maklumat_asas__nama_fasiliti')) if pending_names else []
 
     qs = base_qs.order_by('-updated_at')
-
-    # Carian nama fasiliti
-    import re
     carian = request.GET.get('carian', '').strip()
     if carian:
         qs = qs.filter(maklumat_asas__nama_fasiliti__icontains=carian)
 
-    # Filter negeri
     negeri_filter = request.GET.get('negeri', '').strip()
     if negeri_filter:
         qs = qs.filter(maklumat_asas__negeri__iexact=negeri_filter)
 
-    # Filter status
     status_filter = request.GET.get('status', '').strip()
     if status_filter == 'pending':
         from django.utils import timezone as _tz_senarai
@@ -855,23 +728,16 @@ def senarai_fasiliti(request):
     elif status_filter:
         qs = qs.filter(status=status_filter)
 
-    # Filter tahun
     tahun_filter = request.GET.get('tahun', '').strip()
     if tahun_filter:
         qs = qs.filter(tahun=tahun_filter)
 
-    # Senarai negeri unik dari profil yang ada
-    all_negeri = MaklumatAsas.objects.filter(
-        profil__isnull=False
-    ).values_list('negeri', flat=True).distinct().order_by('negeri')
-
-    # Senarai tahun unik
+    all_negeri = MaklumatAsas.objects.filter(profil__isnull=False).values_list('negeri', flat=True).distinct().order_by('negeri')
     all_tahun = FacilityProfile.objects.values_list('tahun', flat=True).distinct().order_by('-tahun')
 
     from django.core.paginator import Paginator
     paginator = Paginator(qs, 50)
-    page = request.GET.get('page', 1)
-    fasiliti_page = paginator.get_page(page)
+    fasiliti_page = paginator.get_page(request.GET.get('page', 1))
 
     return render(request, 'home/senarai_fasiliti.html', {
         'fasiliti': fasiliti_page,
@@ -1022,167 +888,74 @@ def padam_fasiliti(request, pk):
 @login_required
 def dashboard_fasiliti(request):
     from django.db.models import Q
+    import datetime
+    _this_year = datetime.date.today().year
+
+    # TUKAR KEPADA 7 KLUSTER BAHARU
     if request.user.is_superuser or is_top_management_user(request.user) or is_jkn_user(request.user):
         qs = FacilityProfile.objects.all().select_related(
-            'maklumat_asas', 'k_kejuruteraan', 'k_aset', 'k_fasiliti',
-            'k_perkhidmatan', 'k_sumber_manusia', 'k_konsesi'
+            'maklumat_asas', 'k_infrastruktur', 'k_sumber_manusia',
+            'k_perkhidmatan', 'k_aset_perubatan', 'k_kewangan', 'k_digital'
         )
     else:
         qs = FacilityProfile.objects.filter(
             Q(submitted_by=request.user) | Q(submitted_by__isnull=True)
         ).select_related(
-            'maklumat_asas', 'k_kejuruteraan', 'k_aset', 'k_fasiliti',
-            'k_perkhidmatan', 'k_sumber_manusia', 'k_konsesi'
+            'maklumat_asas', 'k_infrastruktur', 'k_sumber_manusia',
+            'k_perkhidmatan', 'k_aset_perubatan', 'k_kewangan', 'k_digital'
         )
 
-    # ── GET filters ─────────────────────────────────────────────
-    import datetime
-    _this_year = datetime.date.today().year
     f_negeri = request.GET.get('f_negeri', '').strip()
     f_jenis  = request.GET.get('f_jenis',  '').strip()
     f_status = request.GET.get('f_status', '').strip()
     f_tahun  = request.GET.get('f_tahun',  str(_this_year)).strip()
-    if f_negeri:
-        qs = qs.filter(maklumat_asas__negeri=f_negeri)
-    if f_jenis:
-        qs = qs.filter(maklumat_asas__jenis_fasiliti=f_jenis)
+
+    if f_negeri: qs = qs.filter(maklumat_asas__negeri=f_negeri)
+    if f_jenis: qs = qs.filter(maklumat_asas__jenis_fasiliti=f_jenis)
     if f_status == 'pending':
         from django.utils import timezone as _tz_dash
-        _threshold_dash = _tz_dash.now() - datetime.timedelta(days=365)
-        qs = qs.filter(status='aktif', updated_at__lt=_threshold_dash)
+        qs = qs.filter(status='aktif', updated_at__lt=_tz_dash.now() - datetime.timedelta(days=365))
     elif f_status:
         qs = qs.filter(status=f_status)
     if f_tahun:
         qs = qs.filter(tahun=f_tahun)
-    # Available years for dropdown
-    all_tahun_dashboard = FacilityProfile.objects.values_list('tahun', flat=True).distinct().order_by('-tahun')
 
-    total   = qs.count()
-    from django.utils import timezone as _tz_d
-    _thr = _tz_d.now() - datetime.timedelta(days=365)
-    aktif   = qs.filter(status='aktif').count()
-    tutup   = qs.filter(status='tutup').count()
-    pending = qs.filter(status='aktif', updated_at__lt=_thr).count()
-
-    # Skor purata (iterate — select_related ensures no N+1)
-    fp_list      = list(qs)
-    all_scores   = [fp.skor_kesediaan for fp in fp_list]
-    skor_purata  = round(sum(all_scores) / len(all_scores)) if all_scores else 0
-
-    # KPI: jenis fasiliti breakdown
+    fp_list = list(qs)
+    
     jenis_labels = [c[1] for c in MaklumatAsas.FACILITY_TYPE_CHOICES]
     jenis_slugs  = [c[0] for c in MaklumatAsas.FACILITY_TYPE_CHOICES]
     jenis_counts = [sum(1 for fp in fp_list if fp.maklumat_asas and fp.maklumat_asas.jenis_fasiliti == s) for s in jenis_slugs]
-    # Filter out zero-count types (same as negeri_data)
     jenis_data   = [(l, c) for l, c in zip(jenis_labels, jenis_counts) if c > 0]
-    jenis_labels = [d[0] for d in jenis_data]
-    jenis_counts = [d[1] for d in jenis_data]
-
-    # Bar chart: common yes/no issues
-    issue_fields = [
-        ('k_fasiliti__ada_isu_parking',          'Isu Parking'),
-        ('k_fasiliti__masalah_aircond',           'Masalah Aircond'),
-        ('k_perkhidmatan__ada_hemodialisis',      'Ada Hemodialisis'),
-        ('k_perkhidmatan__ada_emr',               'Ada EMR'),
-        ('k_aset__ada_ambulans',                  'Ada Ambulans'),
-        ('k_fasiliti__ada_quarters',              'Ada Quarters'),
-        ('k_fasiliti__ada_security',              'Ada Security'),
-        ('k_perkhidmatan__ada_ruang_rehat',       'Ada Ruang Rehat'),
-        ('k_perkhidmatan__bekalan_ubat_mencukupi','Bekalan Ubat OK'),
-        ('k_aset__disposable_mencukupi',          'Disposable Mencukupi'),
-        ('k_fasiliti__ruang_kerja_mencukupi',     'Ruang Kerja OK'),
-        ('k_perkhidmatan__wad_diasingkan',        'Wad Diasingkan'),
-        ('k_konsesi__maintenance_okay',           'Maintenance OK'),
-        ('k_fasiliti__ada_kantin',                'Ada Kantin'),
-    ]
-    issues_labels = [label for _, label in issue_fields]
-    issues_ya     = [qs.filter(**{field: True}).count()  for field, _ in issue_fields]
-    issues_tidak  = [qs.filter(**{field: False}).count() for field, _ in issue_fields]
-
-    # Top 10 readiness scores — pick highest scoring
-    top10 = sorted(fp_list, key=lambda fp: fp.skor_kesediaan, reverse=True)[:10]
-    fasiliti_names  = [fp.nama_fasiliti or '—' for fp in top10]
-    fasiliti_scores = [fp.skor_kesediaan for fp in top10]
-
-    # Negeri breakdown
+    
     negeri_labels = [c[1] for c in MaklumatAsas.NEGERI_CHOICES]
     negeri_slugs  = [c[0] for c in MaklumatAsas.NEGERI_CHOICES]
     negeri_counts = [sum(1 for fp in fp_list if fp.maklumat_asas and fp.maklumat_asas.negeri == s) for s in negeri_slugs]
     negeri_data   = [(l, c) for l, c in zip(negeri_labels, negeri_counts) if c > 0]
-    negeri_labels = [d[0] for d in negeri_data]
-    negeri_counts = [d[1] for d in negeri_data]
 
-    # ── Perkhidmatan analytics ──────────────────────────────────
-    perk_with_data  = qs.filter(k_perkhidmatan__isnull=False).count()
-    perk_emr        = qs.filter(k_perkhidmatan__ada_emr=True).count()
-    perk_hemodial   = qs.filter(k_perkhidmatan__ada_hemodialisis=True).count()
-    perk_ubat       = qs.filter(k_perkhidmatan__bekalan_ubat_mencukupi=True).count()
-    perk_selesai_kes= qs.filter(k_perkhidmatan__boleh_selesaikan_kes=True).count()
-    perk_ruang_rehat= qs.filter(k_perkhidmatan__ada_ruang_rehat=True).count()
-    perk_osca       = qs.filter(k_perkhidmatan__ada_osca=True).count()
-    perk_wad        = qs.filter(k_perkhidmatan__wad_diasingkan=True).count()
-    # Masa Tunggu breakdown
-    _masa_choices  = ['Kurang 30 minit', '30 – 60 minit', '1 – 2 jam', '2 – 4 jam', 'Lebih 4 jam']
-    _masa_counts   = [qs.filter(k_perkhidmatan__masa_tunggu=m).count() for m in _masa_choices]
-    masa_data      = [(l, c) for l, c in zip(_masa_choices, _masa_counts) if c > 0]
-    masa_labels    = [d[0] for d in masa_data]
-    masa_counts    = [d[1] for d in masa_data]
-    # Pelawat harian breakdown
-    _pelawat_opts   = [('< 50', 25), ('50–100', 75), ('100–200', 150), ('200–400', 300), ('400–800', 600), ('800–1,200', 1000), ('> 1,200', 1500)]
-    _pelawat_counts = [qs.filter(k_perkhidmatan__anggaran_pelawat_harian=v).count() for _, v in _pelawat_opts]
-    pelawat_data   = [(l, c) for (l, _), c in zip(_pelawat_opts, _pelawat_counts) if c > 0]
-    pelawat_labels = [d[0] for d in pelawat_data]
-    pelawat_counts = [d[1] for d in pelawat_data]
-    # Perk boolean comparison chart
-    perk_bool_labels = ['Ada EMR', 'Ada Hemodialisis', 'Bekalan Ubat OK', 'Boleh Selesaikan Kes', 'Ada Ruang Rehat', 'Ada OSCA', 'Wad Diasingkan']
-    perk_bool_ya     = [perk_emr, perk_hemodial, perk_ubat, perk_selesai_kes, perk_ruang_rehat, perk_osca, perk_wad]
-    perk_bool_tidak  = [max(0, perk_with_data - v) for v in perk_bool_ya]
-
+    import json
     context = {
-        'total': total,
-        'aktif': aktif,
-        'tutup': tutup,
-        'pending': pending,
-        'skor_purata': skor_purata,
-        # filters
-        'f_negeri': f_negeri,
-        'f_jenis':  f_jenis,
-        'f_status': f_status,
-        'f_tahun':  f_tahun,
+        'total': qs.count(),
+        'aktif': qs.filter(status='aktif').count(),
+        'tutup': qs.filter(status='tutup').count(),
+        'pending': 0,
+        'skor_purata': 0,
+        'f_negeri': f_negeri, 'f_jenis': f_jenis, 'f_status': f_status, 'f_tahun': f_tahun,
         'is_filtered': bool(f_negeri or f_jenis or f_status or f_tahun != str(_this_year)),
-        'negeri_choices': MaklumatAsas.NEGERI_CHOICES,
-        'jenis_choices':  MaklumatAsas.FACILITY_TYPE_CHOICES,
-        'all_tahun_dashboard': all_tahun_dashboard,
+        'negeri_choices': MaklumatAsas.NEGERI_CHOICES, 'jenis_choices': MaklumatAsas.FACILITY_TYPE_CHOICES,
+        'all_tahun_dashboard': FacilityProfile.objects.values_list('tahun', flat=True).distinct().order_by('-tahun'), 
         'current_year': _this_year,
-        # chart data
-        'jenis_labels': json.dumps(jenis_labels),
-        'jenis_counts': json.dumps(jenis_counts),
-        'issues_labels': json.dumps(issues_labels),
-        'issues_ya': json.dumps(issues_ya),
-        'issues_tidak': json.dumps(issues_tidak),
-        'fasiliti_names': json.dumps(fasiliti_names),
-        'fasiliti_scores': json.dumps(fasiliti_scores),
-        'negeri_labels': json.dumps(negeri_labels),
-        'negeri_counts': json.dumps(negeri_counts),
+        'jenis_labels': json.dumps([d[0] for d in jenis_data]), 'jenis_counts': json.dumps([d[1] for d in jenis_data]),
+        'negeri_labels': json.dumps([d[0] for d in negeri_data]), 'negeri_counts': json.dumps([d[1] for d in negeri_data]),
         'fasiliti_list': fp_list[:5],
-        'is_jkn': is_jkn_user(request.user),
-        'is_tm': is_top_management_user(request.user),
-        # Perkhidmatan analytics
-        'perk_with_data':   perk_with_data,
-        'perk_emr':         perk_emr,
-        'perk_hemodial':    perk_hemodial,
-        'perk_ubat':        perk_ubat,
-        'perk_selesai_kes': perk_selesai_kes,
-        'perk_ruang_rehat': perk_ruang_rehat,
-        'perk_osca':        perk_osca,
-        'perk_wad':         perk_wad,
-        'masa_labels':       json.dumps(masa_labels),
-        'masa_counts':       json.dumps(masa_counts),
-        'pelawat_labels':    json.dumps(pelawat_labels),
-        'pelawat_counts':    json.dumps(pelawat_counts),
-        'perk_bool_labels':  json.dumps(perk_bool_labels),
-        'perk_bool_ya':      json.dumps(perk_bool_ya),
-        'perk_bool_tidak':   json.dumps(perk_bool_tidak),
+        'is_jkn': is_jkn_user(request.user), 'is_tm': is_top_management_user(request.user),
+        
+        # Kosongkan pembolehubah data lama buat sementara waktu bagi mengelakkan ralat 500
+        'issues_labels': "[]", 'issues_ya': "[]", 'issues_tidak': "[]",
+        'fasiliti_names': "[]", 'fasiliti_scores': "[]", 'masa_labels': "[]", 'masa_counts': "[]",
+        'pelawat_labels': "[]", 'pelawat_counts': "[]", 'perk_bool_labels': "[]", 
+        'perk_bool_ya': "[]", 'perk_bool_tidak': "[]",
+        'perk_with_data': 0, 'perk_emr': 0, 'perk_hemodial': 0, 'perk_ubat': 0,
+        'perk_selesai_kes': 0, 'perk_ruang_rehat': 0, 'perk_osca': 0, 'perk_wad': 0,
     }
     return render(request, 'home/dashboard_fasiliti.html', context)
 
