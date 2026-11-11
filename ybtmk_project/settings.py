@@ -9,6 +9,12 @@ pymysql.install_as_MySQLdb()
 from django.db.backends.mysql.base import DatabaseWrapper
 DatabaseWrapper.check_database_version_supported = lambda self: None
 
+# --- TAMBAH 3 BARIS INI UNTUK BYPASS RALAT 1109 BLUEHOST ---
+from django.db.backends.mysql.features import DatabaseFeatures
+DatabaseFeatures.supports_column_check_constraints = False
+DatabaseFeatures.can_introspect_check_constraints = False
+# -----------------------------------------------------------
+
 from pathlib import Path
 import os
 
