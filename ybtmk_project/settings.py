@@ -25,48 +25,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 
 # ==============================================================================
-# 1. SUIS KAWALAN PERSEKITARAN (Tukar ke False sebelum upload (Zip) ke Bluehost!)
+# 1. SUIS KAWALAN PERSEKITARAN
 # ==============================================================================
-DEBUG = False  # <--- TUKAR KEPADA TRUE UNTUK PEMBANGUNAN LOKAL FALSE=PRODUCTION,TRUE=LOCALHOST
+DEBUG = True  # <--- BUKA KEPADA TRUE SEMENTARA UNTUK KESAN RALAT DI RENDER
 
 if DEBUG:
-    # -----------------------------------------
-    # TETAPAN LOCALHOST (Komputer Anda)
-    # -----------------------------------------
     ALLOWED_HOSTS = ['*']
-    
-    # 1. KITA GUNA SQLITE SEMENTARA UNTUK PEMBANGUNAN LOKAL
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-
-    # 2. KOMENKAN TETAPAN TiDB LAMA (Boleh buka semula kemudian jika perlu)
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.mysql',
-    #         'NAME': 'test',
-    #         'USER': '2CwNRpLuETQ92Zu.root',
-    #         'PASSWORD': 's27Rm9mBo1KWq1jE',
-    #         'HOST': 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
-    #         'PORT': '4000',
-    #         'OPTIONS': {
-    #             'ssl': {},
-    #         }
-    #     }
-    # }
-else:
-    # -----------------------------------------
-    # TETAPAN BLUEHOST (Production / Live)
-    # -----------------------------------------
-    # Simbol '*' diletakkan agar anda tidak mendapat ralat ketika menguji sistem di Bluehost
-    ALLOWED_HOSTS = ['ybtmk.michma.com', 'ybtmk.healomic.com', 'localhost', '127.0.0.1']
-
     CSRF_TRUSTED_ORIGINS = ['https://ybtmk.michma.com', 'https://ybtmk.healomic.com']
     
-    # Pangkalan data MySQL Bluehost (TIDAK BERUBAH)
+    # KITA PAKSA IA BERSAMBUNG KE BLUEHOST SUPAYA RALAT SEBENAR MUNCUL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'healomic_ybtmkdb',
+            'USER': 'healomic_dbadmin',
+            'PASSWORD': '@Hpu_ybtmk2026',
+            'HOST': 'box5692.bluehost.com',
+            'PORT': '3306',
+        }
+    }
+else:
+    ALLOWED_HOSTS = ['ybtmk.michma.com', 'ybtmk.healomic.com', 'localhost', '127.0.0.1']
+    CSRF_TRUSTED_ORIGINS = ['https://ybtmk.michma.com', 'https://ybtmk.healomic.com']
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
