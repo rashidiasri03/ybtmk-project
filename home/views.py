@@ -540,11 +540,7 @@ def tambah_pengguna(request):
             return redirect('home:urus_pengguna')
             
     # Ambil senarai semua fasiliti untuk diletakkan dalam ruangan 'Tandakan Fasiliti'
-    all_facilities = list(
-        MaklumatAsas.objects.filter(profil__isnull=False)
-        .values_list('nama_fasiliti', flat=True)
-        .distinct().order_by('nama_fasiliti')
-    )
+    all_facilities = list(MaklumatAsas.objects.filter(facilityprofile__isnull=False).values_list('nama_fasiliti', flat=True).distinct().order_by('nama_fasiliti'))
     
     return render(request, 'home/tambah_pengguna.html', {
         'all_facilities': all_facilities
@@ -576,11 +572,8 @@ def edit_pengguna(request, user_id):
         messages.success(request, f'Pengguna "{target.username}" berjaya dikemaskini.')
         return redirect('home:urus_pengguna')
     # All unique facility names for the picker
-    all_facilities = list(
-        MaklumatAsas.objects.filter(profil__isnull=False)
-        .values_list('nama_fasiliti', flat=True)
-        .distinct().order_by('nama_fasiliti')
-    )
+    all_facilities = list(MaklumatAsas.objects.filter(facilityprofile__isnull=False).values_list('nama_fasiliti', flat=True).distinct().order_by('nama_fasiliti'))
+    
     return render(request, 'home/edit_pengguna.html', {
         'target':                  target,
         'all_sections':            ALL_SECTIONS,
@@ -737,7 +730,7 @@ def senarai_fasiliti(request):
     if tahun_filter:
         qs = qs.filter(tahun=tahun_filter)
 
-    all_negeri = MaklumatAsas.objects.filter(profil__isnull=False).values_list('negeri', flat=True).distinct().order_by('negeri')
+    all_negeri = MaklumatAsas.objects.filter(facilityprofile__isnull=False).values_list('negeri', flat=True).distinct().order_by('negeri')
     all_tahun = FacilityProfile.objects.values_list('tahun', flat=True).distinct().order_by('-tahun')
 
     from django.core.paginator import Paginator
