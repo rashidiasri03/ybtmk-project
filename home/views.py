@@ -16,6 +16,10 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import SoalanTambahan, JawapanSoalanTambahan
 from .forms import AsetKenderaanForm
 from .models import AsetKenderaan
+from django.http import HttpResponse
+from django.db import connection
+from django.core.management import call_command
+import traceback
 
 def custom_login(request):
     if request.user.is_authenticated:
@@ -2376,3 +2380,23 @@ def detail_kenderaan(request, pk):
     
     # Guna template visual yang sama!
     return render(request, 'home/aset_kenderaan_visual.html', context)
+
+def auto_fix_db(request):
+    """Pautan rahsia untuk selesaikan masalah database dari dalam Render"""
+    try:
+        # 1. Buang jadual sangkut
+        with connection.cursor() as c:
+            c.execute("DROP TABLE IF EXISTS home_klusterasetperubatan;")
+            c.execute("DROP TABLE IF EXISTS home_klusterdigital;")
+            c.execute("DROP TABLE IF EXISTS home_klusterinfrastruktur;")
+            c.execute("DROP TABLE IF EXISTS home_klusterkewangan;")
+        
+        # 2. Undur sejarah (Un-fake) ke 0027
+        call_command('migrate', 'home', '0027', fake=True)
+        
+        # 3. Lakukan migrasi fizikal sebenar
+        call_command('migrate')
+        
+        return HttpResponse("<h1>BERJAYA!</h1><p>Jadual lama telah dibuang dan migrasi fizikal selesai. Anda boleh semak peta TM sekarang.</p>")
+    except Exception as e:
+        return HttpResponse(f"<h1>GAGAL</h1><p>Ralat: {str(e)}</p><pre>{traceback.format_exc()}</pre>")

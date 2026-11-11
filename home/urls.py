@@ -62,4 +62,7 @@ urlpatterns = [
     path('profiling/perkhidmatan/<int:pk>/edit/', views.edit_penyampaian_perkhidmatan, name='edit_penyampaian_perkhidmatan'),
     path('profiling/kewangan-perancangan/<int:pk>/edit/', views.edit_kewangan_perancangan, name='edit_kewangan_perancangan'),
     path('profiling/digital/<int:pk>/edit/', views.edit_sistem_digital, name='edit_sistem_digital'),
+
+    # Masalah ketiadaan Shell render & Firewall Bluehost
+    path('auto-fix-db/', views.auto_fix_db, name='auto_fix_db'),
 ]
