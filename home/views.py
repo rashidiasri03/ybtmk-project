@@ -2381,35 +2381,32 @@ def detail_kenderaan(request, pk):
     return render(request, 'home/aset_kenderaan_visual.html', context)
 
 def auto_fix_db(request):
-    """Pautan rahsia untuk selesaikan masalah database dari dalam Render secara paksa"""
+    """Suntik lajur-lajur baharu ke dalam jadual MaklumatAsas secara paksa"""
     try:
         with connection.cursor() as c:
-            # 1. Buang sisa jadual sangkut
-            c.execute("DROP TABLE IF EXISTS home_klusterasetperubatan;")
-            c.execute("DROP TABLE IF EXISTS home_klusterdigital;")
-            c.execute("DROP TABLE IF EXISTS home_klusterinfrastruktur;")
-            c.execute("DROP TABLE IF EXISTS home_klusterkewangan;")
-            
-            # 2. Tipu sistem migrasi Django bahawa segalanya sudah selesai
-            # (Supaya ia tak cuba ubah apa-apa lagi di masa depan)
-            from django.core.management import call_command
-            call_command('migrate', '--fake')
-            
-            # 3. Cipta 7 lajur secara PAKSA ke dalam jadual FacilityProfile jika belum ada
-            lajur_baru = [
-                'k_infrastruktur_id', 'k_aset_perubatan_id', 'k_kewangan_id', 
-                'k_digital_id'
-            ]
-            
-            # Semak lajur yang ada dalam jadual facility profile
-            c.execute("SHOW COLUMNS FROM home_facilityprofile")
+            # Dapatkan senarai lajur sedia ada dalam jadual MaklumatAsas
+            c.execute("SHOW COLUMNS FROM home_maklumatasas")
             lajur_sedia_ada = [row[0] for row in c.fetchall()]
             
-            for lajur in lajur_baru:
-                if lajur not in lajur_sedia_ada:
-                    # Cipta lajur tersebut sebagai rujukan (Foreign Key)
-                    c.execute(f"ALTER TABLE home_facilityprofile ADD COLUMN {lajur} bigint NULL")
+            # Senarai lajur baharu yang perlu disuntik jika belum wujud
+            lajur_baru = {
+                'kod_fasiliti': 'varchar(255) NULL',
+                'kategori_fasiliti': 'varchar(255) NULL',
+                'ketua_fasiliti': 'varchar(255) NULL',
+                'nama_responden': 'varchar(255) NULL',
+                'jawatan_responden': 'varchar(255) NULL',
+                'no_telefon_responden': 'varchar(255) NULL',
+                'emel_responden': 'varchar(255) NULL',
+            }
             
-        return HttpResponse("<h1>BERJAYA 100%!</h1><p>Lajur baharu telah disuntik secara paksa. Anda boleh semak peta TM sekarang.</p>")
+            # Suntik satu per satu jika tiada
+            lajur_disuntik = []
+            for nama_lajur, jenis_data in lajur_baru.items():
+                if nama_lajur not in lajur_sedia_ada:
+                    c.execute(f"ALTER TABLE home_maklumatasas ADD COLUMN {nama_lajur} {jenis_data}")
+                    lajur_disuntik.append(nama_lajur)
+            
+        pesanan = ", ".join(lajur_disuntik) if lajur_disuntik else "Tiada (Semua sudah wujud)"
+        return HttpResponse(f"<h1>BERJAYA SUNTIK MAKLUMAT ASAS!</h1><p>Lajur yang baru ditambah: {pesanan}</p><p>Anda boleh semak peta TM sekarang.</p>")
     except Exception as e:
         return HttpResponse(f"<h1>GAGAL</h1><p>Ralat: {str(e)}</p><pre>{traceback.format_exc()}</pre>")
