@@ -322,8 +322,8 @@ def tm_portal(request):
         return redirect('home:bahagian')
     import datetime
     from django.core.paginator import Paginator
-    # Stats
     from django.utils import timezone as _tz_tm
+    
     _threshold_tm = _tz_tm.now() - datetime.timedelta(days=365)
     total   = FacilityProfile.objects.count()
     aktif   = FacilityProfile.objects.filter(status='aktif').count()
@@ -331,14 +331,16 @@ def tm_portal(request):
     pending = FacilityProfile.objects.filter(status='aktif', updated_at__lt=_threshold_tm).count()
     tahun   = datetime.date.today().year
     jumlah_tahun = FacilityProfile.objects.filter(tahun=tahun).count()
-    # Senarai laporan (paginated)
-    import re
+    
+    # HANYA panggil 'maklumat_asas', jangan masukkan kluster lain
     qs = FacilityProfile.objects.select_related('maklumat_asas').order_by('-updated_at')
     carian = request.GET.get('carian', '').strip()
     if carian:
         qs = qs.filter(maklumat_asas__nama_fasiliti__icontains=carian)
+        
     paginator = Paginator(qs, 25)
     page_obj  = paginator.get_page(request.GET.get('page', 1))
+    
     return render(request, 'home/tm_portal.html', {
         'total': total, 'aktif': aktif, 'tutup': tutup, 'pending': pending,
         'tahun': tahun, 'jumlah_tahun': jumlah_tahun,
@@ -381,8 +383,8 @@ def peta_fasiliti(request):
         messages.error(request, "Akses ditolak. Halaman ini untuk Admin sahaja.")
         return redirect('home:bahagian')
         
-    # 3. Jika pengguna adalah Superadmin atau Admin (is_staff), paparkan peta Admin
     import json
+    # PADAMKAN k_kejuruteraan, k_aset dll, biarkan maklumat_asas sahaja
     fps = FacilityProfile.objects.select_related('maklumat_asas').all()
     data = []
     for fp in fps:
@@ -391,8 +393,8 @@ def peta_fasiliti(request):
             data.append({
                 'pk':     fp.pk,
                 'nama':   ma.nama_fasiliti,
-                'jenis':  ma.get_jenis_fasiliti_display(),
-                'negeri': ma.get_negeri_display(),
+                'jenis':  ma.get_jenis_fasiliti_display() if hasattr(ma, 'get_jenis_fasiliti_display') else '',
+                'negeri': ma.get_negeri_display() if hasattr(ma, 'get_negeri_display') else '',
                 'daerah': ma.daerah,
                 'alamat': ma.alamat or '',
                 'poskod': ma.poskod or '',
@@ -422,8 +424,8 @@ def peta_tm(request):
             data.append({
                 'pk':     fp.pk,
                 'nama':   ma.nama_fasiliti,
-                'jenis':  ma.get_jenis_fasiliti_display(),
-                'negeri': ma.get_negeri_display(),
+                'jenis':  ma.get_jenis_fasiliti_display() if hasattr(ma, 'get_jenis_fasiliti_display') else '',
+                'negeri': ma.get_negeri_display() if hasattr(ma, 'get_negeri_display') else '',
                 'daerah': ma.daerah,
                 'alamat': ma.alamat or '',
                 'poskod': ma.poskod or '',
