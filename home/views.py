@@ -19,7 +19,6 @@ from .models import AsetKenderaan
 from django.http import HttpResponse
 from django.db import connection
 import traceback
-from .models import KlusterInfrastruktur, KlusterAsetPerubatan, KlusterKewangan, KlusterDigital
 
 def custom_login(request):
     if request.user.is_authenticated:
@@ -2375,24 +2374,87 @@ def detail_kenderaan(request, pk):
     return render(request, 'home/aset_kenderaan_visual.html', context)
 
 def auto_fix_db(request):
-    """Bina semula jadual yang hilang secara paksa menggunakan Schema Editor Django"""
+    """Suntik lajur-lajur baharu ke dalam jadual sedia ada secara paksa"""
     try:
-        jadual_dicipta = []
-        # Gunakan Schema Editor untuk cipta jadual fizikal dengan tepat
-        with connection.schema_editor() as schema_editor:
-            models_to_check = [KlusterInfrastruktur, KlusterAsetPerubatan, KlusterKewangan, KlusterDigital]
+        lajur_ditambah = []
+        with connection.cursor() as c:
             
-            with connection.cursor() as c:
-                c.execute("SHOW TABLES")
-                existing_tables = [row[0] for row in c.fetchall()]
-                
-                for model in models_to_check:
-                    table_name = model._meta.db_table
-                    if table_name not in existing_tables:
-                        schema_editor.create_model(model)
-                        jadual_dicipta.append(table_name)
-                        
-        pesanan = ", ".join(jadual_dicipta) if jadual_dicipta else "Tiada (Semua jadual sudah wujud)"
-        return HttpResponse(f"<h1>BERJAYA BINA JADUAL FIZIKAL!</h1><p>Jadual baharu yang dicipta: {pesanan}</p><p>Sila semak Senarai Fasiliti sekarang.</p>")
+            # 1. Suntik lajur ke dalam home_klustersumbermanusia
+            c.execute("SHOW COLUMNS FROM home_klustersumbermanusia")
+            sumbermanusia_lajur_wujud = [row[0] for row in c.fetchall()]
+            
+            sumbermanusia_lajur_baru = {
+                'fail_perjawatan': 'varchar(100) NULL',
+                'fail_pengisian': 'varchar(100) NULL',
+                'fail_kekosongan': 'varchar(100) NULL',
+                'json_kakitangan': 'json NULL',
+                'fail_kakitangan': 'varchar(100) NULL',
+                'ada_isu_petugas': 'tinyint(1) NULL',
+                'isu_petugas_nota': 'longtext NOT NULL DEFAULT ""',
+                'status_pertukaran': 'varchar(255) NOT NULL DEFAULT ""',
+                'proses_cuti': 'varchar(255) NOT NULL DEFAULT ""',
+                'isu_penjadualan': 'varchar(255) NOT NULL DEFAULT ""',
+                'fail_wishlist': 'varchar(100) NULL',
+                'ada_ot_allowance': 'tinyint(1) NULL',
+                'bilangan_staff_non_medical': 'int NULL',
+                'waktu_beroperasi': 'varchar(255) NOT NULL DEFAULT ""',
+                'cara_minta_cuti': 'varchar(255) NOT NULL DEFAULT ""',
+                'isu_penempatan': 'varchar(255) NOT NULL DEFAULT ""'
+            }
+            
+            for nama, jenis in sumbermanusia_lajur_baru.items():
+                if nama not in sumbermanusia_lajur_wujud:
+                    c.execute(f"ALTER TABLE home_klustersumbermanusia ADD COLUMN {nama} {jenis}")
+                    lajur_ditambah.append(f"home_klustersumbermanusia.{nama}")
+                    
+            # 2. Suntik lajur ke dalam home_klusterperkhidmatan
+            c.execute("SHOW COLUMNS FROM home_klusterperkhidmatan")
+            perkhidmatan_lajur_wujud = [row[0] for row in c.fetchall()]
+            
+            perkhidmatan_lajur_baru = {
+                'json_waktu_operasi': 'json NULL',
+                'json_program': 'json NULL',
+                'fail_program': 'varchar(100) NULL',
+                'json_penyakit': 'json NULL',
+                'fail_penyakit': 'varchar(100) NULL',
+                'ruang_menunggu_selesa': 'tinyint(1) NULL',
+                'ruang_menunggu_nota': 'longtext NOT NULL DEFAULT ""',
+                'ada_wad': 'tinyint(1) NULL',
+                'wad_asing_jantina': 'tinyint(1) NULL',
+                'katil_mencukupi': 'tinyint(1) NULL',
+                'ada_kaunseling': 'tinyint(1) NULL',
+                'ada_rehabilitasi': 'tinyint(1) NULL',
+                'boleh_selesai_kes_nota': 'longtext NOT NULL DEFAULT ""',
+                'json_fasiliti_terdekat': 'json NULL',
+                'fail_fasiliti_terdekat': 'varchar(100) NULL',
+                'anggaran_masa_tunggu': 'varchar(150) NOT NULL DEFAULT ""',
+                'ada_forensik': 'tinyint(1) NULL',
+                'sedia_makanan': 'tinyint(1) NULL',
+                'makanan_memuaskan': 'tinyint(1) NULL',
+                'makanan_nota': 'longtext NOT NULL DEFAULT ""',
+                'fail_wishlist': 'varchar(100) NULL',
+                'jenis_perkhidmatan': 'varchar(255) NOT NULL DEFAULT ""',
+                'jenis_penyakit_kerap': 'varchar(255) NOT NULL DEFAULT ""',
+                'rujukan_ke': 'varchar(255) NOT NULL DEFAULT ""',
+                'ada_ruang_rehat': 'tinyint(1) NULL',
+                'ada_hemodialisis': 'tinyint(1) NULL',
+                'unit_hemodialisis': 'int NULL',
+                'bekalan_ubat_mencukupi': 'tinyint(1) NULL',
+                'keperluan_oksigen': 'varchar(255) NOT NULL DEFAULT ""',
+                'ada_emr': 'tinyint(1) NULL',
+                'wad_diasingkan': 'tinyint(1) NULL',
+                'kualiti_makanan': 'varchar(255) NOT NULL DEFAULT ""',
+                'siapa_manage': 'varchar(255) NOT NULL DEFAULT ""',
+                'masa_tunggu': 'varchar(255) NOT NULL DEFAULT ""',
+                'ada_osca': 'tinyint(1) NULL'
+            }
+
+            for nama, jenis in perkhidmatan_lajur_baru.items():
+                if nama not in perkhidmatan_lajur_wujud:
+                    c.execute(f"ALTER TABLE home_klusterperkhidmatan ADD COLUMN {nama} {jenis}")
+                    lajur_ditambah.append(f"home_klusterperkhidmatan.{nama}")
+
+        pesanan = "<br>".join(lajur_ditambah) if lajur_ditambah else "Tiada (Semua jadual sudah lengkap)"
+        return HttpResponse(f"<h1>BERJAYA SUNTIK LAJUR KLUSTER!</h1><p>Lajur baharu yang disuntik:<br>{pesanan}</p><p>Sila semak Senarai Fasiliti sekarang.</p>")
     except Exception as e:
         return HttpResponse(f"<h1>GAGAL</h1><p>Ralat: {str(e)}</p><pre>{traceback.format_exc()}</pre>")
