@@ -104,16 +104,16 @@ class KlusterInfrastruktur(models.Model):
     # 2.6 Keselamatan
     ada_security = models.BooleanField(null=True, blank=True)
     ada_cctv = models.BooleanField(null=True, blank=True)
-    json_pekerja_security = models.JSONField(default=list, blank=True) # Adding Row
+    json_pekerja_security = models.JSONField(null=True, blank=True) # Adding Row
     fail_pekerja_security = models.FileField(upload_to='infrastruktur_files/', null=True, blank=True)
 
     # 2.7 Tindak Balas Kecemasan
     ada_sistem_kebakaran = models.BooleanField(null=True, blank=True)
-    json_kebakaran_aktif = models.JSONField(default=list, blank=True) # Adding Row
-    json_kebakaran_pasif = models.JSONField(default=list, blank=True) # Adding Row
+    json_kebakaran_aktif = models.JSONField(null=True, blank=True) # Adding Row
+    json_kebakaran_pasif = models.JSONField(null=True, blank=True) # Adding Row
     tarikh_fire_drill = models.DateField(null=True, blank=True)
     pernah_kecemasan = models.BooleanField(null=True, blank=True)
-    json_sejarah_kecemasan = models.JSONField(default=list, blank=True) # Adding Row
+    json_sejarah_kecemasan = models.JSONField(null=True, blank=True) # Adding Row
     
     fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
@@ -123,9 +123,9 @@ class KlusterInfrastruktur(models.Model):
 # ─────────────────────────────────────────────────────────────────
 class KlusterAsetPerubatan(models.Model):
     # 3.1 Peralatan Perubatan & Sokongan
-    json_peralatan = models.JSONField(default=list, blank=True) # Adding Row
+    json_peralatan = models.JSONField(null=True, blank=True) # Adding Row
     fail_peralatan = models.FileField(upload_to='aset_perubatan_files/', null=True, blank=True)
-    json_aset_tidak_spec = models.JSONField(default=list, blank=True) # Adding Row
+    json_aset_tidak_spec = models.JSONField(null=True, blank=True) # Adding Row
     fail_aset_tidak_spec = models.FileField(upload_to='aset_perubatan_files/', null=True, blank=True)
     
     consumables_mencukupi = models.BooleanField(null=True, blank=True)
@@ -154,7 +154,7 @@ class KlusterSumberManusia(models.Model):
     fail_kekosongan = models.FileField(upload_to='sumber_manusia_files/', null=True, blank=True)
     
     # JSON untuk fail/senarai sokongan
-    json_kakitangan = models.JSONField(default=list, blank=True) 
+    json_kakitangan = models.JSONField(null=True, blank=True) 
     fail_kakitangan = models.FileField(upload_to='sumber_manusia_files/', null=True, blank=True)
     
     ada_kakitangan_pinjaman = models.BooleanField(null=True, blank=True)
@@ -185,11 +185,11 @@ class StafFasiliti(models.Model):
 # ─────────────────────────────────────────────────────────────────
 class KlusterPerkhidmatan(models.Model):
     # 5.1 Operasi & Pesakit
-    json_waktu_operasi = models.JSONField(default=list, blank=True) # Adding Row
+    json_waktu_operasi = models.JSONField(null=True, blank=True) # Adding Row
     anggaran_pelawat = models.IntegerField(null=True, blank=True)
-    json_program = models.JSONField(default=list, blank=True) # Adding Row
+    json_program = models.JSONField(null=True, blank=True) # Adding Row
     fail_program = models.FileField(upload_to='perkhidmatan_files/', null=True, blank=True)
-    json_penyakit = models.JSONField(default=list, blank=True) # Adding Row
+    json_penyakit = models.JSONField(null=True, blank=True) # Adding Row
     fail_penyakit = models.FileField(upload_to='perkhidmatan_files/', null=True, blank=True)
 
     # 5.2 Kapasiti Rawatan & Keselesaan
@@ -203,7 +203,7 @@ class KlusterPerkhidmatan(models.Model):
     boleh_selesai_kes = models.BooleanField(null=True, blank=True)
     boleh_selesai_kes_nota = models.TextField(blank=True)
     
-    json_fasiliti_terdekat = models.JSONField(default=list, blank=True) # Adding Row
+    json_fasiliti_terdekat = models.JSONField(null=True, blank=True) # Adding Row
     fail_fasiliti_terdekat = models.FileField(upload_to='perkhidmatan_files/', null=True, blank=True)
     anggaran_masa_tunggu = models.CharField(max_length=150, blank=True)
 
@@ -230,7 +230,7 @@ class KlusterKewangan(models.Model):
     
     # 6.3 Perancangan Masa Depan
     perlu_tambah_infrastruktur = models.BooleanField(null=True, blank=True)
-    json_infrastruktur_baru = models.JSONField(default=list, blank=True) # Adding Row
+    json_infrastruktur_baru = models.JSONField(null=True, blank=True) # Adding Row
     
     fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
@@ -247,11 +247,11 @@ class KlusterDigital(models.Model):
     perlu_tambah_nota = models.TextField(blank=True)
     internet_pantas = models.BooleanField(null=True, blank=True)
     
-    json_peranti = models.JSONField(default=list, blank=True) # Adding Row
+    json_peranti = models.JSONField(null=True, blank=True) # Adding Row
     fail_peranti = models.FileField(upload_to='digital_files/', null=True, blank=True)
     
     # 7.2 Sistem Pendigitalan
-    json_sistem = models.JSONField(default=list, blank=True) # Adding Row
+    json_sistem = models.JSONField(null=True, blank=True) # Adding Row
     fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
 
