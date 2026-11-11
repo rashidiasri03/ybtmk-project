@@ -1,24 +1,15 @@
 from django.contrib import admin
 from .models import (
-    MaklumatAsas,
-    KlusterKejuruteraan,
-    KlusterSumberManusia,
-    StafFasiliti,
-    KlusterPerkhidmatan,
-    KlusterAset,
-    KlusterFasiliti,
-    KlusterPerancangan,
-    KlusterKonsesi,
-    FacilityProfile,
-    UserProfile,
-    SyarikatServisKenderaan,  
-    AsetKenderaan
+    MaklumatAsas, KlusterInfrastruktur, KlusterAsetPerubatan,
+    KlusterSumberManusia, KlusterPerkhidmatan, KlusterKewangan, KlusterDigital,
+    FacilityProfile, UserProfile, StafFasiliti, SyarikatServisKenderaan,
+    AsetKenderaan, SoalanTambahan, JawapanSoalanTambahan
 )
 
 class StafFasilitiInline(admin.TabularInline):
     model = StafFasiliti
     extra = 0
-    fields = ('nama_staf', 'no_pengenalan', 'skim', 'status_lantikan', 'tarikh_tamat_perkhidmatan')
+    fields = ('nama_staf', 'skim', 'status_lantikan', 'tarikh_tamat_perkhidmatan')
 
 @admin.register(KlusterSumberManusia)
 class KlusterSumberManusiaAdmin(admin.ModelAdmin):
@@ -33,18 +24,19 @@ class StafFasilitiAdmin(admin.ModelAdmin):
 
 @admin.register(FacilityProfile)
 class FacilityProfileAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'status', 'tahun', 'skor_kesediaan', 'updated_at')
+    list_display = ('__str__', 'status', 'tahun', 'updated_at')
     list_filter = ('status', 'tahun', 'status_lawatan')
     search_fields = ('maklumat_asas__nama_fasiliti',)
 
 # Daftar model-model lain untuk rujukan mudah
 admin.site.register(MaklumatAsas)
-admin.site.register(KlusterKejuruteraan)
+admin.site.register(KlusterInfrastruktur)
+admin.site.register(KlusterAsetPerubatan)
 admin.site.register(KlusterPerkhidmatan)
-admin.site.register(KlusterAset)
-admin.site.register(KlusterFasiliti)
-admin.site.register(KlusterPerancangan)
-admin.site.register(KlusterKonsesi)
+admin.site.register(KlusterKewangan)
+admin.site.register(KlusterDigital)
 admin.site.register(UserProfile)
 admin.site.register(SyarikatServisKenderaan)
 admin.site.register(AsetKenderaan)
+admin.site.register(SoalanTambahan)
+admin.site.register(JawapanSoalanTambahan)

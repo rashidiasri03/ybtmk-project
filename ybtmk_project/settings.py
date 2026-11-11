@@ -21,7 +21,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 # ==============================================================================
 # 1. SUIS KAWALAN PERSEKITARAN (Tukar ke False sebelum upload (Zip) ke Bluehost!)
 # ==============================================================================
-DEBUG = False
+DEBUG = False  # <--- TUKAR KEPADA TRUE UNTUK PEMBANGUNAN LOKAL FALSE=PRODUCTION,TRUE=LOCALHOST
 
 if DEBUG:
     # -----------------------------------------
@@ -29,20 +29,28 @@ if DEBUG:
     # -----------------------------------------
     ALLOWED_HOSTS = ['*']
     
-    # Kekalkan TiDB untuk ujian di komputer supaya data lama masih ada
+    # 1. KITA GUNA SQLITE SEMENTARA UNTUK PEMBANGUNAN LOKAL
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'test',
-            'USER': '2CwNRpLuETQ92Zu.root',
-            'PASSWORD': 's27Rm9mBo1KWq1jE',
-            'HOST': 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
-            'PORT': '4000',
-            'OPTIONS': {
-                'ssl': {},
-            }
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+    # 2. KOMENKAN TETAPAN TiDB LAMA (Boleh buka semula kemudian jika perlu)
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.mysql',
+    #         'NAME': 'test',
+    #         'USER': '2CwNRpLuETQ92Zu.root',
+    #         'PASSWORD': 's27Rm9mBo1KWq1jE',
+    #         'HOST': 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+    #         'PORT': '4000',
+    #         'OPTIONS': {
+    #             'ssl': {},
+    #         }
+    #     }
+    # }
 else:
     # -----------------------------------------
     # TETAPAN BLUEHOST (Production / Live)
@@ -52,7 +60,7 @@ else:
 
     CSRF_TRUSTED_ORIGINS = ['https://ybtmk.michma.com', 'https://ybtmk.healomic.com']
     
-    # Pangkalan data MySQL Bluehost
+    # Pangkalan data MySQL Bluehost (TIDAK BERUBAH)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',

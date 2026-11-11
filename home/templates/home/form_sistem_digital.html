@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>7. Rangkaian & Digital | YBTMK</title>
+    <link rel="icon" type="image/png" href="{% static 'home/images/jata negara.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
+        body { background: #f0f4fa; }
+        .pill-item input[type="radio"] { display:none; }
+        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label:hover { border-color:#94a3b8; }
+        .pill-item input:checked + label.ya { border-color:#0284c7; background:#f0f9ff; color:#0369a1; }
+        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
+        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(2,132,199,.05); }
+        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
+        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; outline:none; transition:all .15s; }
+        .f-input:focus { border-color:#0284c7; box-shadow:0 0 0 3px rgba(2,132,199,.1); }
+        .btn-submit { background:linear-gradient(110deg,#0284c7,#0ea5e9); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; }
+        
+        .file-upload-wrapper { position: relative; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; background: #f8fafc; transition: all 0.2s; cursor: pointer; }
+        .file-upload-wrapper:hover { border-color: #0284c7; background: #f0f9ff; }
+        .file-upload-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
+        .file-display { pointer-events: none; }
+        
+        .dyn-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; }
+        .dyn-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
+        .dyn-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; }
+    </style>
+</head>
+<body class="min-h-screen">
+<nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
+    <div class="px-8 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
+            <div><p class="text-[9px] font-bold tracking-widest text-sky-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Rangkaian & Digital</p></div>
+        </div>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+    </div>
+</nav>
+
+<div class="bg-gradient-to-r from-sky-700 via-sky-600 to-cyan-500 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
+    <div class="relative z-10 px-10 py-7">
+        <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 7: SISTEM RANGKAIAN & PERALATAN DIGITAL</h1>
+        <p class="text-sky-100 text-xs opacity-80">{{ fp.nama_fasiliti }}</p>
+    </div>
+</div>
+
+<main class="px-8 pb-16 pt-6">
+<form method="post" enctype="multipart/form-data" id="digitalForm" class="space-y-6">
+{% csrf_token %}
+
+<div class="sec-group">
+    <div class="sec-title"><div class="sec-dot bg-sky-50 text-sky-600">7.1</div><span class="sec-label">Peranti Digital</span></div>
+    
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Peranti/komputer mencukupi untuk kegunaan staf?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="peranti_mencukupi" id="pm_y" value="1" {% if fp.k_digital.peranti_mencukupi == True %}checked{% endif %}><label for="pm_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="peranti_mencukupi" id="pm_t" value="0" {% if fp.k_digital.peranti_mencukupi == False %}checked{% endif %}><label for="pm_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Rangkaian internet mudah dicapai di fasiliti ini?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="internet_pantas" id="ip_y" value="1" {% if fp.k_digital.internet_pantas == True %}checked{% endif %}><label for="ip_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="internet_pantas" id="ip_t" value="0" {% if fp.k_digital.internet_pantas == False %}checked{% endif %}><label for="ip_t" class="tidak">Tidak</label></div></div></div>
+        
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Peranti/komputer dalam keadaan baik dan terkini?</label>
+            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="peranti_baik" id="pb_y" value="1" onchange="toggleNote('pb_nota', false)" {% if fp.k_digital.peranti_baik == True %}checked{% endif %}><label for="pb_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="peranti_baik" id="pb_t" value="0" onchange="toggleNote('pb_nota', true)" {% if fp.k_digital.peranti_baik == False %}checked{% endif %}><label for="pb_t" class="tidak">Tidak (Nyatakan)</label></div></div>
+            <div id="pb_nota" class="{% if fp.k_digital.peranti_baik != False %}hidden{% endif %} mt-2"><input type="text" name="peranti_baik_nota" class="f-input" placeholder="Cth: Sangat perlahan..." value="{{ fp.k_digital.peranti_baik_nota|default:'' }}"></div>
+        </div>
+        
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Keperluan penambahan / penggantian peranti?</label>
+            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="perlu_tambah_peranti" id="pt_y" value="1" onchange="toggleNote('pt_nota', false)" {% if fp.k_digital.perlu_tambah_peranti == True %}checked{% endif %}><label for="pt_y" class="ya">Ya (Nyatakan)</label></div><div class="pill-item"><input type="radio" name="perlu_tambah_peranti" id="pt_t" value="0" onchange="toggleNote('pt_nota', true)" {% if fp.k_digital.perlu_tambah_peranti == False %}checked{% endif %}><label for="pt_t" class="tidak">Tidak</label></div></div>
+            <div id="pt_nota" class="{% if fp.k_digital.perlu_tambah_peranti != True %}hidden{% endif %} mt-2"><input type="text" name="perlu_tambah_nota" class="f-input" placeholder="Cth: Perlu 2 biji PC..." value="{{ fp.k_digital.perlu_tambah_nota|default:'' }}"></div>
+        </div>
+    </div>
+
+    <!-- Senarai Peranti Digital -->
+    <div class="q-card mb-4">
+        <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Peranti Digital (Komputer, Router, dll)</label>
+        <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
+            <table class="w-full text-left dyn-table">
+                <thead><tr><th>Nama Peranti</th><th>Kuantiti / Keadaan</th><th class="w-8"></th></tr></thead>
+                <tbody id="tb-peranti"></tbody>
+            </table>
+        </div>
+        <button type="button" onclick="addRow('tb-peranti', ['Cth: PC / Laptop', 'Cth: 5 Baik, 2 Rosak'])" class="text-[10px] font-bold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
+        <input type="hidden" name="json_peranti_data" id="json_peranti_data">
+        <div class="mt-3 border-t border-slate-200 pt-3">
+            <div class="file-upload-wrapper" id="w-peranti"><input type="file" name="fail_peranti" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-peranti')">
+            <div class="file-display" id="d-peranti">{% if fp.k_digital.fail_peranti %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_digital.fail_peranti.name }}</p>{% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Atau Muat Naik Dokumen Senarai Peranti</p>{% endif %}</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="sec-group">
+    <div class="sec-title"><div class="sec-dot bg-sky-50 text-sky-600">7.2</div><span class="sec-label">Sistem Pendigitalan</span></div>
+    
+    <div class="q-card mb-4">
+        <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Sistem yang digunakan di Fasiliti</label>
+        <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
+            <table class="w-full text-left dyn-table">
+                <thead><tr><th>Nama Sistem (Cth: EMR, HRMIS)</th><th>Fungsi / Tahap Penggunaan</th><th class="w-8"></th></tr></thead>
+                <tbody id="tb-sistem"></tbody>
+            </table>
+        </div>
+        <button type="button" onclick="addRow('tb-sistem', ['Cth: EMR', 'Cth: Digunakan setiap hari'])" class="text-[10px] font-bold text-sky-600 bg-sky-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
+        <input type="hidden" name="json_sistem_data" id="json_sistem_data">
+    </div>
+</div>
+
+<!-- Wishlist Sub-Topik -->
+<div class="sec-group bg-sky-50 border-sky-200">
+    <div class="q-card border-none bg-transparent shadow-none p-0">
+        <label class="block text-sm font-bold text-slate-700 mb-2"><i class="fas fa-star text-amber-500 mr-1"></i> Wishlist Berkaitan Rangkaian & Digital</label>
+        <div class="file-upload-wrapper bg-white border-sky-300" id="wrap-wishlist">
+            <input type="file" name="fail_wishlist" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-wishlist')">
+            <div class="file-display" id="disp-wishlist">
+                {% if fp.k_digital.fail_wishlist %}
+                    <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] truncate">{{ fp.k_digital.fail_wishlist.name }}</p>
+                {% else %}
+                    <i class="fas fa-cloud-upload-alt text-3xl text-sky-400 mb-2"></i><p class="text-xs">Klik/Seret dokumen Wishlist (Maksima 5MB)</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SUBMIT -->
+<div class="flex items-center justify-between pt-2">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Batal</a>
+    <button type="submit" onclick="prepareSubmit()" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Digital</button>
+</div>
+
+</form>
+</main>
+
+<script>
+    function handleFile(inputElement, displayId) {
+        const file = inputElement.files[0];
+        const display = document.getElementById(displayId);
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { alert("Ralat: Saiz fail melebihi had maksima 5MB."); inputElement.value = ""; return; }
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        display.innerHTML = `<p class="text-[10px] font-bold text-emerald-600 truncate"><i class="fas fa-check-circle"></i> ${file.name} (${sizeMB} MB)</p>`;
+        inputElement.parentElement.classList.add('border-emerald-400', 'bg-emerald-50');
+    }
+
+    function toggleNote(id, show) {
+        const wrap = document.getElementById(id);
+        if(wrap) { if(!show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+    }
+
+    function addRow(tbodyId, placeholders, existingData = null) {
+        const tbody = document.getElementById(tbodyId);
+        const tr = document.createElement('tr');
+        let html = '';
+        placeholders.forEach((ph, index) => {
+            const val = existingData ? existingData[index] : '';
+            html += `<td><input type="text" class="dyn-input" placeholder="${ph}" value="${val}"></td>`;
+        });
+        html += `<td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 p-1"><i class="fas fa-trash-alt"></i></button></td>`;
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const populateTable = (rawStr, tBody, cols) => {
+            if(rawStr && rawStr !== '""' && rawStr !== '[]') {
+                try { JSON.parse(rawStr).forEach(row => addRow(tBody, cols, row)); } catch(e) {}
+            }
+        };
+        populateTable('{{ fp.k_digital.json_peranti|safe|escapejs }}', 'tb-peranti', ['Nama Peranti', 'Kuantiti / Keadaan']);
+        populateTable('{{ fp.k_digital.json_sistem|safe|escapejs }}', 'tb-sistem', ['Nama Sistem', 'Fungsi / Tahap']);
+    });
+
+    function getTableData(tbodyId) {
+        let data = [];
+        Array.from(document.getElementById(tbodyId).rows).forEach(tr => {
+            let rowVals = [];
+            tr.querySelectorAll('input').forEach(inp => rowVals.push(inp.value.trim()));
+            if(rowVals.some(v => v !== '')) data.push(rowVals);
+        });
+        return JSON.stringify(data);
+    }
+
+    function prepareSubmit() {
+        document.getElementById('json_peranti_data').value = getTableData('tb-peranti');
+        document.getElementById('json_sistem_data').value = getTableData('tb-sistem');
+    }
+</script>
+</body>
+</html>

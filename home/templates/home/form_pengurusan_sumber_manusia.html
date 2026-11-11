@@ -15,25 +15,24 @@
         .pill-item input[type="radio"] { display:none; }
         .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
         .pill-item label:hover { border-color:#94a3b8; }
-        .pill-item input:checked + label.ya { border-color:#9333ea; background:#faf5ff; color:#7e22ce; }
+        .pill-item input:checked + label.ya { border-color:#7c3aed; background:#f5f3ff; color:#6d28d9; }
         .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
-        .pill-item input:checked + label.other { border-color:#eab308; background:#fefce8; color:#ca8a04; }
-        .cb-label { display:flex; align-items:center; gap:10px; cursor:pointer; padding:10px; border-radius:8px; transition:background .15s; }
-        .cb-label:hover { background:#f8fafc; }
-        .cb-input { width:16px; height:16px; accent-color:#9333ea; }
-        .cb-text { font-size:.85rem; font-weight:600; color:#334155; }
         .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
-        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(147,51,234,.08); border-color:#d8b4fe; }
-        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(147,51,234,.05); }
+        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(124,58,237,.05); }
         .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
         .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
-        .sec-label { font-size:.8rem; font-weight:800; color:#334155; letter-spacing:.01em; text-transform:uppercase; }
-        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none; transition:all .15s; background:#fff; }
-        .f-input:focus { border-color:#9333ea; box-shadow:0 0 0 3px rgba(147,51,234,.1); }
-        .btn-submit { background:linear-gradient(110deg,#9333ea,#a855f7); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 4px 20px rgba(147,51,234,.3); }
-        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
-        .fade-in { opacity:0; animation:fadeUp .4s ease both; }
+        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; outline:none; transition:all .15s; }
+        .f-input:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.1); }
+        .btn-submit { background:linear-gradient(110deg,#7c3aed,#8b5cf6); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; }
+        
+        .file-upload-wrapper { position: relative; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; background: #f8fafc; transition: all 0.2s; cursor: pointer; }
+        .file-upload-wrapper:hover { border-color: #7c3aed; background: #f5f3ff; }
+        .file-upload-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
+        .file-display { pointer-events: none; }
+        
+        .dyn-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; }
+        .dyn-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
+        .dyn-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -56,327 +55,221 @@
 </div>
 
 <main class="px-8 pb-16 pt-6">
-<form method="post" id="mainForm" class="space-y-6">
+<form method="post" enctype="multipart/form-data" id="smForm" class="space-y-6">
 {% csrf_token %}
 
-<div class="sec-group fade-in" style="animation-delay:.1s;">
+<!-- 4.1 Bilangan & Penempatan Staf -->
+<div class="sec-group">
     <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.1</div><span class="sec-label">Bilangan & Penempatan Staf</span></div>
     
-    <div class="grid grid-cols-3 gap-3 mb-3">
+    <div class="grid grid-cols-3 gap-4 mb-4">
+        <!-- Perjawatan -->
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-1.5">Jumlah Warta Perjawatan</label>
-            <input type="number" id="input_perjawatan" name="jumlah_perjawatan" class="f-input font-bold" min="0" value="{{ jumlah_perjawatan|default:'' }}" oninput="kiraKekosonganUI()">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Jumlah Warta Perjawatan</label>
+            <input type="number" name="jumlah_perjawatan" class="f-input mb-3 font-bold text-lg text-purple-700" value="{{ fp.k_sumber_manusia.jumlah_perjawatan|default:'' }}">
+            <div class="file-upload-wrapper p-2" id="w-perj">
+                <input type="file" name="fail_perjawatan" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-perj')">
+                <div class="file-display" id="d-perj">
+                    {% if fp.k_sumber_manusia.fail_perjawatan %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_sumber_manusia.fail_perjawatan.name }}</p>
+                    {% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Muat Naik Dokumen Sokongan</p>{% endif %}
+                </div>
+            </div>
         </div>
-        <div class="q-card bg-slate-50">
-            <label class="block text-xs font-bold text-purple-600 mb-1.5"><i class="fas fa-magic mr-1"></i> Jumlah Pengisian (Auto)</label>
-            <input type="number" id="input_pengisian" name="jumlah_pengisian" class="f-input bg-slate-100 cursor-not-allowed font-bold text-purple-700" readonly value="{{ jumlah_pengisian|default:'0' }}">
+        <!-- Pengisian -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Jumlah Pengisian</label>
+            <input type="number" name="jumlah_pengisian" class="f-input mb-3 font-bold text-lg text-teal-600" value="{{ fp.k_sumber_manusia.jumlah_pengisian|default:'' }}">
+            <div class="file-upload-wrapper p-2" id="w-peng">
+                <input type="file" name="fail_pengisian" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-peng')">
+                <div class="file-display" id="d-peng">
+                    {% if fp.k_sumber_manusia.fail_pengisian %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_sumber_manusia.fail_pengisian.name }}</p>
+                    {% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Muat Naik Dokumen Sokongan</p>{% endif %}
+                </div>
+            </div>
         </div>
-        <div class="q-card bg-slate-50">
-            <label class="block text-xs font-bold text-red-500 mb-1.5"><i class="fas fa-calculator mr-1"></i> Jumlah Kekosongan (Auto)</label>
-            <input type="number" id="input_kekosongan" name="jumlah_kekosongan" class="f-input bg-slate-100 cursor-not-allowed font-bold text-red-600" readonly value="{{ jumlah_kekosongan|default:'0' }}">
+        <!-- Kekosongan -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Jumlah Kekosongan</label>
+            <input type="number" name="jumlah_kekosongan" class="f-input mb-3 font-bold text-lg text-rose-500" value="{{ fp.k_sumber_manusia.jumlah_kekosongan|default:'' }}">
+            <div class="file-upload-wrapper p-2" id="w-keko">
+                <input type="file" name="fail_kekosongan" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-keko')">
+                <div class="file-display" id="d-keko">
+                    {% if fp.k_sumber_manusia.fail_kekosongan %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_sumber_manusia.fail_kekosongan.name }}</p>
+                    {% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Muat Naik Dokumen Sokongan</p>{% endif %}
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- JADUAL DINAMIK STAF BERENAMA -->
-    <div class="mt-8 border-t border-slate-100 pt-5 mb-5">
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <label class="block text-sm font-extrabold text-slate-700 tracking-wide">Senarai Kakitangan Berenama</label>
-                <p class="text-[10px] text-slate-500 font-medium">Masukkan senarai staf fasiliti untuk sistem mengira pengisian secara automatik.</p>
-            </div>
-            <button type="button" onclick="tambahBarisStaf()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap shadow-sm"><i class="fas fa-user-plus mr-1.5"></i> Tambah Staf</button>
-        </div>
-        
-        <div class="overflow-x-auto border border-slate-200 rounded-xl bg-slate-50 p-2">
-            <table class="w-full text-left border-collapse min-w-[850px]">
-                <thead class="text-[10px] uppercase text-slate-500 bg-slate-100 rounded-lg">
-                    <tr>
-                        <th class="p-3 font-bold w-1/4 rounded-l-lg">Nama Penuh Staf</th>
-                        <th class="p-3 font-bold w-32">MyKad / No.Pekerja</th>
-                        <th class="p-3 font-bold w-48">Skim & Gred</th>
-                        <th class="p-3 font-bold w-40">Status Lantikan</th>
-                        <th class="p-3 font-bold">Catatan Mobilisasi</th>
-                        <th class="p-3 font-bold w-12 text-center rounded-r-lg">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="staf-tbody" class="divide-y divide-slate-200 text-xs bg-white">
-                    {% for staf in senarai_staf %}
-                    <tr class="staf-row group hover:bg-slate-50 transition">
-                        <td class="p-2"><input type="text" name="nama_staf[]" value="{{ staf.nama_staf }}" placeholder="Cth: Dr. Ahmad" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500" required oninput="kiraKekosonganUI()"></td>
-                        <td class="p-2"><input type="text" name="no_pengenalan[]" value="{{ staf.no_pengenalan }}" placeholder="No. ID" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
-                        <td class="p-2 flex gap-1.5">
-                            <select name="skim[]" class="w-2/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white">
-                                <option value="pakar" {% if staf.skim == 'pakar' %}selected{% endif %}>Pakar (FMS/Klinikal)</option>
-                                <option value="perubatan" {% if staf.skim == 'perubatan' %}selected{% endif %}>Perubatan/Pergigian (MO)</option>
-                                <option value="paramedik" {% if staf.skim == 'paramedik' %}selected{% endif %}>Paramedik/Jururawat</option>
-                                <option value="farmasi" {% if staf.skim == 'farmasi' %}selected{% endif %}>Farmasi</option>
-                                <option value="allied_health" {% if staf.skim == 'allied_health' %}selected{% endif %}>Sains Bersekutu</option>
-                                <option value="sokongan" {% if staf.skim == 'sokongan' %}selected{% endif %}>Sokongan/Tadbir</option>
-                            </select>
-                            <input type="text" name="gred[]" value="{{ staf.gred }}" placeholder="Gred" class="w-1/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 uppercase">
-                        </td>
-                        <td class="p-2">
-                            <select name="status_lantikan[]" class="w-full mb-1 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white font-semibold" onchange="toggleTarikh(this); kiraKekosonganUI();">
-                                <option value="tetap" {% if staf.status_lantikan == 'tetap' %}selected{% endif %}>Tetap</option>
-                                <option value="kontrak" {% if staf.status_lantikan == 'kontrak' %}selected{% endif %}>Kontrak</option>
-                                <option value="mystep" {% if staf.status_lantikan == 'mystep' %}selected{% endif %}>MySTEP</option>
-                                <option value="pinjaman_in" {% if staf.status_lantikan == 'pinjaman_in' %}selected{% endif %}>Pinjam Masuk (IN)</option>
-                                <option value="pinjaman_out" {% if staf.status_lantikan == 'pinjaman_out' %}selected{% endif %}>Pinjam Keluar (OUT)</option>
-                            </select>
-                            <input type="date" name="tarikh_tamat[]" value="{{ staf.tarikh_tamat_perkhidmatan|date:'Y-m-d'|default:'' }}" class="tarikh-tamat w-full p-2 border border-rose-200 bg-rose-50 text-rose-700 rounded-lg text-[10px] outline-none focus:border-rose-400 {% if staf.status_lantikan == 'tetap' or staf.status_lantikan == 'pinjaman_out' %}hidden{% endif %}" title="Tarikh Tamat Kontrak">
-                        </td>
-                        <td class="p-2"><input type="text" name="catatan_mobilisasi[]" value="{{ staf.catatan_mobilisasi }}" placeholder="Lokasi Penempatan..." class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
-                        <td class="p-2 text-center"><button type="button" onclick="padamBaris(this)" class="text-slate-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                    {% empty %}
-                    <!-- Baris Default Kosong jika tiada data -->
-                    {% endfor %}
-                </tbody>
+    <!-- Senarai Staf JSON -->
+    <div class="q-card mb-4">
+        <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Kakitangan Berenama</label>
+        <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
+            <table class="w-full text-left dyn-table">
+                <thead><tr><th>Nama Pekerja</th><th>Jawatan / Gred</th><th>Status (Tetap/Kontrak/Dll)</th><th class="w-10"></th></tr></thead>
+                <tbody id="tbody-kakitangan"></tbody>
             </table>
         </div>
-    </div>
-
-    <!-- SOALAN LAMA: Pinjaman, Isu & Pertukaran -->
-    <div class="grid grid-cols-2 gap-3 mb-3 border-t border-slate-100 pt-4">
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Terdapat kakitangan pinjaman fasiliti lain?</label>
-            <div class="flex gap-2 mb-2">
-                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_ya" value="1" onchange="toggleNote('pinjam_nota_wrap', true)" {% if ada_kakitangan_pinjaman == True %}checked{% endif %}><label for="pinjam_ya" class="other"><i class="fas fa-check"></i> Ya</label></div>
-                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_tidak" value="0" onchange="toggleNote('pinjam_nota_wrap', false)" {% if ada_kakitangan_pinjaman == False %}checked{% endif %}><label for="pinjam_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+        <button type="button" onclick="addRow('tbody-kakitangan', ['Nama', 'Jawatan / Gred', 'Status'])" class="text-[10px] font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
+        <input type="hidden" name="json_kakitangan_data" id="json_kakitangan_data">
+        
+        <div class="mt-4 border-t border-slate-200 pt-4">
+            <label class="block text-xs font-bold text-slate-500 mb-2">Atau Muat Naik Dokumen Senarai Staf Berenama</label>
+            <div class="file-upload-wrapper" id="w-kak">
+                <input type="file" name="fail_kakitangan" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'd-kak')">
+                <div class="file-display" id="d-kak">
+                    {% if fp.k_sumber_manusia.fail_kakitangan %}<i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] truncate">{{ fp.k_sumber_manusia.fail_kakitangan.name }}</p>
+                    {% else %}<i class="fas fa-cloud-upload-alt text-3xl text-purple-400 mb-2"></i><p class="text-xs">Klik/Seret fail (Maksima 5MB)</p>{% endif %}
+                </div>
             </div>
-            <div id="pinjam_nota_wrap" class="mt-2 {% if ada_kakitangan_pinjaman != True %}hidden{% endif %}"><input type="text" name="nota_kakitangan_pinjaman" class="f-input" placeholder="Cth: 1 Pegawai Perubatan..." value="{{ nota_kakitangan_pinjaman|default:'' }}"></div>
+            <a href="#" class="text-[10px] font-bold text-purple-600 hover:underline mt-1 block text-right"><i class="fas fa-download"></i> Muat Turun Templat</a>
         </div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Isu/krisis kepada petugas?</label>
-            <div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_isu_kakitangan" id="isu_ya" value="1" {% if ada_isu_kakitangan == True %}checked{% endif %}><label for="isu_ya" class="other"><i class="fas fa-exclamation-triangle"></i> Ya</label></div><div class="pill-item"><input type="radio" name="ada_isu_kakitangan" id="isu_tidak" value="0" {% if ada_isu_kakitangan == False %}checked{% endif %}><label for="isu_tidak" class="ya"><i class="fas fa-check"></i> Tidak</label></div></div>
-        </div>
-    </div>
-    <div class="q-card">
-        <label class="block text-xs font-bold text-slate-500 mb-3">Status pertukaran perjawatan petugas dalam setahun?</label>
-        <div class="flex flex-col gap-2">
-            <label class="cb-label"><input type="radio" name="status_pertukaran_staf" value="Tinggi / Kritikal" class="cb-input" {% if status_pertukaran_staf == 'Tinggi / Kritikal' %}checked{% endif %}><span class="cb-text text-red-600">Tinggi / Kritikal (Sering bertukar)</span></label>
-            <label class="cb-label"><input type="radio" name="status_pertukaran_staf" value="Sederhana" class="cb-input" {% if status_pertukaran_staf == 'Sederhana' %}checked{% endif %}><span class="cb-text text-amber-600">Sederhana</span></label>
-            <label class="cb-label"><input type="radio" name="status_pertukaran_staf" value="Rendah" class="cb-input" {% if status_pertukaran_staf == 'Rendah' %}checked{% endif %}><span class="cb-text text-green-600">Rendah / Tiada Keperluan (Kekal Stabil)</span></label>
-        </div>
-    </div>
-</div>
-
-<div class="sec-group fade-in" style="animation-delay:.15s;">
-    <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.2</div><span class="sec-label">Penjadualan & Syif</span></div>
-    <div class="space-y-3">
-        <!-- Render checkboxes via custom logic (using template strings to make it easy) -->
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Bilangan Shift Kerja (Boleh pilih >1):</label>
-            <input type="hidden" name="jenis_shift" id="f_jenis_shift" value="{{ jenis_shift|default:'' }}">
-            <div class="flex flex-col gap-1 cb-group-shift">
-                {% for opt in opt_shift %}
-                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
-                <label class="cb-label"><input type="checkbox" class="cb-input shift-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
-                {% endfor %}
-                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input shift-cb" id="shift_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="shift_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
-            </div>
-        </div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Corak Penugasan / Penjadualan Syif:</label>
-            <input type="hidden" name="corak_penugasan" id="f_corak_penugasan" value="{{ corak_penugasan|default:'' }}">
-            <div class="flex flex-col gap-1 cb-group-corak">
-                {% for opt in opt_corak %}
-                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
-                <label class="cb-label"><input type="checkbox" class="cb-input corak-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
-                {% endfor %}
-                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input corak-cb" id="corak_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="corak_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
-            </div>
-        </div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Pengurusan Jadual (Duty Roster):</label>
-            <input type="hidden" name="pengurusan_jadual" id="f_pengurusan_jadual" value="{{ pengurusan_jadual|default:'' }}">
-            <div class="flex flex-col gap-1 cb-group-roster">
-                {% for opt in opt_roster %}
-                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
-                <label class="cb-label"><input type="checkbox" class="cb-input roster-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
-                {% endfor %}
-                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input roster-cb" id="roster_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="roster_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
-            </div>
-        </div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Proses Merekod Masa Cuti:</label>
-            <input type="hidden" name="cara_minta_cuti" id="f_cara_minta_cuti" value="{{ cara_minta_cuti|default:'' }}">
-            <div class="flex flex-col gap-1 cb-group-cuti">
-                {% for opt in opt_cuti %}
-                <label class="cb-label"><input type="checkbox" class="cb-input cuti-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
-                {% endfor %}
-                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input cuti-cb" id="cuti_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="cuti_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
-            </div>
-        </div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Isu Penjadualan & Syif:</label>
-            <input type="hidden" name="isu_penempatan" id="f_isu_penempatan" value="{{ isu_penempatan|default:'' }}">
-            <div class="flex flex-col gap-1 cb-group-isu">
-                {% for opt in opt_isu %}
-                {% if opt == 'Tidak Berkenaan' %}<div class="border-t border-slate-100 my-1"></div>{% endif %}
-                <label class="cb-label"><input type="checkbox" class="cb-input isu-cb" value="{{ opt }}"> <span class="cb-text">{{ opt }}</span></label>
-                {% endfor %}
-                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input isu-cb" id="isu_other_cb" value="Other"> <span class="cb-text">Lain-lain:</span> <input type="text" id="isu_other_text" class="f-input ml-2 py-1 px-2" style="width:200px;"></label>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ═══ SOALAN TAMBAHAN DINAMIK (DIBINA OLEH ADMIN) ═══ -->
-{% if soalan_dinamik %}
-<div class="sec-group fade-in" style="animation-delay:.25s;">
-    <div class="sec-title">
-        <div class="sec-dot bg-indigo-50 text-indigo-600"><i class="fas fa-plus-circle"></i></div>
-        <span class="sec-label">Soalan Tambahan Khusus</span>
     </div>
     
-    <div class="space-y-4">
-        {% for s in soalan_dinamik %}
+    <div class="grid grid-cols-2 gap-4">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Terdapat kakitangan pinjaman fasiliti lain?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pin_y" value="1" {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman == True %}checked{% endif %}><label for="pin_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pin_t" value="0" {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman == False %}checked{% endif %}><label for="pin_t" class="tidak">Tidak</label></div></div></div>
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-700 mb-2">
-                {{ s.teks_soalan }} {% if s.is_wajib %}<span class="text-red-500">*</span>{% endif %}
-            </label>
-            
-            {% if s.jenis_input == 'teks' %}
-                <input type="text" name="soalan_dyn_{{ s.id }}" class="f-input" value="{{ s.jawapan_teks }}" {% if s.is_wajib %}required{% endif %}>
-            {% elif s.jenis_input == 'textarea' %}
-                <textarea name="soalan_dyn_{{ s.id }}" class="f-textarea" {% if s.is_wajib %}required{% endif %}>{{ s.jawapan_teks }}</textarea>
-            {% elif s.jenis_input == 'nombor' %}
-                <input type="number" name="soalan_dyn_{{ s.id }}" class="f-input" value="{{ s.jawapan_teks }}" {% if s.is_wajib %}required{% endif %}>
-            {% elif s.jenis_input == 'ya_tidak' %}
-                <div class="flex gap-4">
-                    <label class="flex items-center gap-1.5 text-xs font-bold text-slate-700"><input type="radio" name="soalan_dyn_{{ s.id }}" value="Ya" {% if s.jawapan_teks == 'Ya' %}checked{% endif %} {% if s.is_wajib %}required{% endif %}> Ya</label>
-                    <label class="flex items-center gap-1.5 text-xs font-bold text-slate-700"><input type="radio" name="soalan_dyn_{{ s.id }}" value="Tidak" {% if s.jawapan_teks == 'Tidak' %}checked{% endif %} {% if s.is_wajib %}required{% endif %}> Tidak</label>
-                </div>
-            {% elif s.jenis_input == 'fail' %}
-                <input type="file" name="soalan_dyn_{{ s.id }}" class="f-input text-xs bg-white" {% if s.is_wajib and not s.jawapan_fail %}required{% endif %}>
-                {% if s.jawapan_fail %}
-                    <p class="text-[10px] text-blue-600 mt-1.5 font-semibold"><i class="fas fa-paperclip mr-1"></i>Fail sedia ada: <a href="{{ s.jawapan_fail.url }}" target="_blank" class="underline">Lihat Lampiran</a></p>
-                {% endif %}
-            {% endif %}
+            <label class="block text-xs font-bold text-slate-500 mb-2">Isu/krisis kepada petugas?</label>
+            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="ada_isu_petugas" id="isu_y" value="1" onchange="toggleNote('isu_nota', false)" {% if fp.k_sumber_manusia.ada_isu_petugas == True %}checked{% endif %}><label for="isu_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_isu_petugas" id="isu_t" value="0" onchange="toggleNote('isu_nota', true)" {% if fp.k_sumber_manusia.ada_isu_petugas == False %}checked{% endif %}><label for="isu_t" class="tidak">Tidak</label></div></div>
+            <div id="isu_nota" class="{% if fp.k_sumber_manusia.ada_isu_petugas != True %}hidden{% endif %} mt-2"><input type="text" name="isu_petugas_nota" class="f-input" placeholder="Nyatakan isu..." value="{{ fp.k_sumber_manusia.isu_petugas_nota|default:'' }}"></div>
         </div>
+        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">Status pertukaran perjawatan petugas dalam setahun?</label><select name="status_pertukaran" class="f-input"><option value="">-- Pilih --</option><option value="Sangat Kerap" {% if fp.k_sumber_manusia.status_pertukaran == 'Sangat Kerap' %}selected{% endif %}>Sangat Kerap</option><option value="Sederhana" {% if fp.k_sumber_manusia.status_pertukaran == 'Sederhana' %}selected{% endif %}>Sederhana</option><option value="Jarang Berlaku" {% if fp.k_sumber_manusia.status_pertukaran == 'Jarang Berlaku' %}selected{% endif %}>Jarang Berlaku</option></select></div>
+    </div>
+</div>
+
+<!-- 4.2 Penjadualan & Syif -->
+<div class="sec-group">
+    <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.2</div><span class="sec-label">Penjadualan & Syif</span></div>
+    <div class="grid grid-cols-2 gap-4">
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Bilangan Shift Kerja</label>
+            <select name="bilangan_shift" class="f-input">
+                <option value="">-- Pilih --</option>
+                <option value="1 Shift" {% if '1 Shift' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>1 Shift (Waktu Pejabat)</option>
+                <option value="2 Shift" {% if '2 Shift' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>2 Shift (Pagi & Petang)</option>
+                <option value="3 Shift" {% if '3 Shift' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>3 Shift (Operasi 24 jam)</option>
+                <option value="Standby" {% if 'Standby' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>On Call / Standby</option>
+            </select>
+        </div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Corak Penugasan / Penjadualan</label>
+            <select name="corak_penugasan" class="f-input">
+                <option value="">-- Pilih --</option>
+                <option value="Standard" {% if 'Standard' in fp.k_sumber_manusia.corak_penugasan %}selected{% endif %}>Kapasiti / Tenaga kerja mencukupi</option>
+                <option value="Kekurangan Staf Tinggi" {% if 'Kekurangan' in fp.k_sumber_manusia.corak_penugasan %}selected{% endif %}>Kekurangan staf tinggi (Double shift kerap)</option>
+                <option value="OT Kerap" {% if 'OT Kerap' in fp.k_sumber_manusia.corak_penugasan %}selected{% endif %}>Tugas OT kerap / Staf burnout</option>
+            </select>
+        </div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Pengurusan Jadual (Duty Roster)</label><select name="pengurusan_jadual" class="f-input"><option value="">-- Pilih --</option><option value="Manual" {% if 'Manual' in fp.k_sumber_manusia.pengurusan_jadual %}selected{% endif %}>Manual (Borang/Excel)</option><option value="Sistem Digital" {% if 'Sistem Digital' in fp.k_sumber_manusia.pengurusan_jadual %}selected{% endif %}>Sistem Digital / Automasi</option></select></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Proses Merekod Cuti</label><select name="proses_cuti" class="f-input"><option value="">-- Pilih --</option><option value="Sistem Dalam Talian" {% if 'Sistem' in fp.k_sumber_manusia.proses_cuti %}selected{% endif %}>Sistem Dalam Talian (HRMIS)</option><option value="Manual / Kertas" {% if 'Manual' in fp.k_sumber_manusia.proses_cuti %}selected{% endif %}>Manual / Borang Kertas</option></select></div>
+    </div>
+</div>
+
+<!-- SOALAN DINAMIK ADMIN -->
+{% if soalan_dinamik %}
+<div class="sec-group bg-slate-50">
+    <div class="sec-title"><div class="sec-dot bg-slate-200 text-slate-600"><i class="fas fa-list-check"></i></div><span class="sec-label">Maklumat Tambahan (Dinamik)</span></div>
+    <div class="grid grid-cols-2 gap-4">
+        {% for s in soalan_dinamik %}
+            <div class="q-card {% if s.jenis_input == 'textarea' or s.jenis_input == 'fail' %}col-span-2{% endif %}">
+                <label class="block text-xs font-bold text-slate-500 mb-2">{{ s.teks_soalan }} {% if s.is_wajib %}<span class="text-red-500">*</span>{% endif %}</label>
+                {% if s.jenis_input == 'fail' %}
+                    <div class="file-upload-wrapper" id="w-dyn-{{ s.id }}">
+                        <input type="file" name="soalan_dyn_{{ s.id }}" class="file-upload-input" onchange="handleFile(this, 'd-dyn-{{ s.id }}')" {% if s.is_wajib and not s.jawapan_fail %}required{% endif %}>
+                        <div class="file-display" id="d-dyn-{{ s.id }}">
+                            {% if s.jawapan_fail %}<i class="fas fa-file-check text-2xl text-emerald-500 mb-1"></i><p class="text-[10px] truncate">{{ s.jawapan_fail.name }}</p>
+                            {% else %}<i class="fas fa-cloud-upload-alt text-2xl text-slate-400 mb-1"></i><p class="text-[10px]">Klik/Seret fail</p>{% endif %}
+                        </div>
+                    </div>
+                {% elif s.jenis_input == 'textarea' %}
+                    <textarea name="soalan_dyn_{{ s.id }}" class="f-input h-20" {% if s.is_wajib %}required{% endif %}>{{ s.jawapan_teks }}</textarea>
+                {% elif s.jenis_input == 'ya_tidak' %}
+                    <div class="flex gap-2"><div class="pill-item"><input type="radio" name="soalan_dyn_{{ s.id }}" id="dy_{{s.id}}" value="Ya" {% if s.jawapan_teks == 'Ya' %}checked{% endif %}><label for="dy_{{s.id}}" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="soalan_dyn_{{ s.id }}" id="dt_{{s.id}}" value="Tidak" {% if s.jawapan_teks == 'Tidak' %}checked{% endif %}><label for="dt_{{s.id}}" class="tidak">Tidak</label></div></div>
+                {% else %}
+                    <input type="text" name="soalan_dyn_{{ s.id }}" class="f-input" value="{{ s.jawapan_teks }}" {% if s.is_wajib %}required{% endif %}>
+                {% endif %}
+            </div>
         {% endfor %}
     </div>
 </div>
 {% endif %}
 
-<div class="fade-in flex items-center justify-between pt-2" style="animation-delay:.2s;">
-    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-times text-xs"></i> Batal</a>
-    <button type="submit" class="btn-submit" onclick="syncAllCheckboxes()"><i class="fas fa-save mr-2"></i> Kemaskini Sumber Manusia</button>
+<!-- Wishlist Sub-Topik -->
+<div class="sec-group bg-purple-50 border-purple-200">
+    <div class="q-card border-none bg-transparent shadow-none p-0">
+        <label class="block text-sm font-bold text-slate-700 mb-2"><i class="fas fa-star text-amber-400 mr-1"></i> Wishlist Berkaitan Sumber Manusia</label>
+        <div class="file-upload-wrapper bg-white border-purple-300" id="wrap-wishlist">
+            <input type="file" name="fail_wishlist" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-wishlist')">
+            <div class="file-display" id="disp-wishlist">
+                {% if fp.k_sumber_manusia.fail_wishlist %}
+                    <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] truncate">{{ fp.k_sumber_manusia.fail_wishlist.name }}</p>
+                {% else %}
+                    <i class="fas fa-cloud-upload-alt text-3xl text-purple-400 mb-2"></i><p class="text-xs">Klik/Seret dokumen Wishlist (Maksima 5MB)</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- SUBMIT -->
+<div class="flex items-center justify-between pt-2">
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Batal</a>
+    <button type="submit" onclick="prepareSubmit()" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Sumber Manusia</button>
+</div>
+
 </form>
 </main>
+
 <script>
+    function handleFile(inputElement, displayId) {
+        const file = inputElement.files[0];
+        const display = document.getElementById(displayId);
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Ralat: Saiz fail melebihi had maksima 5MB.");
+            inputElement.value = ""; return;
+        }
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        display.innerHTML = `<p class="text-[10px] font-bold text-emerald-600 truncate"><i class="fas fa-check-circle"></i> ${file.name} (${sizeMB} MB)</p>`;
+        inputElement.parentElement.classList.add('border-emerald-400', 'bg-emerald-50');
+    }
+
     function toggleNote(id, show) {
         const wrap = document.getElementById(id);
-        if(wrap) { if(show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+        if(wrap) { if(!show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
     }
-    function bindCheckboxGroup(hiddenId, cbClass, otherCbId, otherTextId) {
-        const hidden = document.getElementById(hiddenId);
-        if(!hidden) return function(){};
-        const cbs = document.querySelectorAll('.' + cbClass);
-        const otherCb = document.getElementById(otherCbId);
-        const otherText = document.getElementById(otherTextId);
-        const savedRaw = hidden.value;
-        if(savedRaw && otherCb) {
-            const savedItems = savedRaw.split('|||').map(s=>s.trim()).filter(Boolean);
-            savedItems.forEach(item => {
-                let matched = false;
-                cbs.forEach(cb => { if(cb.value === item && cb.id !== otherCbId) { cb.checked = true; matched = true; } });
-                if(!matched) { otherCb.checked = true; otherText.value = item; }
-            });
-        }
-        return function sync() {
-            let selected = [];
-            cbs.forEach(cb => { if(cb.checked && (!otherCb || cb.id !== otherCbId)) selected.push(cb.value); });
-            if(otherCb && otherCb.checked && otherText.value.trim() !== '') selected.push(otherText.value.trim());
-            hidden.value = otherCb ? selected.join('|||') : selected.join(', ');
-        };
-    }
-    const syncShift = bindCheckboxGroup('f_jenis_shift', 'shift-cb', 'shift_other_cb', 'shift_other_text');
-    const syncCorak = bindCheckboxGroup('f_corak_penugasan', 'corak-cb', 'corak_other_cb', 'corak_other_text');
-    const syncRoster = bindCheckboxGroup('f_pengurusan_jadual', 'roster-cb', 'roster_other_cb', 'roster_other_text');
-    const syncCuti = bindCheckboxGroup('f_cara_minta_cuti', 'cuti-cb', 'cuti_other_cb', 'cuti_other_text');
-    const syncIsu = bindCheckboxGroup('f_isu_penempatan', 'isu-cb', 'isu_other_cb', 'isu_other_text');
-    function syncAllCheckboxes() { syncShift(); syncCorak(); syncRoster(); syncCuti(); syncIsu(); }
 
-    // --- FUNGSI JADUAL DINAMIK & AUTOKIRA ---
-    function tambahBarisStaf() {
-        const tbody = document.getElementById('staf-tbody');
+    function addRow(tbodyId, placeholders, existingData = null) {
+        const tbody = document.getElementById(tbodyId);
         const tr = document.createElement('tr');
-        tr.className = 'staf-row group hover:bg-slate-50 transition';
-        tr.innerHTML = `
-            <td class="p-2"><input type="text" name="nama_staf[]" placeholder="Cth: Dr. Ahmad" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500" required oninput="kiraKekosonganUI()"></td>
-            <td class="p-2"><input type="text" name="no_pengenalan[]" placeholder="No. ID" class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
-            <td class="p-2 flex gap-1.5">
-                <select name="skim[]" class="w-2/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white">
-                    <option value="pakar">Pakar (FMS/Klinikal)</option>
-                    <option value="perubatan">Perubatan/Pergigian (MO)</option>
-                    <option value="paramedik">Paramedik/Jururawat</option>
-                    <option value="farmasi">Farmasi</option>
-                    <option value="allied_health">Sains Bersekutu</option>
-                    <option value="sokongan">Sokongan/Tadbir</option>
-                </select>
-                <input type="text" name="gred[]" placeholder="Gred" class="w-1/3 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 uppercase">
-            </td>
-            <td class="p-2">
-                <select name="status_lantikan[]" class="w-full mb-1 p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500 bg-white font-semibold" onchange="toggleTarikh(this); kiraKekosonganUI();">
-                    <option value="tetap">Tetap</option>
-                    <option value="kontrak">Kontrak</option>
-                    <option value="mystep">MySTEP</option>
-                    <option value="pinjaman_in">Pinjam Masuk (IN)</option>
-                    <option value="pinjaman_out">Pinjam Keluar (OUT)</option>
-                </select>
-                <input type="date" name="tarikh_tamat[]" class="tarikh-tamat w-full p-2 border border-rose-200 bg-rose-50 text-rose-700 rounded-lg text-[10px] outline-none focus:border-rose-400 hidden">
-            </td>
-            <td class="p-2"><input type="text" name="catatan_mobilisasi[]" placeholder="Lokasi Penempatan..." class="w-full p-2.5 border border-slate-200 rounded-lg outline-none focus:border-purple-500"></td>
-            <td class="p-2 text-center"><button type="button" onclick="padamBaris(this)" class="text-slate-300 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button></td>
-        `;
-        tbody.appendChild(tr);
-        kiraKekosonganUI();
-    }
-
-    function toggleTarikh(selectElement) {
-        const inputDate = selectElement.nextElementSibling;
-        // Tunjuk kotak tarikh jika Kontrak, MySTEP atau Pinjam Masuk
-        if (selectElement.value === 'kontrak' || selectElement.value === 'mystep' || selectElement.value === 'pinjaman_in') {
-            inputDate.classList.remove('hidden');
-            inputDate.required = true;
-        } else {
-            inputDate.classList.add('hidden');
-            inputDate.required = false;
-        }
-    }
-
-    function padamBaris(btn) {
-        const row = btn.closest('tr');
-        row.remove();
-        kiraKekosonganUI();
-    }
-
-    function kiraKekosonganUI() {
-        const inputPerjawatan = document.getElementById('input_perjawatan');
-        const perjawatan = parseInt(inputPerjawatan.value) || 0;
-        
-        let pengisian = 0;
-        const rows = document.querySelectorAll('.staf-row');
-        rows.forEach(row => {
-            const nama = row.querySelector('input[name="nama_staf[]"]').value.trim();
-            const status = row.querySelector('select[name="status_lantikan[]"]').value;
-            // Hanya kira yang ada nama dan BUKAN pinjaman keluar
-            if(nama !== '' && status !== 'pinjaman_out') {
-                pengisian++;
-            }
+        let html = '';
+        placeholders.forEach((ph, index) => {
+            const val = existingData ? existingData[index] : '';
+            html += `<td><input type="text" class="dyn-input" placeholder="${ph}" value="${val}"></td>`;
         });
-        
-        document.getElementById('input_pengisian').value = pengisian;
-        const kekosongan = Math.max(0, perjawatan - pengisian);
-        document.getElementById('input_kekosongan').value = kekosongan;
+        html += `<td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 p-1"><i class="fas fa-trash-alt"></i></button></td>`;
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
     }
 
-    // Call once on page load to tally existing staff
-    window.addEventListener('load', kiraKekosonganUI);
+    document.addEventListener("DOMContentLoaded", function() {
+        const rawKakitangan = '{{ fp.k_sumber_manusia.json_kakitangan|safe|escapejs }}';
+        if(rawKakitangan && rawKakitangan !== '""' && rawKakitangan !== '[]') {
+            try { JSON.parse(rawKakitangan).forEach(row => addRow('tbody-kakitangan', ['Nama', 'Jawatan/Gred', 'Status'], row)); } catch(e) {}
+        }
+    });
 
+    function getTableData(tbodyId) {
+        let data = [];
+        Array.from(document.getElementById(tbodyId).rows).forEach(tr => {
+            let rowVals = [];
+            tr.querySelectorAll('input').forEach(inp => rowVals.push(inp.value.trim()));
+            if(rowVals.some(v => v !== '')) data.push(rowVals);
+        });
+        return JSON.stringify(data);
+    }
+
+    function prepareSubmit() {
+        document.getElementById('json_kakitangan_data').value = getTableData('tbody-kakitangan');
+    }
 </script>
 </body>
 </html>

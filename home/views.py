@@ -7,8 +7,9 @@ from django.contrib import messages, auth
 from django.contrib.auth.forms import AuthenticationForm
 from .models import (
     UserProfile, FacilityProfile, MaklumatAsas,
-    KlusterKejuruteraan, KlusterSumberManusia, KlusterPerkhidmatan,
-    KlusterAset, KlusterFasiliti, KlusterPerancangan, KlusterKonsesi,
+    KlusterInfrastruktur, KlusterAsetPerubatan, KlusterSumberManusia,
+    KlusterPerkhidmatan, KlusterKewangan, KlusterDigital,
+    SoalanTambahan, JawapanSoalanTambahan, AsetKenderaan, SyarikatServisKenderaan
 )
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -36,13 +37,12 @@ def custom_login(request):
 # Peta langkah → (atribut pada FacilityProfile, ModelClass)
 CLUSTER_ATTR_MAP = [
     (0, 'maklumat_asas',    MaklumatAsas),
-    (1, 'k_kejuruteraan',  KlusterKejuruteraan),
-    (2, 'k_sumber_manusia', KlusterSumberManusia),
-    (3, 'k_perkhidmatan',  KlusterPerkhidmatan),
-    (4, 'k_aset',          KlusterAset),
-    (5, 'k_fasiliti',      KlusterFasiliti),
-    (6, 'k_perancangan',   KlusterPerancangan),
-    (7, 'k_konsesi',       KlusterKonsesi),
+    (1, 'k_infrastruktur',  KlusterInfrastruktur),
+    (2, 'k_aset_perubatan', KlusterAsetPerubatan),
+    (3, 'k_sumber_manusia', KlusterSumberManusia),
+    (4, 'k_perkhidmatan',   KlusterPerkhidmatan),
+    (5, 'k_kewangan',       KlusterKewangan),
+    (6, 'k_digital',        KlusterDigital),
 ]
 import json
 
@@ -1933,673 +1933,409 @@ def kemaskini_status_lawatan(request, pk):
     return JsonResponse({'status': 'error'}, status=400)
 
 # ══════════════════════════════════════════════════════════════════
-# MODUL 1: LATAR BELAKANG (Google Forms)
+# MODUL 1: LATAR BELAKANG
 # ══════════════════════════════════════════════════════════════════
-
 @login_required
 def edit_latar_belakang(request, pk):
     fp = get_object_or_404(FacilityProfile, pk=pk)
+    
     if request.method == 'POST':
-        return _save_latar_belakang(request, fp=fp)
+        ma = fp.maklumat_asas or MaklumatAsas()
+        
+        # 1.1 Maklumat Responden
+        ma.nama_responden = request.POST.get('nama_responden', '').strip()
+        ma.jawatan_responden = request.POST.get('jawatan_responden', '').strip()
+        ma.no_telefon_responden = request.POST.get('no_telefon_responden', '').strip()
+        ma.emel_responden = request.POST.get('emel_responden', '').strip()
+        
+        # 1.2 Maklumat Fasiliti & Lokasi
+        ma.nama_fasiliti = request.POST.get('nama_fasiliti', '').strip()
+        ma.kod_fasiliti = request.POST.get('kod_fasiliti', '').strip()
+        ma.kategori_fasiliti = request.POST.get('kategori_fasiliti', '').strip()
+        ma.jenis_fasiliti = request.POST.get('jenis_fasiliti', '')
+        ma.alamat = request.POST.get('alamat', '').strip()
+        ma.poskod = request.POST.get('poskod', '').strip()
+        ma.daerah = request.POST.get('daerah', '').strip()
+        ma.negeri = request.POST.get('negeri', '')
+        ma.ketua_fasiliti = request.POST.get('ketua_fasiliti', '').strip()
+        
+        try: ma.latitud = float(request.POST.get('latitud', ''))
+        except ValueError: pass
+        try: ma.longitud = float(request.POST.get('longitud', ''))
+        except ValueError: pass
 
-    ctx = {'mode': 'edit', 'fp': fp}
-    
-    if fp.maklumat_asas:
-        ctx.update({
-            'nama_responden': fp.maklumat_asas.nama_responden,
-            'jawatan_responden': fp.maklumat_asas.jawatan_responden,
-            'no_telefon_responden': fp.maklumat_asas.no_telefon_responden,
-            'emel_responden': fp.maklumat_asas.emel_responden,
-            'nama_fasiliti': fp.maklumat_asas.nama_fasiliti,
-            'jenis_fasiliti': fp.maklumat_asas.jenis_fasiliti,
-        })
-    if fp.k_kejuruteraan:
-        ctx['tahun_dibina'] = fp.k_kejuruteraan.tahun_dibina
-        ctx['kod_fasiliti'] = fp.k_kejuruteraan.kod_fasiliti
-    if fp.k_perkhidmatan:
-        ctx['siapa_manage'] = fp.k_perkhidmatan.siapa_manage
+        if not ma.nama_fasiliti:
+            messages.error(request, 'Nama fasiliti wajib diisi.')
+            return redirect(request.path)
+            
+        ma.save()
+        fp.maklumat_asas = ma
+        fp.save()
+        
+        messages.success(request, 'Modul 1: Latar Belakang berjaya dikemaskini.')
+        return redirect('home:pilih_modul', pk=fp.pk)
 
-    return render(request, 'home/form_latar_belakang.html', ctx)
+    return render(request, 'home/form_latar_belakang.html', {'mode': 'edit', 'fp': fp})
 
-def _save_latar_belakang(request, fp):
-    post = request.POST
-
-    ma = (fp.maklumat_asas if fp and fp.maklumat_asas else None) or MaklumatAsas()
-    ma.nama_responden = post.get('nama_responden', '').strip()
-    ma.jawatan_responden = post.get('jawatan_responden', '').strip()
-    ma.no_telefon_responden = post.get('no_telefon_responden', '').strip()
-    ma.emel_responden = post.get('emel_responden', '').strip()
-    
-    ma.nama_fasiliti  = post.get('nama_fasiliti', '').strip()
-    ma.jenis_fasiliti = post.get('jenis_fasiliti', '')
-    
-    # --- TAMBAHAN DATA LOKASI ---
-    ma.negeri = post.get('negeri', '')
-    ma.daerah = post.get('daerah', '').strip()
-    ma.alamat = post.get('alamat', '').strip()
-    ma.poskod = post.get('poskod', '').strip()
-    
-    _lat = post.get('latitud', '').strip()
-    _lon = post.get('longitud', '').strip()
-    try:
-        ma.latitud = float(_lat) if _lat else None
-    except ValueError:
-        pass
-    try:
-        ma.longitud = float(_lon) if _lon else None
-    except ValueError:
-        pass
-    # -----------------------------
-    
-    if not ma.nama_fasiliti:
-        messages.error(request, 'Nama fasiliti tidak boleh kosong.')
-        return redirect(request.path)
-    ma.save()
-
-    # Kluster 1 (Tahun Dibina)
-    k1 = (fp.k_kejuruteraan if fp and fp.k_kejuruteraan else None) or KlusterKejuruteraan()
-    k1.kod_fasiliti = post.get('kod_fasiliti', '').strip()
-    try:
-        k1.tahun_dibina = int(post.get('tahun_dibina', ''))
-    except (ValueError, TypeError):
-        pass
-    k1.save()
-
-    # Kluster 3 (Person in Charge / Ketua Fasiliti)
-    k3 = (fp.k_perkhidmatan if fp and fp.k_perkhidmatan else None) or KlusterPerkhidmatan()
-    k3.siapa_manage = post.get('siapa_manage', '').strip()
-    k3.save()
-
-    if fp is None:
-        fp = FacilityProfile(submitted_by=request.user, status='draf')
-    fp.maklumat_asas = ma
-    fp.k_kejuruteraan = k1
-    fp.k_perkhidmatan = k3
-    fp.save()
-    
-    messages.success(request, f'Bahagian Latar Belakang "{ma.nama_fasiliti}" berjaya dikemaskini.')
-    return redirect('home:pilih_modul', pk=fp.pk)
 
 # ══════════════════════════════════════════════════════════════════
-# MODUL 2: INFRASTRUKTUR FASILITI (Google Forms)
+# MODUL 2: INFRASTRUKTUR FASILITI (Termasuk Logik JSON & Fail)
 # ══════════════════════════════════════════════════════════════════
-
 @login_required
 def edit_infrastruktur(request, pk):
     fp = get_object_or_404(FacilityProfile, pk=pk)
+    
     if request.method == 'POST':
-        return _save_infrastruktur(request, fp=fp)
+        ki = fp.k_infrastruktur or KlusterInfrastruktur()
+        
+        def yesno(key):
+            val = request.POST.get(key)
+            return True if val == '1' else (False if val == '0' else None)
 
-    ctx = {'mode': 'edit', 'fp': fp}
-    
-    if fp.k_kejuruteraan:
-        ctx.update({
-            'siling_okay': fp.k_kejuruteraan.siling_okay,
-            'siling_nota': fp.k_kejuruteraan.siling_nota,
-            'ukuran_tanah': fp.k_kejuruteraan.ukuran_tanah,
-            'tanah_mencukupi': fp.k_kejuruteraan.tanah_mencukupi,
-        })
-    if fp.k_fasiliti:
-        ctx.update({
-            'ruang_kerja_mencukupi': fp.k_fasiliti.ruang_kerja_mencukupi,
-            'ada_pantry': fp.k_fasiliti.ada_pantry,
-            'ada_kantin': fp.k_fasiliti.ada_kantin,
-            'ada_parking': fp.k_fasiliti.ada_parking,
-            'parking_mencukupi': fp.k_fasiliti.parking_mencukupi,
-            'ada_quarters': fp.k_fasiliti.ada_quarters,
-            'quarters_mencukupi': fp.k_fasiliti.quarters_mencukupi,
-            'masalah_aircond': fp.k_fasiliti.masalah_aircond,
-            'aircond_nota': fp.k_fasiliti.aircond_nota,
-            'masalah_kipas': fp.k_fasiliti.masalah_kipas,
-            'kipas_nota': fp.k_fasiliti.kipas_nota,
-        })
-    if fp.k_perkhidmatan:
-        ctx.update({
-            'ada_ruang_rehat': fp.k_perkhidmatan.ada_ruang_rehat,
-        })
+        # 2.1 - 2.3 Data Biasa (Teks & Radio)
+        ki.keluasan_tapak = request.POST.get('keluasan_tapak', '').strip()
+        ki.tanah_mencukupi = yesno('tanah_mencukupi')
+        ki.struktur_baik = yesno('struktur_baik')
+        ki.struktur_nota = request.POST.get('struktur_nota', '').strip()
+        ki.lif_berfungsi = yesno('lif_berfungsi')
+        ki.lif_nota = request.POST.get('lif_nota', '').strip()
+        ki.ada_ups = yesno('ada_ups')
+        ki.ruang_rawatan_mencukupi = yesno('ruang_rawatan_mencukupi')
+        ki.ada_ruang_rehat_pelawat = yesno('ada_ruang_rehat_pelawat')
+        
+        # ── LOGIK PENGURUSAN FAIL (5MB disemak di frontend, backend urus simpan) ──
+        if 'fail_aset_alih' in request.FILES:
+            if ki.fail_aset_alih: ki.fail_aset_alih.delete(save=False) # Buang fail lama jika ada
+            ki.fail_aset_alih = request.FILES['fail_aset_alih']
+            
+        if 'fail_aset_tak_alih' in request.FILES:
+            if ki.fail_aset_tak_alih: ki.fail_aset_tak_alih.delete(save=False)
+            ki.fail_aset_tak_alih = request.FILES['fail_aset_tak_alih']
+            
+        if 'fail_wishlist' in request.FILES:
+            if ki.fail_wishlist: ki.fail_wishlist.delete(save=False)
+            ki.fail_wishlist = request.FILES['fail_wishlist']
 
-    return render(request, 'home/form_infrastruktur.html', ctx)
+        # ── LOGIK PENGURUSAN "ADDING ROW" (JSON) ──
+        # Data jadual dinamik akan dihantar oleh Frontend sebagai string JSON tersembunyi
+        json_kebakaran_aktif_data = request.POST.get('json_kebakaran_aktif_data', '[]')
+        json_pekerja_security_data = request.POST.get('json_pekerja_security_data', '[]')
+        
+        try:
+            ki.json_kebakaran_aktif = json.loads(json_kebakaran_aktif_data)
+            ki.json_pekerja_security = json.loads(json_pekerja_security_data)
+        except json.JSONDecodeError:
+            pass # Jika ralat, kekalkan data sedia ada
 
-def _save_infrastruktur(request, fp):
-    post = request.POST
+        ki.save()
+        fp.k_infrastruktur = ki
+        fp.save()
+        
+        messages.success(request, 'Modul 2: Infrastruktur Fasiliti berjaya dikemaskini.')
+        return redirect('home:pilih_modul', pk=fp.pk)
 
-    def yesno(key):
-        val = post.get(key)
-        if val == '1': return True
-        if val == '0': return False
-        return None
-
-    # Kluster 1 (Kejuruteraan)
-    k1 = (fp.k_kejuruteraan if fp and fp.k_kejuruteraan else None) or KlusterKejuruteraan()
-    k1.siling_okay = yesno('siling_okay')
-    k1.siling_nota = post.get('siling_nota', '').strip()
-    k1.ukuran_tanah = post.get('ukuran_tanah', '').strip()
-    k1.tanah_mencukupi = yesno('tanah_mencukupi')
-    k1.save()
-
-    # Kluster 5 (Fasiliti)
-    k5 = (fp.k_fasiliti if fp and fp.k_fasiliti else None) or KlusterFasiliti()
-    k5.ruang_kerja_mencukupi = yesno('ruang_kerja_mencukupi')
-    k5.ada_pantry = yesno('ada_pantry')
-    k5.ada_kantin = yesno('ada_kantin')
-    k5.ada_parking = yesno('ada_parking')
-    k5.parking_mencukupi = yesno('parking_mencukupi')
-    k5.ada_quarters = yesno('ada_quarters')
-    k5.quarters_mencukupi = yesno('quarters_mencukupi')
-    k5.masalah_aircond = yesno('masalah_aircond')
-    k5.aircond_nota = post.get('aircond_nota', '').strip()
-    k5.masalah_kipas = yesno('masalah_kipas')
-    k5.kipas_nota = post.get('kipas_nota', '').strip()
-    k5.save()
-
-    # Kluster 3 (Perkhidmatan - untuk ruang rehat pelawat)
-    k3 = (fp.k_perkhidmatan if fp and fp.k_perkhidmatan else None) or KlusterPerkhidmatan()
-    k3.ada_ruang_rehat = yesno('ada_ruang_rehat')
-    k3.save()
-
-    if fp is None:
-        fp = FacilityProfile(submitted_by=request.user, status='draf')
-    fp.k_kejuruteraan = k1
-    fp.k_fasiliti = k5
-    fp.k_perkhidmatan = k3
-    fp.save()
-    
-    messages.success(request, f'Bahagian Infrastruktur Fasiliti berjaya dikemaskini.')
-    return redirect('home:pilih_modul', pk=fp.pk)
+    return render(request, 'home/form_infrastruktur.html', {'mode': 'edit', 'fp': fp})
 
 # ══════════════════════════════════════════════════════════════════
-# MODUL 3: ASET PERUBATAN (Google Forms)
+# MODUL 3: ASET PERUBATAN
 # ══════════════════════════════════════════════════════════════════
-
 @login_required
 def edit_aset_perubatan(request, pk):
     fp = get_object_or_404(FacilityProfile, pk=pk)
+    
     if request.method == 'POST':
-        return _save_aset_perubatan(request, fp=fp)
-
-    ctx = {'mode': 'edit', 'fp': fp}
-    
-    # Data dari Kluster Aset
-    if fp.k_aset:
-        ctx.update({
-            'senarai_peralatan': fp.k_aset.senarai_peralatan,
-            'aset_tidak_ikut_spec': fp.k_aset.aset_tidak_ikut_spec,
-            'disposable_mencukupi': fp.k_aset.disposable_mencukupi,
-            'ada_ambulans': fp.k_aset.ada_ambulans,
-            'ambulans_nota': fp.k_aset.ambulans_nota,
-            'sistem_pendigitalan': fp.k_aset.sistem_pendigitalan,
-            'gajet_ict_baik': fp.k_aset.gajet_ict_baik,
-            'gajet_ict_nota': fp.k_aset.gajet_ict_nota,
-        })
-    
-    # Data dari Kluster Perkhidmatan (Ubat & Hemodialisis)
-    if fp.k_perkhidmatan:
-        ctx.update({
-            'bekalan_ubat_mencukupi': fp.k_perkhidmatan.bekalan_ubat_mencukupi,
-            'ada_hemodialisis': fp.k_perkhidmatan.ada_hemodialisis,
-        })
+        ap = fp.k_aset_perubatan or KlusterAsetPerubatan()
         
-    # Data dari Kluster Fasiliti (Perabot & Security)
-    if fp.k_fasiliti:
-        ctx.update({
-            'keadaan_perabot': fp.k_fasiliti.keadaan_perabot,
-            'ada_security': fp.k_fasiliti.ada_security,
-        })
+        def yesno(key):
+            val = request.POST.get(key)
+            return True if val == '1' else (False if val == '0' else None)
 
-    # Pilihan sistem pendigitalan untuk template
-    ctx['digital_choices'] = ['EMR', 'CMS', 'HIS', 'LIS', 'HRMIS', 'PhIS', 'MyVAS', 'Tidak berkenaan']
+        # 3.2 Peralatan Biasa (Ya / Tidak)
+        ap.consumables_mencukupi = yesno('consumables_mencukupi')
+        ap.ubat_mencukupi = yesno('ubat_mencukupi')
+        ap.ada_blood_bank = yesno('ada_blood_bank')
+        ap.ada_hemodialisis = yesno('ada_hemodialisis')
+        ap.ada_radiologi = yesno('ada_radiologi')
+        ap.ada_makmal = yesno('ada_makmal')
 
-    return render(request, 'home/form_aset_perubatan.html', ctx)
+        # ── LOGIK PENGURUSAN FAIL (5MB disemak di frontend) ──
+        if 'fail_peralatan' in request.FILES:
+            if ap.fail_peralatan: ap.fail_peralatan.delete(save=False)
+            ap.fail_peralatan = request.FILES['fail_peralatan']
+            
+        if 'fail_aset_tidak_spec' in request.FILES:
+            if ap.fail_aset_tidak_spec: ap.fail_aset_tidak_spec.delete(save=False)
+            ap.fail_aset_tidak_spec = request.FILES['fail_aset_tidak_spec']
+            
+        if 'fail_wishlist' in request.FILES:
+            if ap.fail_wishlist: ap.fail_wishlist.delete(save=False)
+            ap.fail_wishlist = request.FILES['fail_wishlist']
 
-def _save_aset_perubatan(request, fp):
-    post = request.POST
+        # ── LOGIK PENGURUSAN "ADDING ROW" (JSON) ──
+        json_peralatan_data = request.POST.get('json_peralatan_data', '[]')
+        json_aset_tidak_spec_data = request.POST.get('json_aset_tidak_spec_data', '[]')
+        
+        try:
+            ap.json_peralatan = json.loads(json_peralatan_data)
+            ap.json_aset_tidak_spec = json.loads(json_aset_tidak_spec_data)
+        except json.JSONDecodeError:
+            pass
 
-    def yesno(key):
-        val = post.get(key)
-        if val == '1': return True
-        if val == '0': return False
-        return None
+        ap.save()
+        fp.k_aset_perubatan = ap
+        fp.save()
+        
+        messages.success(request, 'Modul 3: Aset Perubatan berjaya dikemaskini.')
+        return redirect('home:pilih_modul', pk=fp.pk)
 
-    # Simpan Kluster Aset
-    a = (fp.k_aset if fp and fp.k_aset else None) or KlusterAset()
-    a.senarai_peralatan = post.get('senarai_peralatan', '').strip()
-    a.aset_tidak_ikut_spec = post.get('aset_tidak_ikut_spec', '').strip()
-    a.disposable_mencukupi = yesno('disposable_mencukupi')
-    a.ada_ambulans = yesno('ada_ambulans')
-    a.ambulans_nota = post.get('ambulans_nota', '').strip()
-    a.sistem_pendigitalan = post.get('sistem_pendigitalan', '').strip()
-    a.gajet_ict_baik = yesno('gajet_ict_baik')
-    a.gajet_ict_nota = post.get('gajet_ict_nota', '').strip()
-    a.save()
+    return render(request, 'home/form_aset_perubatan.html', {'mode': 'edit', 'fp': fp})
 
-    # Simpan Kluster Fasiliti (Perabot & Security)
-    kf = (fp.k_fasiliti if fp and fp.k_fasiliti else None) or KlusterFasiliti()
-    kf.keadaan_perabot = post.get('keadaan_perabot', '').strip()
-    kf.ada_security = yesno('ada_security')
-    kf.save()
-
-    # Simpan Kluster Perkhidmatan (Ubat & Hemodialisis)
-    k3 = (fp.k_perkhidmatan if fp and fp.k_perkhidmatan else None) or KlusterPerkhidmatan()
-    k3.bekalan_ubat_mencukupi = yesno('bekalan_ubat_mencukupi')
-    k3.ada_hemodialisis = yesno('ada_hemodialisis')
-    k3.save()
-
-    if fp is None:
-        fp = FacilityProfile(submitted_by=request.user, status='draf')
-    fp.k_aset = a
-    fp.k_fasiliti = kf
-    fp.k_perkhidmatan = k3
-    fp.save()
-    
-    messages.success(request, 'Bahagian Aset Perubatan berjaya dikemaskini.')
-    return redirect('home:pilih_modul', pk=fp.pk)
 
 # ══════════════════════════════════════════════════════════════════
-# MODUL 4: PENGURUSAN SUMBER MANUSIA (Google Forms)
+# MODUL 4: PENGURUSAN SUMBER MANUSIA
 # ══════════════════════════════════════════════════════════════════
-
 @login_required
 def edit_pengurusan_sumber_manusia(request, pk):
     fp = get_object_or_404(FacilityProfile, pk=pk)
-    if request.method == 'POST':
-        return _save_pengurusan_sumber_manusia(request, fp=fp)
-
-    ctx = {'mode': 'edit', 'fp': fp}
     
-    if fp.k_sumber_manusia:
-        k2 = fp.k_sumber_manusia
-        ctx.update({
-            'jumlah_perjawatan': k2.jumlah_perjawatan,
-            'jumlah_pengisian': k2.jumlah_pengisian,
-            'jumlah_kekosongan': k2.jumlah_kekosongan,
-            'ada_kakitangan_pinjaman': k2.ada_kakitangan_pinjaman,
-            'nota_kakitangan_pinjaman': k2.nota_kakitangan_pinjaman,
-            'ada_isu_kakitangan': k2.ada_isu_kakitangan,
-            'ada_fasiliti_petugas': k2.ada_fasiliti_petugas,
-            'jenis_shift': k2.jenis_shift,
-            'corak_penugasan': k2.corak_penugasan,
-            'pengurusan_jadual': k2.pengurusan_jadual,
-            'cara_minta_cuti': k2.cara_minta_cuti,
-            'isu_penempatan': k2.isu_penempatan,
-            'status_pertukaran_staf': k2.status_pertukaran_staf,
-            'senarai_staf': k2.senarai_staf.all()
-        })
+    if request.method == 'POST':
+        sm = fp.k_sumber_manusia or KlusterSumberManusia()
+        
+        def yesno(key):
+            val = request.POST.get(key)
+            return True if val == '1' else (False if val == '0' else None)
+            
+        def intval(key):
+            try: return int(request.POST.get(key, ''))
+            except (ValueError, TypeError): return None
 
-    # Data Checkboxes
-    ctx['opt_shift'] = [
-        '1 Shift (Waktu Pejabat: 8 pagi - 5 petang)', '2 Shift (Pagi & Petang)', 
-        '3 Shift (Pagi, Petang & Malam / Operasi 24 jam)', 'Sistem Panggilan Tugas (On Call / Standby)', 'Tidak Berkenaan'
-    ]
-    ctx['opt_corak'] = [
-        'Mengikut standard / Norma ditetapkan (Kapasiti / Tenaga kerja mencukupi)',
-        'Kekurangan staf tinggi / Penugasan double shift kerap diamalkan akibat kekurangan staf',
-        'Tugas on-call / kerja lebih masa (OT) kerap diamalkan sehingga ada staf burnout',
-        'Kerja lebih masa (OT) jarang diamalkan', 'Tidak Berkenaan'
-    ]
-    ctx['opt_roster'] = [
-        'Disediakan oleh Ketua Unit / Penyelia secara manual (Borang / Microsoft Excel/Word)',
-        'Sistem Penjadualan Digital / Automasi',
-        'Dibuat secara tetap - tiada rotasi / pertukaran tempoh',
-        'Sistem dalam Percubaan / Skim Syif yang fleksibel antara rakan sekerja (bergilir atas persetujuan)',
-        'Tidak Berkenaan'
-    ]
-    ctx['opt_cuti'] = [
-        'Sistem Dalam Talian (HRMIS / Sistem Pengurusan Cuti Dalaman)',
-        'Manual / Borang / Kertas (Borang Cuti Fizikal Sokongan / Lulus & Disimpan)',
-        'Hybrid (Borang secara fizikal, tetapi data direkod juga di pangkalan data secara manual)'
-    ]
-    ctx['opt_isu'] = [
-        'Kekurangan Staf Utama Menyebabkan Penugasan Syif Yang Tidak Seimbang / Beban Kerja Berlebihan',
-        'Pertindihan Jadual Waktu Bekerja / Kekurangan Pengganti Cuti',
-        'Jadual Syif Kerap Ditukar (Perubahan Minit Akhir / Kurang Notice)',
-        'Kesukaran Memantau Penugasan/Cuti (Sistem Manual Tiada Ciri Integrasi Automatik)',
-        'Tiada Sokongan ICT / Penggunaan Perisian Jadual Yang Ketinggalan Zaman/Teruk',
-        'Tidak Berkenaan'
-    ]
+        # 4.1 Bilangan (Input Manual tanpa Autokira)
+        sm.jumlah_perjawatan = intval('jumlah_perjawatan')
+        sm.jumlah_pengisian  = intval('jumlah_pengisian')
+        sm.jumlah_kekosongan = intval('jumlah_kekosongan')
+        
+        sm.ada_kakitangan_pinjaman = yesno('ada_kakitangan_pinjaman')
+        sm.ada_isu_petugas = yesno('ada_isu_petugas')
+        sm.isu_petugas_nota = request.POST.get('isu_petugas_nota', '').strip()
+        sm.status_pertukaran = request.POST.get('status_pertukaran', '').strip()
+        
+        # 4.2 Penjadualan & Syif (Pilihan Kekal Teks Biasa)
+        sm.bilangan_shift = request.POST.get('bilangan_shift', '').strip()
+        sm.corak_penugasan = request.POST.get('corak_penugasan', '').strip()
+        sm.pengurusan_jadual = request.POST.get('pengurusan_jadual', '').strip()
+        sm.proses_cuti = request.POST.get('proses_cuti', '').strip()
+        sm.isu_penjadualan = request.POST.get('isu_penjadualan', '').strip()
 
-    # --- KOD TARIK SOALAN DINAMIK & JAWAPAN ---
+        # ── LOGIK PENGURUSAN FAIL ──
+        fail_keys = ['fail_perjawatan', 'fail_pengisian', 'fail_kekosongan', 'fail_kakitangan', 'fail_wishlist']
+        for fk in fail_keys:
+            if fk in request.FILES:
+                existing_file = getattr(sm, fk)
+                if existing_file: existing_file.delete(save=False)
+                setattr(sm, fk, request.FILES[fk])
+
+        # ── LOGIK "ADDING ROW" JSON UNTUK KAKITANGAN ──
+        json_kakitangan_data = request.POST.get('json_kakitangan_data', '[]')
+        try:
+            sm.json_kakitangan = json.loads(json_kakitangan_data)
+        except json.JSONDecodeError:
+            pass
+
+        sm.save()
+        fp.k_sumber_manusia = sm
+        fp.save()
+        
+        # ── SIMPAN SOALAN DINAMIK ──
+        soalan_aktif = SoalanTambahan.objects.filter(modul='sumber_manusia', is_aktif=True)
+        for s in soalan_aktif:
+            field_name = f"soalan_dyn_{s.id}"
+            jawapan_obj, _ = JawapanSoalanTambahan.objects.get_or_create(profil_fasiliti=fp, soalan=s)
+            
+            if s.jenis_input == 'fail':
+                if field_name in request.FILES:
+                    if jawapan_obj.jawapan_fail: jawapan_obj.jawapan_fail.delete(save=False)
+                    jawapan_obj.jawapan_fail = request.FILES[field_name]
+                    jawapan_obj.save()
+            else:
+                jawapan_obj.jawapan_teks = request.POST.get(field_name, '').strip()
+                jawapan_obj.save()
+
+        messages.success(request, 'Modul 4: Pengurusan Sumber Manusia berjaya dikemaskini.')
+        return redirect('home:pilih_modul', pk=fp.pk)
+
+    # ── PAPARAN GET (Fetch Soalan Dinamik untuk UI) ──
     soalan_dinamik = []
     soalan_aktif = SoalanTambahan.objects.filter(modul='sumber_manusia', is_aktif=True)
     
     for s in soalan_aktif:
-        j_teks = ''
-        j_fail = None
+        j_teks, j_fail = '', None
         if fp:
             jawapan_obj = JawapanSoalanTambahan.objects.filter(profil_fasiliti=fp, soalan=s).first()
             if jawapan_obj:
-                j_teks = jawapan_obj.jawapan_teks
-                j_fail = jawapan_obj.jawapan_fail
+                j_teks, j_fail = jawapan_obj.jawapan_teks, jawapan_obj.jawapan_fail
 
         soalan_dinamik.append({
-            'id': s.id,
-            'teks_soalan': s.teks_soalan,
-            'jenis_input': s.jenis_input,
-            'is_wajib': s.is_wajib,
-            'jawapan_teks': j_teks,
-            'jawapan_fail': j_fail,
+            'id': s.id, 'teks_soalan': s.teks_soalan, 'jenis_input': s.jenis_input,
+            'is_wajib': s.is_wajib, 'jawapan_teks': j_teks, 'jawapan_fail': j_fail,
         })
 
-    ctx['soalan_dinamik'] = soalan_dinamik
-    # ------------------------------------------
-
-    return render(request, 'home/form_pengurusan_sumber_manusia.html', ctx)
-
-
-def _save_pengurusan_sumber_manusia(request, fp):
-    post = request.POST
-    files = request.FILES # Wajib ditarik untuk membaca muat naik fail
-
-    def yesno(key):
-        val = post.get(key)
-        return True if val == '1' else (False if val == '0' else None)
-        
-    def intval(key):
-        try: return int(post.get(key, ''))
-        except (ValueError, TypeError): return None
-
-    k2 = (fp.k_sumber_manusia if fp and fp.k_sumber_manusia else None) or KlusterSumberManusia()
-    k2.save() # Simpan awal
-    
-    # --- PROSES SENARAI STAF BERENAMA & AUTOKIRA ---
-    from .models import StafFasiliti
-    k2.senarai_staf.all().delete()
-    
-    nama_staf_list = post.getlist('nama_staf[]')
-    no_pengenalan_list = post.getlist('no_pengenalan[]')
-    skim_list = post.getlist('skim[]')
-    gred_list = post.getlist('gred[]')
-    status_lantikan_list = post.getlist('status_lantikan[]')
-    tarikh_tamat_list = post.getlist('tarikh_tamat[]')
-    catatan_list = post.getlist('catatan_mobilisasi[]')
-    
-    jumlah_pengisian_dikira = 0
-    
-    for i in range(len(nama_staf_list)):
-        nama = nama_staf_list[i].strip()
-        if not nama: continue
-            
-        tarikh_tamat_val = tarikh_tamat_list[i].strip() if i < len(tarikh_tamat_list) else ''
-        
-        StafFasiliti.objects.create(
-            kluster_sm=k2,
-            nama_staf=nama,
-            no_pengenalan=no_pengenalan_list[i].strip() if i < len(no_pengenalan_list) else '',
-            skim=skim_list[i] if i < len(skim_list) else 'sokongan',
-            gred=gred_list[i].strip() if i < len(gred_list) else '',
-            status_lantikan=status_lantikan_list[i] if i < len(status_lantikan_list) else 'tetap',
-            tarikh_tamat_perkhidmatan=tarikh_tamat_val if tarikh_tamat_val else None,
-            catatan_mobilisasi=catatan_list[i].strip() if i < len(catatan_list) else ''
-        )
-        status_kini = status_lantikan_list[i] if i < len(status_lantikan_list) else 'tetap'
-        if status_kini != 'pinjaman_out':
-            jumlah_pengisian_dikira += 1
-            
-    k2.jumlah_perjawatan = intval('jumlah_perjawatan')
-    k2.jumlah_pengisian  = jumlah_pengisian_dikira
-    
-    if k2.jumlah_perjawatan is not None:
-        k2.jumlah_kekosongan = max(0, k2.jumlah_perjawatan - k2.jumlah_pengisian)
-    else:
-        k2.jumlah_kekosongan = 0
-    
-    k2.ada_kakitangan_pinjaman = yesno('ada_kakitangan_pinjaman')
-    k2.nota_kakitangan_pinjaman = post.get('nota_kakitangan_pinjaman', '').strip()
-    k2.ada_isu_kakitangan = yesno('ada_isu_kakitangan')
-    k2.ada_fasiliti_petugas = yesno('ada_fasiliti_petugas')
-    k2.jenis_shift = post.get('jenis_shift', '').strip()
-    k2.corak_penugasan = post.get('corak_penugasan', '').strip()
-    k2.pengurusan_jadual = post.get('pengurusan_jadual', '').strip()
-    k2.cara_minta_cuti = post.get('cara_minta_cuti', '').strip()
-    k2.isu_penempatan = post.get('isu_penempatan', '').strip()
-    k2.status_pertukaran_staf = post.get('status_pertukaran_staf', '').strip()
-    k2.save()
-
-    if fp is None:
-        fp = FacilityProfile(submitted_by=request.user, status='draf')
-    fp.k_sumber_manusia = k2
-    fp.save()
-    
-    # --- KOD SIMPAN JAWAPAN SOALAN DINAMIK ---
-    soalan_aktif = SoalanTambahan.objects.filter(modul='sumber_manusia', is_aktif=True)
-    for s in soalan_aktif:
-        field_name = f"soalan_dyn_{s.id}"
-        jawapan_obj, created = JawapanSoalanTambahan.objects.get_or_create(
-            profil_fasiliti=fp,
-            soalan=s
-        )
-        
-        if s.jenis_input == 'fail':
-            if field_name in files:
-                jawapan_obj.jawapan_fail = files[field_name]
-                jawapan_obj.save()
-        else:
-            jawapan_obj.jawapan_teks = post.get(field_name, '').strip()
-            jawapan_obj.save()
-    # ------------------------------------------
-
-    from django.contrib import messages
-    messages.success(request, 'Bahagian Pengurusan Sumber Manusia & Soalan Dinamik berjaya dikemaskini.')
-    return redirect('home:pilih_modul', pk=fp.pk)
+    return render(request, 'home/form_pengurusan_sumber_manusia.html', {
+        'mode': 'edit', 
+        'fp': fp,
+        'soalan_dinamik': soalan_dinamik
+    })
 
 # ══════════════════════════════════════════════════════════════════
-# MODUL 5: PENYAMPAIAN PERKHIDMATAN (Google Forms)
+# MODUL 5: PENYAMPAIAN PERKHIDMATAN
 # ══════════════════════════════════════════════════════════════════
-
 @login_required
 def edit_penyampaian_perkhidmatan(request, pk):
     fp = get_object_or_404(FacilityProfile, pk=pk)
+    
     if request.method == 'POST':
-        return _save_penyampaian_perkhidmatan(request, fp=fp)
+        kp = fp.k_perkhidmatan or KlusterPerkhidmatan()
+        
+        def yesno(key):
+            val = request.POST.get(key)
+            return True if val == '1' else (False if val == '0' else None)
+            
+        def intval(key):
+            try: return int(request.POST.get(key, ''))
+            except (ValueError, TypeError): return None
 
-    ctx = {'mode': 'edit', 'fp': fp}
-    
-    # K2: Waktu Operasi (disimpan dalam Sumber Manusia pada asalnya)
-    if fp.k_sumber_manusia:
-        ctx['waktu_beroperasi'] = fp.k_sumber_manusia.waktu_beroperasi
+        # 5.1 & 5.2 Input Biasa
+        kp.anggaran_pelawat = intval('anggaran_pelawat')
+        kp.ruang_menunggu_selesa = yesno('ruang_menunggu_selesa')
+        kp.ruang_menunggu_nota = request.POST.get('ruang_menunggu_nota', '').strip()
+        kp.ada_wad = yesno('ada_wad')
+        kp.wad_asing_jantina = yesno('wad_asing_jantina')
+        kp.katil_mencukupi = yesno('katil_mencukupi')
+        kp.ada_kaunseling = yesno('ada_kaunseling')
+        kp.ada_rehabilitasi = yesno('ada_rehabilitasi')
+        kp.boleh_selesai_kes = yesno('boleh_selesai_kes')
+        kp.boleh_selesai_kes_nota = request.POST.get('boleh_selesai_kes_nota', '').strip()
+        kp.anggaran_masa_tunggu = request.POST.get('anggaran_masa_tunggu', '').strip()
+        
+        # 5.3 Maklumat Tambahan
+        kp.ada_forensik = yesno('ada_forensik')
+        kp.sedia_makanan = yesno('sedia_makanan')
+        kp.makanan_memuaskan = yesno('makanan_memuaskan')
+        kp.makanan_nota = request.POST.get('makanan_nota', '').strip()
 
-    # K3: Data Perkhidmatan Kesihatan
-    if fp.k_perkhidmatan:
-        k3 = fp.k_perkhidmatan
-        ctx.update({
-            'anggaran_pelawat_harian': k3.anggaran_pelawat_harian,
-            'jenis_perkhidmatan': k3.jenis_perkhidmatan,
-            'jenis_penyakit_kerap': k3.jenis_penyakit_kerap,
-            'wad_diasingkan': k3.wad_diasingkan,
-            'ruang_tunggu_selesa': k3.ruang_tunggu_selesa,
-            'ruang_tunggu_nota': k3.ruang_tunggu_nota,
-            'boleh_selesaikan_kes': k3.boleh_selesaikan_kes,
-            'kekangan_rawatan': k3.kekangan_rawatan,
-            'masa_tunggu': k3.masa_tunggu,
-        })
+        # ── LOGIK PENGURUSAN FAIL ──
+        fail_keys = ['fail_program', 'fail_penyakit', 'fail_fasiliti_terdekat', 'fail_wishlist']
+        for fk in fail_keys:
+            if fk in request.FILES:
+                existing_file = getattr(kp, fk)
+                if existing_file: existing_file.delete(save=False)
+                setattr(kp, fk, request.FILES[fk])
 
-    return render(request, 'home/form_penyampaian_perkhidmatan.html', ctx)
+        # ── LOGIK "ADDING ROW" JSON ──
+        json_fields = ['json_waktu_operasi_data', 'json_program_data', 'json_penyakit_data', 'json_fasiliti_terdekat_data']
+        for jf in json_fields:
+            data = request.POST.get(jf, '[]')
+            try:
+                # Padankan nama variable JSON backend dengan nama POST data
+                target_field = jf.replace('_data', '')
+                setattr(kp, target_field, json.loads(data))
+            except json.JSONDecodeError:
+                pass
 
-def _save_penyampaian_perkhidmatan(request, fp):
-    post = request.POST
+        kp.save()
+        fp.k_perkhidmatan = kp
+        fp.save()
+        
+        messages.success(request, 'Modul 5: Penyampaian Perkhidmatan berjaya dikemaskini.')
+        return redirect('home:pilih_modul', pk=fp.pk)
 
-    def yesno(key):
-        val = post.get(key)
-        if val == '1': return True
-        if val == '0': return False
-        return None
+    return render(request, 'home/form_penyampaian_perkhidmatan.html', {'mode': 'edit', 'fp': fp})
 
-    def intval(key):
-        try: return int(post.get(key, ''))
-        except (ValueError, TypeError): return None
-
-    # Simpan Waktu Operasi ke Kluster 2
-    k2 = (fp.k_sumber_manusia if fp and fp.k_sumber_manusia else None) or KlusterSumberManusia()
-    k2.waktu_beroperasi = post.get('waktu_beroperasi', '').strip()
-    k2.save()
-
-    # Simpan Kluster 3
-    k3 = (fp.k_perkhidmatan if fp and fp.k_perkhidmatan else None) or KlusterPerkhidmatan()
-    k3.anggaran_pelawat_harian = intval('anggaran_pelawat_harian')
-    k3.jenis_perkhidmatan = post.get('jenis_perkhidmatan', '').strip()
-    k3.jenis_penyakit_kerap = post.get('jenis_penyakit_kerap', '').strip()
-    k3.wad_diasingkan = yesno('wad_diasingkan')
-    k3.ruang_tunggu_selesa = yesno('ruang_tunggu_selesa')
-    k3.ruang_tunggu_nota = post.get('ruang_tunggu_nota', '').strip()
-    k3.boleh_selesaikan_kes = yesno('boleh_selesaikan_kes')
-    k3.kekangan_rawatan = post.get('kekangan_rawatan', '').strip()
-    k3.masa_tunggu = post.get('masa_tunggu', '').strip()
-    k3.save()
-
-    if fp is None:
-        fp = FacilityProfile(submitted_by=request.user, status='draf')
-    fp.k_sumber_manusia = k2
-    fp.k_perkhidmatan = k3
-    fp.save()
-    
-    messages.success(request, 'Bahagian Penyampaian Perkhidmatan berjaya dikemaskini.')
-    return redirect('home:pilih_modul', pk=fp.pk)
 
 # ══════════════════════════════════════════════════════════════════
-# MODUL 6: KEWANGAN, KONSESI & PERANCANGAN (Google Forms)
+# MODUL 6: KEWANGAN, KONSESI & PERANCANGAN
 # ══════════════════════════════════════════════════════════════════
-
 @login_required
 def edit_kewangan_perancangan(request, pk):
     fp = get_object_or_404(FacilityProfile, pk=pk)
+    
     if request.method == 'POST':
-        return _save_kewangan_perancangan(request, fp=fp)
+        kw = fp.k_kewangan or KlusterKewangan()
+        
+        def yesno(key):
+            val = request.POST.get(key)
+            return True if val == '1' else (False if val == '0' else None)
 
-    ctx = {'mode': 'edit', 'fp': fp}
-    
-    # K6: Kewangan & Perancangan Masa Depan
-    if fp.k_perancangan:
-        ctx.update({
-            'belanja_mengurus': fp.k_perancangan.belanja_mengurus,
-            'belanja_pembangunan': fp.k_perancangan.belanja_pembangunan,
-            'fasiliti_diperlukan': fp.k_perancangan.fasiliti_diperlukan,
-        })
+        kw.belanja_mengurus = request.POST.get('belanja_mengurus', '').strip()
+        kw.belanja_pembangunan = request.POST.get('belanja_pembangunan', '').strip()
+        kw.konsesi_lancar = yesno('konsesi_lancar')
+        kw.isu_utama = request.POST.get('isu_utama', '').strip()
+        kw.perlu_tambah_infrastruktur = yesno('perlu_tambah_infrastruktur')
 
-    # K7: Konsesi & Isu Utama
-    if fp.k_konsesi:
-        ctx.update({
-            'maintenance_okay': fp.k_konsesi.maintenance_okay,
-            'masalah_utama': fp.k_konsesi.masalah_utama,
-        })
+        if 'fail_wishlist' in request.FILES:
+            if kw.fail_wishlist: kw.fail_wishlist.delete(save=False)
+            kw.fail_wishlist = request.FILES['fail_wishlist']
 
-    return render(request, 'home/form_kewangan_perancangan.html', ctx)
+        json_infra = request.POST.get('json_infrastruktur_baru_data', '[]')
+        try:
+            kw.json_infrastruktur_baru = json.loads(json_infra)
+        except json.JSONDecodeError:
+            pass
 
-def _save_kewangan_perancangan(request, fp):
-    post = request.POST
+        kw.save()
+        fp.k_kewangan = kw
+        fp.save()
+        
+        messages.success(request, 'Modul 6: Kewangan & Perancangan berjaya dikemaskini.')
+        return redirect('home:pilih_modul', pk=fp.pk)
 
-    def yesno(key):
-        val = post.get(key)
-        if val == '1': return True
-        if val == '0': return False
-        return None
+    return render(request, 'home/form_kewangan_perancangan.html', {'mode': 'edit', 'fp': fp})
 
-    # Simpan Kewangan & Perancangan (K6)
-    k6 = (fp.k_perancangan if fp and fp.k_perancangan else None) or KlusterPerancangan()
-    k6.belanja_mengurus = post.get('belanja_mengurus', '').strip()
-    k6.belanja_pembangunan = post.get('belanja_pembangunan', '').strip()
-    k6.fasiliti_diperlukan = post.get('fasiliti_diperlukan', '').strip()
-    k6.save()
-
-    # Simpan Konsesi & Isu Utama (K7)
-    k7 = (fp.k_konsesi if fp and fp.k_konsesi else None) or KlusterKonsesi()
-    k7.maintenance_okay = yesno('maintenance_okay')
-    k7.masalah_utama = post.get('masalah_utama', '').strip()
-    k7.save()
-
-    if fp is None:
-        fp = FacilityProfile(submitted_by=request.user, status='draf')
-    fp.k_perancangan = k6
-    fp.k_konsesi = k7
-    fp.save()
-    
-    messages.success(request, 'Bahagian Kewangan & Perancangan berjaya dikemaskini.')
-    return redirect('home:pilih_modul', pk=fp.pk)
 
 # ══════════════════════════════════════════════════════════════════
-# MODUL 7: LAIN-LAIN (Google Forms)
+# MODUL 7: SISTEM RANGKAIAN & PERALATAN DIGITAL
 # ══════════════════════════════════════════════════════════════════
-
 @login_required
-def edit_lain_lain(request, pk):
+def edit_sistem_digital(request, pk):
     fp = get_object_or_404(FacilityProfile, pk=pk)
+    
     if request.method == 'POST':
-        return _save_lain_lain(request, fp=fp)
-
-    ctx = {'mode': 'edit', 'fp': fp}
-    
-    # K7: Konsesi (Google Form)
-    if fp.k_konsesi:
-        k7 = fp.k_konsesi
-        ctx.update({
-            'prosedur_kes_dadah': k7.prosedur_kes_dadah,
-            'hemodialisis_nota': k7.hemodialisis_nota,
-            'status_bekalan_oksigen': k7.status_bekalan_oksigen,
-            'wishlist_fail': k7.wishlist_fail,
-            'wishlist_lama': k7.wishlist,  # Teks lama wishlist
-        })
+        kd = fp.k_digital or KlusterDigital()
         
-    # --- Data Arkib (Maklumat Tambahan Lama) ---
-    if fp.k_fasiliti:
-        ctx['ada_bilik_mayat'] = fp.k_fasiliti.ada_bilik_mayat
-    if fp.k_perkhidmatan:
-        ctx['kualiti_makanan'] = fp.k_perkhidmatan.kualiti_makanan
-    if fp.k_aset:
-        ctx['umur_komputer'] = fp.k_aset.umur_komputer
+        def yesno(key):
+            val = request.POST.get(key)
+            return True if val == '1' else (False if val == '0' else None)
 
-    return render(request, 'home/form_lain_lain.html', ctx)
+        kd.peranti_mencukupi = yesno('peranti_mencukupi')
+        kd.peranti_baik = yesno('peranti_baik')
+        kd.peranti_baik_nota = request.POST.get('peranti_baik_nota', '').strip()
+        kd.perlu_tambah_peranti = yesno('perlu_tambah_peranti')
+        kd.perlu_tambah_nota = request.POST.get('perlu_tambah_nota', '').strip()
+        kd.internet_pantas = yesno('internet_pantas')
 
-def _save_lain_lain(request, fp):
-    post = request.POST
-    files = request.FILES
+        fail_keys = ['fail_peranti', 'fail_wishlist']
+        for fk in fail_keys:
+            if fk in request.FILES:
+                existing = getattr(kd, fk)
+                if existing: existing.delete(save=False)
+                setattr(kd, fk, request.FILES[fk])
 
-    def yesno(key):
-        val = post.get(key)
-        if val == '1': return True
-        if val == '0': return False
-        return None
+        json_fields = ['json_peranti_data', 'json_sistem_data']
+        for jf in json_fields:
+            data = request.POST.get(jf, '[]')
+            try:
+                target_field = jf.replace('_data', '')
+                setattr(kd, target_field, json.loads(data))
+            except json.JSONDecodeError:
+                pass
 
-    # Simpan Google Form (K7)
-    k7 = (fp.k_konsesi if fp and fp.k_konsesi else None) or KlusterKonsesi()
-    k7.prosedur_kes_dadah = post.get('prosedur_kes_dadah', '').strip()
-    k7.hemodialisis_nota = post.get('hemodialisis_nota', '').strip()
-    k7.status_bekalan_oksigen = post.get('status_bekalan_oksigen', '').strip()
-    k7.wishlist = post.get('wishlist_lama', '').strip()
-    
-    # 1. Proses Buang Fail (Jika pengguna menekan butang Padam Fail Semasa)
-    if post.get('delete_wishlist_fail') == '1':
-        if k7.wishlist_fail:
-            k7.wishlist_fail.delete(save=False)  # Padam fail dari server
-            
-    # 2. Proses Muat Naik Fail Baru
-    if 'wishlist_fail' in files:
-        if k7.wishlist_fail:
-            k7.wishlist_fail.delete(save=False)  # Buang fail lama jika di-override
-        k7.wishlist_fail = files['wishlist_fail']
+        kd.save()
+        fp.k_digital = kd
+        fp.save()
         
-    k7.save()
+        messages.success(request, 'Modul 7: Sistem Rangkaian & Digital berjaya dikemaskini.')
+        return redirect('home:pilih_modul', pk=fp.pk)
 
-    # Simpan Data Arkib
-    k5 = (fp.k_fasiliti if fp and fp.k_fasiliti else None) or KlusterFasiliti()
-    k5.ada_bilik_mayat = yesno('ada_bilik_mayat')
-    k5.save()
-    
-    k3 = (fp.k_perkhidmatan if fp and fp.k_perkhidmatan else None) or KlusterPerkhidmatan()
-    k3.kualiti_makanan = post.get('kualiti_makanan', '').strip()
-    k3.save()
-    
-    k4 = (fp.k_aset if fp and fp.k_aset else None) or KlusterAset()
-    k4.umur_komputer = post.get('umur_komputer', '').strip()
-    k4.save()
-
-    if fp is None:
-        fp = FacilityProfile(submitted_by=request.user, status='draf')
-    fp.k_konsesi = k7
-    fp.k_fasiliti = k5
-    fp.k_perkhidmatan = k3
-    fp.k_aset = k4
-    fp.save()
-    
-    messages.success(request, 'Bahagian Lain-lain dan Lampiran berjaya dikemaskini.')
-    return redirect('home:pilih_modul', pk=fp.pk)
+    return render(request, 'home/form_sistem_digital.html', {'mode': 'edit', 'fp': fp})
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect

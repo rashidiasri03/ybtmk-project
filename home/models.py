@@ -4,618 +4,382 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
 def _current_year():
     return datetime.date.today().year
 
-
 # ─────────────────────────────────────────────────────────────────
-# KLUSTER 0 – Maklumat Asas  (table: home_maklumatAsas)
+# KLUSTER 0 – Maklumat Asas (BAHAGIAN 1: Latar Belakang)
 # ─────────────────────────────────────────────────────────────────
 class MaklumatAsas(models.Model):
     FACILITY_TYPE_CHOICES = [
-        ('hospital',                  'Hospital'),
-        ('hospital_pakar',            'Hospital Pakar'),
-        ('klinik_kesihatan',          'Klinik Kesihatan'),
-        ('klinik_desa',              'Klinik Desa'),
-        ('klinik_komuniti',          'Klinik Komuniti'),
-        ('institusi_perubatan_khas',  'Institusi Perubatan Khas'),
-        ('institusi_latihan',         'Institusi Latihan'),
-        ('jabatan_kes_negeri',        'Jabatan Kesihatan Negeri'),
-        ('klinik_pergigian_hosp',     'Klinik Pergigian di Hospital'),
-        ('kk_ibu_anak',              'Klinik Kesihatan Ibu dan Anak'),
-        ('klinik_pergigian_utc',      'Klinik Pergigian UTC'),
-        ('klinik_pergigian_sekolah',  'Klinik Pergigian di Sekolah'),
-        ('kp_kk_utc',                'Klinik Pergigian di Klinik Kesihatan UTC'),
-        ('kp_kk_ibu_anak',           'Klinik Pergigian di Klinik Kesihatan Ibu dan Anak'),
-        ('klinik_pergigian_rtc',      'Klinik Pergigian RTC'),
-        ('klinik_kesihatan_utc',      'Klinik Kesihatan UTC'),
-        ('klinik_pergigian',          'Klinik Pergigian'),
-        ('pkp_bahagian',             'Pejabat Kesihatan Pergigian Bahagian'),
-        ('pkp',                      'Pejabat Kesihatan Pergigian'),
-        ('pkp_daerah',               'Pejabat Kesihatan Pergigian Daerah'),
-        ('pkp_kawasan',              'Pejabat Kesihatan Pergigian Kawasan'),
-        ('lain',                     'Lain-lain'),
+        ('hospital', 'Hospital'), ('hospital_pakar', 'Hospital Pakar'), ('klinik_kesihatan', 'Klinik Kesihatan'),
+        ('klinik_desa', 'Klinik Desa'), ('klinik_komuniti', 'Klinik Komuniti'), ('institusi_perubatan_khas', 'Institusi Perubatan Khas'),
+        ('institusi_latihan', 'Institusi Latihan'), ('jabatan_kes_negeri', 'Jabatan Kesihatan Negeri'), ('klinik_pergigian_hosp', 'Klinik Pergigian di Hospital'),
+        ('kk_ibu_anak', 'Klinik Kesihatan Ibu dan Anak'), ('klinik_pergigian_utc', 'Klinik Pergigian UTC'), ('klinik_pergigian_sekolah', 'Klinik Pergigian di Sekolah'),
+        ('kp_kk_utc', 'Klinik Pergigian di Klinik Kesihatan UTC'), ('kp_kk_ibu_anak', 'Klinik Pergigian di Klinik Kesihatan Ibu dan Anak'),
+        ('klinik_pergigian_rtc', 'Klinik Pergigian RTC'), ('klinik_kesihatan_utc', 'Klinik Kesihatan UTC'), ('klinik_pergigian', 'Klinik Pergigian'),
+        ('pkp_bahagian', 'Pejabat Kesihatan Pergigian Bahagian'), ('pkp', 'Pejabat Kesihatan Pergigian'), ('pkp_daerah', 'Pejabat Kesihatan Pergigian Daerah'),
+        ('pkp_kawasan', 'Pejabat Kesihatan Pergigian Kawasan'), ('lain', 'Lain-lain'),
     ]
     NEGERI_CHOICES = [
-        ('johor', 'Johor'), ('kedah', 'Kedah'), ('kelantan', 'Kelantan'),
-        ('melaka', 'Melaka'), ('negeri_sembilan', 'Negeri Sembilan'),
-        ('pahang', 'Pahang'), ('perak', 'Perak'), ('perlis', 'Perlis'),
-        ('pulau_pinang', 'Pulau Pinang'), ('sabah', 'Sabah'),
-        ('sarawak', 'Sarawak'), ('selangor', 'Selangor'),
-        ('terengganu', 'Terengganu'), ('wp_kl', 'W.P. Kuala Lumpur'),
+        ('johor', 'Johor'), ('kedah', 'Kedah'), ('kelantan', 'Kelantan'), ('melaka', 'Melaka'), ('negeri_sembilan', 'Negeri Sembilan'),
+        ('pahang', 'Pahang'), ('perak', 'Perak'), ('perlis', 'Perlis'), ('pulau_pinang', 'Pulau Pinang'), ('sabah', 'Sabah'),
+        ('sarawak', 'Sarawak'), ('selangor', 'Selangor'), ('terengganu', 'Terengganu'), ('wp_kl', 'W.P. Kuala Lumpur'),
         ('wp_putrajaya', 'W.P. Putrajaya'), ('wp_labuan', 'W.P. Labuan'),
     ]
     WILAYAH_CHOICES = [
-        ('utara',   'Utara (Perlis, Kedah, P.Pinang, Perak)'),
-        ('tengah',  'Tengah (Selangor, KL, Putrajaya, N.Sembilan, Melaka)'),
-        ('selatan', 'Selatan (Johor)'),
-        ('timur',   'Timur (Pahang, Kelantan, Terengganu)'),
-        ('sabah',   'Sabah'),
-        ('sarawak', 'Sarawak'),
-        ('labuan',  'W.P. Labuan'),
+        ('utara', 'Utara'), ('tengah', 'Tengah'), ('selatan', 'Selatan'),
+        ('timur', 'Timur'), ('sabah', 'Sabah'), ('sarawak', 'Sarawak'), ('labuan', 'W.P. Labuan'),
     ]
-    
-    # --- MAKLUMAT RESPONDEN (Baru) ---
-    nama_responden       = models.CharField(max_length=200, blank=True, verbose_name="Nama Penuh Responden")
-    jawatan_responden    = models.CharField(max_length=150, blank=True, verbose_name="Jawatan Responden")
-    no_telefon_responden = models.CharField(max_length=20, blank=True, verbose_name="No. Telefon Responden")
-    emel_responden       = models.EmailField(blank=True, verbose_name="Emel Responden")
 
-    # --- MAKLUMAT FASILITI (Sedia Ada) ---
-    nama_fasiliti  = models.CharField(max_length=200, verbose_name="Nama Fasiliti")
+    # 1.1 Maklumat Responden
+    nama_responden = models.CharField(max_length=200, blank=True, verbose_name="Nama Penuh Responden")
+    jawatan_responden = models.CharField(max_length=150, blank=True, verbose_name="Jawatan Responden")
+    no_telefon_responden = models.CharField(max_length=20, blank=True, verbose_name="No. Telefon Responden")
+    emel_responden = models.EmailField(blank=True, verbose_name="Emel Responden")
+
+    # 1.2 Maklumat Fasiliti & Lokasi
+    nama_fasiliti = models.CharField(max_length=200, verbose_name="Nama Fasiliti")
+    kod_fasiliti = models.CharField(max_length=50, blank=True, verbose_name="Kod Fasiliti")
+    kategori_fasiliti = models.CharField(max_length=150, blank=True, verbose_name="Kategori Fasiliti")
     jenis_fasiliti = models.CharField(max_length=30, choices=FACILITY_TYPE_CHOICES, verbose_name="Jenis Fasiliti")
-    negeri         = models.CharField(max_length=30, choices=NEGERI_CHOICES, blank=True, verbose_name="Negeri")
-    daerah         = models.CharField(max_length=100, blank=True, verbose_name="Daerah/Bandar")
-    wilayah        = models.CharField(max_length=20, choices=WILAYAH_CHOICES, blank=True, verbose_name="Wilayah")
-    zon            = models.CharField(max_length=100, blank=True, verbose_name="Zon")
-    parlimen       = models.CharField(max_length=150, blank=True, verbose_name="Parlimen")
-    alamat         = models.TextField(blank=True, verbose_name="Alamat")
-    poskod         = models.CharField(max_length=10, blank=True, verbose_name="Poskod")
-    latitud        = models.FloatField(null=True, blank=True, verbose_name="Latitud")
-    longitud       = models.FloatField(null=True, blank=True, verbose_name="Longitud")
-    created_at     = models.DateTimeField(auto_now_add=True)
-    updated_at     = models.DateTimeField(auto_now=True)
+    alamat = models.TextField(blank=True, verbose_name="Alamat")
+    poskod = models.CharField(max_length=10, blank=True, verbose_name="Poskod")
+    daerah = models.CharField(max_length=100, blank=True, verbose_name="Daerah/Bandar")
+    negeri = models.CharField(max_length=30, choices=NEGERI_CHOICES, blank=True, verbose_name="Negeri")
+    wilayah = models.CharField(max_length=20, choices=WILAYAH_CHOICES, blank=True)
+    zon = models.CharField(max_length=100, blank=True)
+    parlimen = models.CharField(max_length=150, blank=True)
+    latitud = models.FloatField(null=True, blank=True, verbose_name="Latitud")
+    longitud = models.FloatField(null=True, blank=True, verbose_name="Longitud")
+    ketua_fasiliti = models.CharField(max_length=200, blank=True, verbose_name="Ketua Fasiliti")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.nama_fasiliti} ({self.get_jenis_fasiliti_display()})"
 
-    class Meta:
-        verbose_name = "K0 – Maklumat Asas"
-        verbose_name_plural = "K0 – Maklumat Asas"
-
 
 # ─────────────────────────────────────────────────────────────────
-# KLUSTER 1 – Kejuruteraan  (table: home_klusterkejuruteraan)
+# KLUSTER 1 – Infrastruktur (BAHAGIAN 2: Infrastruktur Fasiliti)
 # ─────────────────────────────────────────────────────────────────
-class KlusterKejuruteraan(models.Model):
-    kod_fasiliti          = models.CharField(max_length=50, blank=True, verbose_name="Kod Fasiliti")
-    parlimen              = models.CharField(max_length=150, blank=True, verbose_name="Parlimen")
-    tahun_dibina          = models.IntegerField(null=True, blank=True, verbose_name="Q1 – Tahun Dibina")
-    jenis_hospital_klinik = models.CharField(max_length=200, blank=True, verbose_name="Q2 – Jenis Hospital/Klinik")
-    siling_okay           = models.BooleanField(null=True, blank=True, verbose_name="Q32 – Siling Okay?")
-    ukuran_tanah          = models.TextField(blank=True, verbose_name="Q29 – Ukuran Tanah & Boleh Extend?")
+class KlusterInfrastruktur(models.Model):
+    # 2.1 Bangunan & Ruang Tapak
+    keluasan_tapak = models.CharField(max_length=100, blank=True)
+    tanah_mencukupi = models.BooleanField(null=True, blank=True)
+    struktur_baik = models.BooleanField(null=True, blank=True)
+    struktur_nota = models.TextField(blank=True)
+    lif_berfungsi = models.BooleanField(null=True, blank=True)
+    lif_nota = models.TextField(blank=True)
+    ada_ups = models.BooleanField(null=True, blank=True)
+
+    # 2.2 Kemudahan Fasiliti
+    ruang_rawatan_mencukupi = models.BooleanField(null=True, blank=True)
+    ada_ruang_rehat_pelawat = models.BooleanField(null=True, blank=True)
+    ada_kantin = models.BooleanField(null=True, blank=True)
+    ada_pantry = models.BooleanField(null=True, blank=True)
+    ada_surau = models.BooleanField(null=True, blank=True)
+    tandas_baik = models.BooleanField(null=True, blank=True)
+
+    # 2.3 Kemudahan Tambahan & Utiliti
+    pengudaraan_baik = models.BooleanField(null=True, blank=True)
+    ada_aircond = models.BooleanField(null=True, blank=True)
+    aircond_nota = models.TextField(blank=True)
+    ada_kipas = models.BooleanField(null=True, blank=True)
+    kipas_nota = models.TextField(blank=True)
+    ada_parking = models.BooleanField(null=True, blank=True)
+    parking_mencukupi = models.BooleanField(null=True, blank=True)
+    parking_nota = models.TextField(blank=True)
+    ada_kuarters = models.BooleanField(null=True, blank=True)
+    kuarters_baik = models.BooleanField(null=True, blank=True)
+    kuarters_nota = models.TextField(blank=True)
+
+    # 2.4 Aset & Peralatan
+    fail_aset_alih = models.FileField(upload_to='infrastruktur_files/', null=True, blank=True)
+    fail_aset_tak_alih = models.FileField(upload_to='infrastruktur_files/', null=True, blank=True)
+
+    # 2.5 Aset Kenderaan (Pautan Butang Ke Modul Kenderaan - Tiada DB field di sini)
+
+    # 2.6 Keselamatan
+    ada_security = models.BooleanField(null=True, blank=True)
+    ada_cctv = models.BooleanField(null=True, blank=True)
+    json_pekerja_security = models.JSONField(default=list, blank=True) # Adding Row
+    fail_pekerja_security = models.FileField(upload_to='infrastruktur_files/', null=True, blank=True)
+
+    # 2.7 Tindak Balas Kecemasan
+    ada_sistem_kebakaran = models.BooleanField(null=True, blank=True)
+    json_kebakaran_aktif = models.JSONField(default=list, blank=True) # Adding Row
+    json_kebakaran_pasif = models.JSONField(default=list, blank=True) # Adding Row
+    tarikh_fire_drill = models.DateField(null=True, blank=True)
+    pernah_kecemasan = models.BooleanField(null=True, blank=True)
+    json_sejarah_kecemasan = models.JSONField(default=list, blank=True) # Adding Row
     
-    # --- MEDAN BARU (FASA 2) ---
-    siling_nota           = models.CharField(max_length=255, blank=True, verbose_name="Nota Siling")
-    tanah_mencukupi       = models.BooleanField(null=True, blank=True, verbose_name="Tanah Mencukupi?")
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "K1 – Kejuruteraan"
-        verbose_name_plural = "K1 – Kejuruteraan"
+    fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
 
 # ─────────────────────────────────────────────────────────────────
-# KLUSTER 2 – Sumber Manusia  (table: home_klustersumbermanusia)
+# KLUSTER 2 – Aset Perubatan (BAHAGIAN 3: Aset Perubatan)
+# ─────────────────────────────────────────────────────────────────
+class KlusterAsetPerubatan(models.Model):
+    # 3.1 Peralatan Perubatan & Sokongan
+    json_peralatan = models.JSONField(default=list, blank=True) # Adding Row
+    fail_peralatan = models.FileField(upload_to='aset_perubatan_files/', null=True, blank=True)
+    json_aset_tidak_spec = models.JSONField(default=list, blank=True) # Adding Row
+    fail_aset_tidak_spec = models.FileField(upload_to='aset_perubatan_files/', null=True, blank=True)
+    
+    consumables_mencukupi = models.BooleanField(null=True, blank=True)
+    ubat_mencukupi = models.BooleanField(null=True, blank=True)
+    ada_blood_bank = models.BooleanField(null=True, blank=True)
+    ada_hemodialisis = models.BooleanField(null=True, blank=True)
+    ada_radiologi = models.BooleanField(null=True, blank=True)
+    ada_makmal = models.BooleanField(null=True, blank=True)
+
+    fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
+
+
+# ─────────────────────────────────────────────────────────────────
+# KLUSTER 3 – Sumber Manusia (BAHAGIAN 4: Pengurusan Sumber Manusia)
 # ─────────────────────────────────────────────────────────────────
 class KlusterSumberManusia(models.Model):
-    kakitangan_tetap           = models.IntegerField(null=True, blank=True, verbose_name="Q3 – Kakitangan Tetap")
-    kakitangan_kontrak         = models.IntegerField(null=True, blank=True, verbose_name="Q3 – Kakitangan Kontrak")
-    kakitangan_mystep          = models.IntegerField(null=True, blank=True, verbose_name="Q3 – Kakitangan MySTeP")
-    ada_kakitangan_pinjaman    = models.BooleanField(null=True, blank=True, verbose_name="Q16 – Ada Staff Pinjaman?")
-    bilangan_shift             = models.IntegerField(null=True, blank=True, verbose_name="Q21/Q39 – Bilangan Shift Sehari")
-    ada_ot_allowance           = models.BooleanField(null=True, blank=True, verbose_name="Q38 – Ada OT/Allowance?")
-    bilangan_staff_non_medical = models.IntegerField(null=True, blank=True, verbose_name="Q47 – Bil. Staff Non-Medical/Admin")
-    waktu_beroperasi           = models.CharField(max_length=200, blank=True, verbose_name="Q43 – Waktu Beroperasi")
-    cara_minta_cuti            = models.TextField(blank=True, verbose_name="Q42 – Cara Minta Cuti & Rotasi")
-    isu_penempatan             = models.TextField(blank=True, verbose_name="Q36 – Isu Penempatan Staff")
+    # 4.1 Bilangan & Penempatan Staf
+    # Dibuat tanpa Autokira - Diisi manual berserta fail
+    jumlah_perjawatan = models.IntegerField(null=True, blank=True)
+    fail_perjawatan = models.FileField(upload_to='sumber_manusia_files/', null=True, blank=True)
     
-    # --- MEDAN BARU (FASA 4) ---
-    jumlah_perjawatan          = models.IntegerField(null=True, blank=True, verbose_name="Jumlah Perjawatan")
-    jumlah_pengisian           = models.IntegerField(null=True, blank=True, verbose_name="Jumlah Pengisian")
-    jumlah_kekosongan          = models.IntegerField(null=True, blank=True, verbose_name="Jumlah Kekosongan")
-    nota_kakitangan_pinjaman   = models.CharField(max_length=255, blank=True, verbose_name="Nota Pinjaman Staf")
+    jumlah_pengisian = models.IntegerField(null=True, blank=True)
+    fail_pengisian = models.FileField(upload_to='sumber_manusia_files/', null=True, blank=True)
     
-    ada_isu_kakitangan         = models.BooleanField(null=True, blank=True, verbose_name="Ada Isu/Krisis Kakitangan?")
-    ada_fasiliti_petugas       = models.BooleanField(null=True, blank=True, verbose_name="Ada Fasiliti/Layanan Petugas?")
+    jumlah_kekosongan = models.IntegerField(null=True, blank=True)
+    fail_kekosongan = models.FileField(upload_to='sumber_manusia_files/', null=True, blank=True)
     
-    jenis_shift                = models.TextField(blank=True, verbose_name="Bilangan Shift (Teks)")
-    corak_penugasan            = models.TextField(blank=True, verbose_name="Corak Penugasan")
-    pengurusan_jadual          = models.TextField(blank=True, verbose_name="Pengurusan Jadual (Roster)")
-    status_pertukaran_staf     = models.CharField(max_length=255, blank=True, verbose_name="Status Pertukaran Staf")
+    # JSON untuk fail/senarai sokongan
+    json_kakitangan = models.JSONField(default=list, blank=True) 
+    fail_kakitangan = models.FileField(upload_to='sumber_manusia_files/', null=True, blank=True)
+    
+    ada_kakitangan_pinjaman = models.BooleanField(null=True, blank=True)
+    ada_isu_petugas = models.BooleanField(null=True, blank=True)
+    isu_petugas_nota = models.TextField(blank=True)
+    status_pertukaran = models.CharField(max_length=255, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # 4.2 Penjadualan & Syif
+    bilangan_shift = models.CharField(max_length=255, blank=True)
+    corak_penugasan = models.CharField(max_length=255, blank=True)
+    pengurusan_jadual = models.CharField(max_length=255, blank=True)
+    proses_cuti = models.CharField(max_length=255, blank=True)
+    isu_penjadualan = models.CharField(max_length=255, blank=True)
 
-    # Autokira Peratusan Kekosongan 
-    @property
-    def peratus_kekosongan(self):
-        if self.jumlah_perjawatan and self.jumlah_perjawatan > 0:
-            kosong = self.jumlah_kekosongan or 0
-            return round((kosong / self.jumlah_perjawatan) * 100, 1)
-        return 0
+    fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
-    class Meta:
-        verbose_name = "K2 – Sumber Manusia"
-        verbose_name_plural = "K2 – Sumber Manusia"
-
-
-# ─────────────────────────────────────────────────────────────────
-# MODEL BAHARU: STAF FASILITI (Senarai Berenama)
-# ─────────────────────────────────────────────────────────────────
+# Pengekalan model StafFasiliti untuk elak ralat jika ada rekod lama atau dashboard panggil
 class StafFasiliti(models.Model):
-    SKIM_CHOICES = [
-        ('pakar', 'Kumpulan Pakar (FMS/Pakar Perubatan/Pakar Pergigian)'),
-        ('perubatan', 'Kumpulan Perubatan & Pergigian (MO/Pegawai Pergigian)'),
-        ('paramedik', 'Kumpulan Paramedik & Kejururawatan (PPP/Jururawat/JM/Juruterapi)'),
-        ('farmasi', 'Kumpulan Farmasi (Pegawai Farmasi/PPF)'),
-        ('allied_health', 'Kumpulan Sains Kesihatan Bersekutu (JTMP/Juru X-Ray/Dietetik/dll)'),
-        ('sokongan', 'Kumpulan Pentadbiran, Logistik & Sokongan (PT/PPK/Pemandu/Awam)'),
-    ]
-
-    STATUS_CHOICES = [
-        ('tetap', 'Tetap'),
-        ('kontrak', 'Kontrak'),
-        ('mystep', 'MySTEP'),
-        ('pinjaman_in', 'Pinjaman Masuk (Dari Fasiliti Lain)'),
-        ('pinjaman_out', 'Pinjaman Keluar (Berkhidmat di tempat lain)'),
-    ]
-
-    # Kita pautkan (link) kepada kluster SM supaya mudah urus formset nanti
     kluster_sm = models.ForeignKey(KlusterSumberManusia, on_delete=models.CASCADE, related_name='senarai_staf')
-    
-    nama_staf = models.CharField(max_length=200, verbose_name="Nama Penuh Staf")
-    no_pengenalan = models.CharField(max_length=50, blank=True, verbose_name="No. Kad Pengenalan / Pekerja")
-    skim = models.CharField(max_length=50, choices=SKIM_CHOICES, verbose_name="Kategori Skim Perkhidmatan")
-    gred = models.CharField(max_length=20, blank=True, verbose_name="Gred (Cth: UD41, U29, N19)")
-    status_lantikan = models.CharField(max_length=30, choices=STATUS_CHOICES, verbose_name="Status Lantikan")
-    
-    # Khas untuk amaran Kontrak / MySTEP / Pinjaman tamat
-    tarikh_tamat_perkhidmatan = models.DateField(null=True, blank=True, verbose_name="Tarikh Tamat Kontrak/MySTEP/Pinjaman")
-    
-    catatan_mobilisasi = models.CharField(max_length=250, blank=True, verbose_name="Catatan (Lokasi Pinjaman dsb.)")
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.nama_staf} ({self.get_skim_display()})"
-
-    @property
-    def is_kontrak_tamat_hampir(self):
-        """Memulangkan True jika kontrak tamat dalam tempoh 90 hari."""
-        if not self.tarikh_tamat_perkhidmatan:
-            return False
-        import datetime
-        from django.utils import timezone
-        sekarang = timezone.now().date()
-        tempoh_90_hari = sekarang + datetime.timedelta(days=90)
-        return sekarang <= self.tarikh_tamat_perkhidmatan <= tempoh_90_hari
-        
-    class Meta:
-        verbose_name = "Staf Fasiliti"
-        verbose_name_plural = "Senarai Staf Fasiliti"
-        ordering = ['skim', 'nama_staf']
+    nama_staf = models.CharField(max_length=200)
+    skim = models.CharField(max_length=50)
+    status_lantikan = models.CharField(max_length=30)
+    tarikh_tamat_perkhidmatan = models.DateField(null=True, blank=True)
 
 
 # ─────────────────────────────────────────────────────────────────
-# KLUSTER 3 – Perkhidmatan Kesihatan  (table: home_klusterperkhidmatan)
+# KLUSTER 4 – Perkhidmatan (BAHAGIAN 5: Penyampaian Perkhidmatan)
 # ─────────────────────────────────────────────────────────────────
 class KlusterPerkhidmatan(models.Model):
-    jenis_perkhidmatan      = models.TextField(blank=True, verbose_name="Q4 – Jenis Perkhidmatan")
-    anggaran_pelawat_harian = models.IntegerField(null=True, blank=True, verbose_name="Q5 – Anggaran Pelawat Harian")
-    jenis_penyakit_kerap    = models.TextField(blank=True, verbose_name="Q6 – Jenis Penyakit Kerap")
-    boleh_selesaikan_kes    = models.BooleanField(null=True, blank=True, verbose_name="Q7 – Boleh Selesaikan Kes?")
-    rujukan_ke              = models.CharField(max_length=200, blank=True, verbose_name="Q7 – Jika Tidak, Rujuk ke Mana?")
-    ada_ruang_rehat         = models.BooleanField(null=True, blank=True, verbose_name="Q8 – Ada Ruang Rehat Pelawat?")
-    ada_hemodialisis        = models.BooleanField(null=True, blank=True, verbose_name="Q9 – Ada Hemodialisis?")
-    unit_hemodialisis       = models.IntegerField(null=True, blank=True, verbose_name="Q9 – Bilangan Unit Hemodialisis")
-    bekalan_ubat_mencukupi  = models.BooleanField(null=True, blank=True, verbose_name="Q10/Q20 – Bekalan Ubat Mencukupi?")
-    keperluan_oksigen       = models.TextField(blank=True, verbose_name="Q27 – Keperluan Oksigen")
-    ada_emr                 = models.BooleanField(null=True, blank=True, verbose_name="Q30 – Ada EMR?")
-    wad_diasingkan          = models.BooleanField(null=True, blank=True, verbose_name="Q34 – Wad Diasingkan (L/P)?")
-    kualiti_makanan         = models.TextField(blank=True, verbose_name="Q35 – Kualiti Makanan")
-    siapa_manage            = models.CharField(max_length=200, blank=True, verbose_name="Q37 – Siapa In-Charge?")
-    masa_tunggu             = models.CharField(max_length=100, blank=True, verbose_name="Q46 – Masa Tunggu Rawatan")
-    ada_osca                = models.BooleanField(null=True, blank=True, verbose_name="Q48 – Ada OSCA?")
-    bilangan_osca           = models.IntegerField(null=True, blank=True, verbose_name="Q48a – Bilangan OSCA")
+    # 5.1 Operasi & Pesakit
+    json_waktu_operasi = models.JSONField(default=list, blank=True) # Adding Row
+    anggaran_pelawat = models.IntegerField(null=True, blank=True)
+    json_program = models.JSONField(default=list, blank=True) # Adding Row
+    fail_program = models.FileField(upload_to='perkhidmatan_files/', null=True, blank=True)
+    json_penyakit = models.JSONField(default=list, blank=True) # Adding Row
+    fail_penyakit = models.FileField(upload_to='perkhidmatan_files/', null=True, blank=True)
+
+    # 5.2 Kapasiti Rawatan & Keselesaan
+    ruang_menunggu_selesa = models.BooleanField(null=True, blank=True)
+    ruang_menunggu_nota = models.TextField(blank=True)
+    ada_wad = models.BooleanField(null=True, blank=True)
+    wad_asing_jantina = models.BooleanField(null=True, blank=True)
+    katil_mencukupi = models.BooleanField(null=True, blank=True)
+    ada_kaunseling = models.BooleanField(null=True, blank=True)
+    ada_rehabilitasi = models.BooleanField(null=True, blank=True)
+    boleh_selesai_kes = models.BooleanField(null=True, blank=True)
+    boleh_selesai_kes_nota = models.TextField(blank=True)
     
-    # --- MEDAN BARU (FASA 5) ---
-    ruang_tunggu_selesa     = models.BooleanField(null=True, blank=True, verbose_name="Ruang Menunggu Selesa?")
-    ruang_tunggu_nota       = models.CharField(max_length=255, blank=True, verbose_name="Nota Ruang Menunggu")
-    kekangan_rawatan        = models.TextField(blank=True, verbose_name="Kekangan Rawatan (Jika Tidak Boleh Selesai Kes)")
+    json_fasiliti_terdekat = models.JSONField(default=list, blank=True) # Adding Row
+    fail_fasiliti_terdekat = models.FileField(upload_to='perkhidmatan_files/', null=True, blank=True)
+    anggaran_masa_tunggu = models.CharField(max_length=150, blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # 5.3 Maklumat Tambahan
+    ada_forensik = models.BooleanField(null=True, blank=True)
+    sedia_makanan = models.BooleanField(null=True, blank=True)
+    makanan_memuaskan = models.BooleanField(null=True, blank=True)
+    makanan_nota = models.TextField(blank=True)
 
-    class Meta:
-        verbose_name = "K3 – Perkhidmatan Kesihatan"
-        verbose_name_plural = "K3 – Perkhidmatan Kesihatan"
+    fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
 
 # ─────────────────────────────────────────────────────────────────
-# KLUSTER 4 – Aset  (table: home_klusteraset)
+# KLUSTER 5 – Kewangan & Rancang (BAHAGIAN 6: Kewangan, Konsesi & Perancangan)
 # ─────────────────────────────────────────────────────────────────
-class KlusterAset(models.Model):
-    disposable_mencukupi = models.BooleanField(null=True, blank=True, verbose_name="Q11 – Disposable Assets Mencukupi?")
-    keadaan_aset         = models.TextField(blank=True, verbose_name="Q12 – Keadaan Aset (Umur & Fungsi)")
-    ada_ambulans         = models.BooleanField(null=True, blank=True, verbose_name="Q15 – Ada Ambulans?")
-    keadaan_ambulans     = models.TextField(blank=True, verbose_name="Q15 – Keadaan Ambulans")
-    aset_perlu_diganti   = models.TextField(blank=True, verbose_name="Q24 – Aset Yang Perlu Diganti")
-    aset_tidak_ikut_spec = models.TextField(blank=True, verbose_name="Q25 – Aset Tidak Ikut Spec KKM")
-    umur_komputer        = models.TextField(blank=True, verbose_name="Q31 – Umur Komputer")
+class KlusterKewangan(models.Model):
+    # 6.1 Peruntukan Kewangan
+    belanja_mengurus = models.CharField(max_length=255, blank=True)
+    belanja_pembangunan = models.CharField(max_length=255, blank=True)
     
-    # --- MEDAN BARU (FASA 3) ---
-    senarai_peralatan    = models.TextField(blank=True, verbose_name="Senarai Peralatan Perubatan")
-    ambulans_nota        = models.CharField(max_length=255, blank=True, verbose_name="Nota Ambulans")
-    sistem_pendigitalan  = models.CharField(max_length=500, blank=True, verbose_name="Sistem Pendigitalan")
-    gajet_ict_baik       = models.BooleanField(null=True, blank=True, verbose_name="Gajet ICT Baik?")
-    gajet_ict_nota       = models.CharField(max_length=255, blank=True, verbose_name="Nota Gajet ICT")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "K4 – Aset"
-        verbose_name_plural = "K4 – Aset"
-
-
-# ─────────────────────────────────────────────────────────────────
-# KLUSTER 5 – Fasiliti Fizikal  (table: home_klusterfasiliti)
-# ─────────────────────────────────────────────────────────────────
-class KlusterFasiliti(models.Model):
-    keadaan_perabot       = models.TextField(blank=True, verbose_name="Q13 – Keadaan Perabot/Infrastruktur")
-    ada_quarters          = models.BooleanField(null=True, blank=True, verbose_name="Q14 – Ada Quarters?")
-    quarters_mencukupi    = models.BooleanField(null=True, blank=True, verbose_name="Q14 – Quarters Mencukupi?")
-    ada_isu_parking       = models.BooleanField(null=True, blank=True, verbose_name="Q22/Q40 – Ada Isu Parking?")
-    masalah_aircond       = models.BooleanField(null=True, blank=True, verbose_name="Q23/Q41 – Ada Masalah Aircond?")
-    ruang_kerja_mencukupi = models.BooleanField(null=True, blank=True, verbose_name="Q26 – Ruang Kerja Mencukupi?")
-    ada_bilik_mayat       = models.BooleanField(null=True, blank=True, verbose_name="Q33 – Ada Bilik Mayat?")
-    ada_pantry            = models.BooleanField(null=True, blank=True, verbose_name="Q29b – Ada Kawasan Rehat Staff?")
-    ada_kantin            = models.BooleanField(null=True, blank=True, verbose_name="Q44 – Ada Kantin/Mini Mart?")
-    ada_security          = models.BooleanField(null=True, blank=True, verbose_name="Q45 – Ada Security?")
+    # 6.2 Perkhidmatan Konsesi
+    konsesi_lancar = models.BooleanField(null=True, blank=True)
+    isu_utama = models.TextField(blank=True)
     
-    # --- MEDAN BARU (FASA 2) ---
-    ada_parking           = models.BooleanField(null=True, blank=True, verbose_name="Ada Parking Disediakan?")
-    parking_mencukupi     = models.BooleanField(null=True, blank=True, verbose_name="Parking Mencukupi?")
-    aircond_nota          = models.CharField(max_length=255, blank=True, verbose_name="Nota Aircond")
-    masalah_kipas         = models.BooleanField(null=True, blank=True, verbose_name="Masalah Kipas?")
-    kipas_nota            = models.CharField(max_length=255, blank=True, verbose_name="Nota Kipas")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "K5 – Fasiliti Fizikal"
-        verbose_name_plural = "K5 – Fasiliti Fizikal"
-
-
-# ─────────────────────────────────────────────────────────────────
-# KLUSTER 6 – Perancangan  (table: home_klusterperancangan)
-# ─────────────────────────────────────────────────────────────────
-class KlusterPerancangan(models.Model):
-    perkhidmatan_baru   = models.TextField(blank=True, verbose_name="Q18 – Perkhidmatan Baru Yang Ingin Diwujudkan")
-    fasiliti_diperlukan = models.TextField(blank=True, verbose_name="Q19 – Fasiliti Yang Sangat Diperlukan")
+    # 6.3 Perancangan Masa Depan
+    perlu_tambah_infrastruktur = models.BooleanField(null=True, blank=True)
+    json_infrastruktur_baru = models.JSONField(default=list, blank=True) # Adding Row
     
-    # --- MEDAN BARU (FASA 6) ---
-    belanja_mengurus    = models.CharField(max_length=255, blank=True, verbose_name="Belanja Mengurus (OE)")
-    belanja_pembangunan = models.CharField(max_length=255, blank=True, verbose_name="Belanja Pembangunan (DE)")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "K6 – Perancangan"
-        verbose_name_plural = "K6 – Perancangan"
+    fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
 
 # ─────────────────────────────────────────────────────────────────
-# KLUSTER 7 – Konsesi & Lain-lain  (table: home_klusterkonsesi)
+# KLUSTER 6 – Sistem Digital (BAHAGIAN 7: Sistem Rangkaian & Peralatan Digital)
 # ─────────────────────────────────────────────────────────────────
-class KlusterKonsesi(models.Model):
-    maintenance_okay = models.BooleanField(null=True, blank=True, verbose_name="Q28 – Maintenance Konsesi OK?")
-    masalah_utama    = models.TextField(blank=True, verbose_name="Q17 – Masalah Utama")
-    wishlist         = models.TextField(blank=True, verbose_name="Q17a – Wishlist")
+class KlusterDigital(models.Model):
+    # 7.1 Peranti Digital
+    peranti_mencukupi = models.BooleanField(null=True, blank=True)
+    peranti_baik = models.BooleanField(null=True, blank=True)
+    peranti_baik_nota = models.TextField(blank=True)
+    perlu_tambah_peranti = models.BooleanField(null=True, blank=True)
+    perlu_tambah_nota = models.TextField(blank=True)
+    internet_pantas = models.BooleanField(null=True, blank=True)
     
-    # --- MEDAN BARU (FASA 7) ---
-    prosedur_kes_dadah     = models.TextField(blank=True, verbose_name="Prosedur Kes Dadah")
-    hemodialisis_nota      = models.TextField(blank=True, verbose_name="Nota Mesin Hemodialisis")
-    status_bekalan_oksigen = models.CharField(max_length=150, blank=True, verbose_name="Status Bekalan Oksigen")
-    wishlist_fail          = models.FileField(upload_to='wishlist_files/', null=True, blank=True, verbose_name="Fail Wishlist")
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "K7 – Konsesi & Lain-lain"
-        verbose_name_plural = "K7 – Konsesi & Lain-lain"
+    json_peranti = models.JSONField(default=list, blank=True) # Adding Row
+    fail_peranti = models.FileField(upload_to='digital_files/', null=True, blank=True)
+    
+    # 7.2 Sistem Pendigitalan
+    json_sistem = models.JSONField(default=list, blank=True) # Adding Row
+    fail_wishlist = models.FileField(upload_to='wishlist_files/', null=True, blank=True)
 
 
 # ─────────────────────────────────────────────────────────────────
-# HUB – FacilityProfile  (table: home_facilityprofile)
-# Menghubungkan semua 8 kluster dengan OneToOneField
+# HUB – FacilityProfile (Menghubungkan semua 7 kluster)
 # ─────────────────────────────────────────────────────────────────
 class FacilityProfile(models.Model):
-    # Backward-compat class constants
-    FACILITY_TYPE_CHOICES = MaklumatAsas.FACILITY_TYPE_CHOICES
-    NEGERI_CHOICES        = MaklumatAsas.NEGERI_CHOICES
     STATUS_CHOICES = [('aktif', 'Aktif'), ('tutup', 'Tutup')]
+    STATUS_LAWATAN_CHOICES = [('merah', 'Belum Dilawati'), ('kuning', 'Dalam Perancangan'), ('biru', 'Sudah Dilawati'), ('hijau', 'Selesai')]
 
-    # ── FK ke setiap kluster ──────────────────────────────────────
-    maklumat_asas    = models.OneToOneField(MaklumatAsas,      on_delete=models.CASCADE,  null=True, blank=True, related_name='profil',         verbose_name="K0 – Maklumat Asas")
-    k_kejuruteraan   = models.OneToOneField(KlusterKejuruteraan,  on_delete=models.SET_NULL, null=True, blank=True, related_name='profil', verbose_name="K1 – Kejuruteraan")
-    k_sumber_manusia = models.OneToOneField(KlusterSumberManusia, on_delete=models.SET_NULL, null=True, blank=True, related_name='profil', verbose_name="K2 – Sumber Manusia")
-    k_perkhidmatan   = models.OneToOneField(KlusterPerkhidmatan,  on_delete=models.SET_NULL, null=True, blank=True, related_name='profil', verbose_name="K3 – Perkhidmatan")
-    k_aset           = models.OneToOneField(KlusterAset,          on_delete=models.SET_NULL, null=True, blank=True, related_name='profil', verbose_name="K4 – Aset")
-    k_fasiliti       = models.OneToOneField(KlusterFasiliti,      on_delete=models.SET_NULL, null=True, blank=True, related_name='profil', verbose_name="K5 – Fasiliti")
-    k_perancangan    = models.OneToOneField(KlusterPerancangan,    on_delete=models.SET_NULL, null=True, blank=True, related_name='profil', verbose_name="K6 – Perancangan")
-    k_konsesi        = models.OneToOneField(KlusterKonsesi,        on_delete=models.SET_NULL, null=True, blank=True, related_name='profil', verbose_name="K7 – Konsesi")
+    # Pautan ke Kluster Baharu
+    maklumat_asas       = models.OneToOneField(MaklumatAsas, on_delete=models.CASCADE, null=True, blank=True)
+    k_infrastruktur     = models.OneToOneField(KlusterInfrastruktur, on_delete=models.SET_NULL, null=True, blank=True)
+    k_aset_perubatan    = models.OneToOneField(KlusterAsetPerubatan, on_delete=models.SET_NULL, null=True, blank=True)
+    k_sumber_manusia    = models.OneToOneField(KlusterSumberManusia, on_delete=models.SET_NULL, null=True, blank=True)
+    k_perkhidmatan      = models.OneToOneField(KlusterPerkhidmatan, on_delete=models.SET_NULL, null=True, blank=True)
+    k_kewangan          = models.OneToOneField(KlusterKewangan, on_delete=models.SET_NULL, null=True, blank=True)
+    k_digital           = models.OneToOneField(KlusterDigital, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # ── Meta ──────────────────────────────────────────────────────
+    # Medat Data Profil
     submitted_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='facility_profiles')
     status       = models.CharField(max_length=10, choices=STATUS_CHOICES, default='aktif')
-    tahun        = models.IntegerField(default=_current_year, verbose_name="Tahun")
-    # TAMBAHAN BARU: Status Lawatan VIP
-    STATUS_LAWATAN_CHOICES = [
-        ('merah',  'Belum Dilawati'),
-        ('kuning', 'Dalam Perancangan/Proses'),
-        ('biru',   'Sudah Dilawati'),
-        ('hijau',  'Selesai/Dilaksanakan'),
-    ]
-    status_lawatan       = models.CharField(max_length=10, choices=STATUS_LAWATAN_CHOICES, default='merah', verbose_name="Status Lawatan")
-    tarikh_lawatan       = models.DateField(null=True, blank=True, verbose_name="Tarikh Lawatan")
-    nama_program_lawatan = models.CharField(max_length=255, blank=True, verbose_name="Nama Program/VIP")
-    catatan_lawatan      = models.TextField(blank=True, verbose_name="Catatan/Tindakan")
+    tahun        = models.IntegerField(default=_current_year)
+    
+    # Status Lawatan VIP
+    status_lawatan       = models.CharField(max_length=10, choices=STATUS_LAWATAN_CHOICES, default='merah')
+    tarikh_lawatan       = models.DateField(null=True, blank=True)
+    nama_program_lawatan = models.CharField(max_length=255, blank=True)
+    catatan_lawatan      = models.TextField(blank=True)
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
 
-    # ── Kluster 0 shortcuts ───────────────────────────────────────
+    # ── FUNGSI PINTASAN LAMA (Dikekalkan untuk elak Dashboard Crash) ──
     @property
-    def nama_fasiliti(self):
-        return self.maklumat_asas.nama_fasiliti if self.maklumat_asas else ''
+    def nama_fasiliti(self): return self.maklumat_asas.nama_fasiliti if self.maklumat_asas else ''
     @property
-    def jenis_fasiliti(self):
-        return self.maklumat_asas.jenis_fasiliti if self.maklumat_asas else ''
+    def jenis_fasiliti(self): return self.maklumat_asas.jenis_fasiliti if self.maklumat_asas else ''
     @property
-    def negeri(self):
-        return self.maklumat_asas.negeri if self.maklumat_asas else ''
+    def negeri(self): return self.maklumat_asas.negeri if self.maklumat_asas else ''
     @property
-    def daerah(self):
-        return self.maklumat_asas.daerah if self.maklumat_asas else ''
+    def daerah(self): return self.maklumat_asas.daerah if self.maklumat_asas else ''
     @property
-    def alamat(self):
-        return self.maklumat_asas.alamat if self.maklumat_asas else ''
-    @property
-    def poskod(self):
-        return self.maklumat_asas.poskod if self.maklumat_asas else ''
-    @property
-    def latitud(self):
-        return self.maklumat_asas.latitud if self.maklumat_asas else None
-    @property
-    def longitud(self):
-        return self.maklumat_asas.longitud if self.maklumat_asas else None
-    @property
-    def wilayah(self):
-        return self.maklumat_asas.wilayah if self.maklumat_asas else ''
-    @property
-    def zon(self):
-        return self.maklumat_asas.zon if self.maklumat_asas else ''
-    @property
-    def parlimen_asas(self):
-        """Parlimen from MaklumatAsas (primary location)."""
-        return self.maklumat_asas.parlimen if self.maklumat_asas else ''
+    def alamat(self): return self.maklumat_asas.alamat if self.maklumat_asas else ''
+    
     def get_jenis_fasiliti_display(self):
         return self.maklumat_asas.get_jenis_fasiliti_display() if self.maklumat_asas else ''
     def get_negeri_display(self):
         return self.maklumat_asas.get_negeri_display() if self.maklumat_asas else ''
 
-    # ── Kluster 1 shortcuts ───────────────────────────────────────
+    # Pintasan dummy / terselamat untuk Dashboard
     @property
-    def kod_fasiliti(self):          return self.k_kejuruteraan.kod_fasiliti if self.k_kejuruteraan else ''
-    @property
-    def parlimen(self):
-        if self.maklumat_asas and self.maklumat_asas.parlimen:
-            return self.maklumat_asas.parlimen
-        return self.k_kejuruteraan.parlimen if self.k_kejuruteraan else ''
-    @property
-    def tahun_dibina(self):          return self.k_kejuruteraan.tahun_dibina if self.k_kejuruteraan else None
-    @property
-    def jenis_hospital_klinik(self): return self.k_kejuruteraan.jenis_hospital_klinik if self.k_kejuruteraan else ''
-    @property
-    def siling_okay(self):           return self.k_kejuruteraan.siling_okay if self.k_kejuruteraan else None
-    @property
-    def ukuran_tanah(self):          return self.k_kejuruteraan.ukuran_tanah if self.k_kejuruteraan else ''
-
-    # ── Kluster 2 shortcuts ───────────────────────────────────────
-    @property
-    def kakitangan_tetap(self):            return self.k_sumber_manusia.kakitangan_tetap if self.k_sumber_manusia else None
-    @property
-    def kakitangan_kontrak(self):          return self.k_sumber_manusia.kakitangan_kontrak if self.k_sumber_manusia else None
-    @property
-    def kakitangan_mystep(self):           return self.k_sumber_manusia.kakitangan_mystep if self.k_sumber_manusia else None
-    @property
-    def ada_kakitangan_pinjaman(self):     return self.k_sumber_manusia.ada_kakitangan_pinjaman if self.k_sumber_manusia else None
-    @property
-    def bilangan_shift(self):              return self.k_sumber_manusia.bilangan_shift if self.k_sumber_manusia else None
-    @property
-    def ada_ot_allowance(self):            return self.k_sumber_manusia.ada_ot_allowance if self.k_sumber_manusia else None
-    @property
-    def bilangan_staff_non_medical(self):  return self.k_sumber_manusia.bilangan_staff_non_medical if self.k_sumber_manusia else None
-    @property
-    def waktu_beroperasi(self):            return self.k_sumber_manusia.waktu_beroperasi if self.k_sumber_manusia else ''
-    @property
-    def cara_minta_cuti(self):             return self.k_sumber_manusia.cara_minta_cuti if self.k_sumber_manusia else ''
-    @property
-    def isu_penempatan(self):              return self.k_sumber_manusia.isu_penempatan if self.k_sumber_manusia else ''
-
-    # ── Kluster 3 shortcuts ───────────────────────────────────────
-    @property
-    def jenis_perkhidmatan(self):      return self.k_perkhidmatan.jenis_perkhidmatan if self.k_perkhidmatan else ''
-    @property
-    def anggaran_pelawat_harian(self): return self.k_perkhidmatan.anggaran_pelawat_harian if self.k_perkhidmatan else None
-    @property
-    def jenis_penyakit_kerap(self):    return self.k_perkhidmatan.jenis_penyakit_kerap if self.k_perkhidmatan else ''
-    @property
-    def boleh_selesaikan_kes(self):    return self.k_perkhidmatan.boleh_selesaikan_kes if self.k_perkhidmatan else None
-    @property
-    def rujukan_ke(self):              return self.k_perkhidmatan.rujukan_ke if self.k_perkhidmatan else ''
-    @property
-    def ada_ruang_rehat(self):         return self.k_perkhidmatan.ada_ruang_rehat if self.k_perkhidmatan else None
-    @property
-    def ada_hemodialisis(self):        return self.k_perkhidmatan.ada_hemodialisis if self.k_perkhidmatan else None
-    @property
-    def unit_hemodialisis(self):       return self.k_perkhidmatan.unit_hemodialisis if self.k_perkhidmatan else None
-    @property
-    def bekalan_ubat_mencukupi(self):  return self.k_perkhidmatan.bekalan_ubat_mencukupi if self.k_perkhidmatan else None
-    @property
-    def keperluan_oksigen(self):       return self.k_perkhidmatan.keperluan_oksigen if self.k_perkhidmatan else ''
-    @property
-    def ada_emr(self):                 return self.k_perkhidmatan.ada_emr if self.k_perkhidmatan else None
-    @property
-    def wad_diasingkan(self):          return self.k_perkhidmatan.wad_diasingkan if self.k_perkhidmatan else None
-    @property
-    def kualiti_makanan(self):         return self.k_perkhidmatan.kualiti_makanan if self.k_perkhidmatan else ''
-    @property
-    def siapa_manage(self):            return self.k_perkhidmatan.siapa_manage if self.k_perkhidmatan else ''
-    @property
-    def masa_tunggu(self):             return self.k_perkhidmatan.masa_tunggu if self.k_perkhidmatan else ''
-    @property
-    def ada_osca(self):                return self.k_perkhidmatan.ada_osca if self.k_perkhidmatan else None
-
-    # ── Kluster 4 shortcuts ───────────────────────────────────────
-    @property
-    def disposable_mencukupi(self):  return self.k_aset.disposable_mencukupi if self.k_aset else None
-    @property
-    def keadaan_aset(self):          return self.k_aset.keadaan_aset if self.k_aset else ''
-    @property
-    def ada_ambulans(self):          return self.k_aset.ada_ambulans if self.k_aset else None
-    @property
-    def keadaan_ambulans(self):      return self.k_aset.keadaan_ambulans if self.k_aset else ''
-    @property
-    def aset_perlu_diganti(self):    return self.k_aset.aset_perlu_diganti if self.k_aset else ''
-    @property
-    def aset_tidak_ikut_spec(self):  return self.k_aset.aset_tidak_ikut_spec if self.k_aset else ''
-    @property
-    def umur_komputer(self):         return self.k_aset.umur_komputer if self.k_aset else ''
-
-    # ── Kluster 5 shortcuts ───────────────────────────────────────
-    @property
-    def keadaan_perabot(self):        return self.k_fasiliti.keadaan_perabot if self.k_fasiliti else ''
-    @property
-    def ada_quarters(self):           return self.k_fasiliti.ada_quarters if self.k_fasiliti else None
-    @property
-    def quarters_mencukupi(self):     return self.k_fasiliti.quarters_mencukupi if self.k_fasiliti else None
-    @property
-    def ada_isu_parking(self):        return self.k_fasiliti.ada_isu_parking if self.k_fasiliti else None
-    @property
-    def masalah_aircond(self):        return self.k_fasiliti.masalah_aircond if self.k_fasiliti else None
-    @property
-    def ruang_kerja_mencukupi(self):  return self.k_fasiliti.ruang_kerja_mencukupi if self.k_fasiliti else None
-    @property
-    def ada_bilik_mayat(self):        return self.k_fasiliti.ada_bilik_mayat if self.k_fasiliti else None
-    @property
-    def ada_pantry(self):             return self.k_fasiliti.ada_pantry if self.k_fasiliti else None
-    @property
-    def ada_kantin(self):             return self.k_fasiliti.ada_kantin if self.k_fasiliti else None
-    @property
-    def ada_security(self):           return self.k_fasiliti.ada_security if self.k_fasiliti else None
-
-    # ── Kluster 6 shortcuts ───────────────────────────────────────
-    @property
-    def perkhidmatan_baru(self):   return self.k_perancangan.perkhidmatan_baru if self.k_perancangan else ''
-    @property
-    def fasiliti_diperlukan(self): return self.k_perancangan.fasiliti_diperlukan if self.k_perancangan else ''
-
-    # ── Kluster 7 shortcuts ───────────────────────────────────────
-    @property
-    def maintenance_okay(self): return self.k_konsesi.maintenance_okay if self.k_konsesi else None
-    @property
-    def masalah_utama(self):    return self.k_konsesi.masalah_utama if self.k_konsesi else ''
-    @property
-    def wishlist(self):         return self.k_konsesi.wishlist if self.k_konsesi else ''
-
-    # ── Computed properties ───────────────────────────────────────
-    def __str__(self):
-        return f"{self.nama_fasiliti} ({self.get_jenis_fasiliti_display()})"
-
-    @property
-    def jumlah_kakitangan(self):
-        total = 0
-        for f in [self.kakitangan_tetap, self.kakitangan_kontrak, self.kakitangan_mystep]:
-            if f:
-                total += f
-        return total
-
+    def kod_fasiliti(self): return self.maklumat_asas.kod_fasiliti if self.maklumat_asas else ''
     @property
     def skor_kesediaan(self):
-        """Skor 0-100 berdasarkan 10 medan Ya/Tidak utama merentasi semua kluster.
-        Setiap medan Ya = 1 mata. Skor = jumlah Ya / 10 * 100.
-        Medan yang belum dijawab (None) dikira sebagai 0."""
-        fields = [
-            self.bekalan_ubat_mencukupi, self.ada_ambulans, self.ada_ruang_rehat,
-            self.ruang_kerja_mencukupi, self.ada_security, self.ada_emr,
-            self.disposable_mencukupi, self.wad_diasingkan, self.siling_okay,
-            self.ada_ot_allowance,
-        ]
-        total = len(fields)  # always 10
-        ya = sum(1 for f in fields if f is True)
-        return round(ya / total * 100)
-
+        # Diselaraskan dengan soalan baru (Contoh 5 metrik utama)
+        score = 0
+        if self.k_infrastruktur and self.k_infrastruktur.struktur_baik: score += 20
+        if self.k_aset_perubatan and self.k_aset_perubatan.ubat_mencukupi: score += 20
+        if self.k_aset_perubatan and self.k_aset_perubatan.consumables_mencukupi: score += 20
+        if self.k_perkhidmatan and self.k_perkhidmatan.boleh_selesai_kes: score += 20
+        if self.k_digital and self.k_digital.peranti_mencukupi: score += 20
+        return score
+        
     @property
     def perlu_kemaskini(self):
-        """True jika fasiliti aktif tapi data > 12 bulan tak dikemaskini."""
-        if self.status != 'aktif':
-            return False
+        if self.status != 'aktif': return False
         from django.utils import timezone
-        import datetime
         threshold = timezone.now() - datetime.timedelta(days=365)
         return self.updated_at < threshold
 
-    class Meta:
-        verbose_name = "Profil Fasiliti"
-        verbose_name_plural = "Profil Fasiliti"
-        ordering = ['-created_at']
+    def __str__(self):
+        return f"{self.nama_fasiliti} ({self.tahun})"
 
 
+# ─────────────────────────────────────────────────────────────────
+# PROFIL PENGGUNA (ROLE)
+# ─────────────────────────────────────────────────────────────────
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    # List of bahagian slugs this user is allowed to access
     bahagian_slugs = models.JSONField(default=list, blank=True)
-    # Read-only top-management access (sees all data, cannot add/edit/delete)
     is_top_management = models.BooleanField(default=False, verbose_name="Top Management")
-    # JKN access: sees all data but can only add/edit/delete assigned facilities
     is_jkn = models.BooleanField(default=False, verbose_name="JKN - Hospital & Klinik")
-    # Facility names (nama_fasiliti) this JKN user is allowed to edit
     assigned_facility_names = models.JSONField(default=list, blank=True, verbose_name="Fasiliti Diperuntukkan")
 
-    def __str__(self):
-        return f'Profile: {self.user.username}'
-
-    def has_bahagian(self, slug):
-        return slug in self.bahagian_slugs
-
+    def __str__(self): return f'Profile: {self.user.username}'
+    def has_bahagian(self, slug): return slug in self.bahagian_slugs
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
-    """Auto-create a UserProfile when a new User is saved."""
-    if created:
-        UserProfile.objects.get_or_create(user=instance)
+    if created: UserProfile.objects.get_or_create(user=instance)
+
 
 # ─────────────────────────────────────────────────────────────────
-# MODEL SOALAN & JAWAPAN DINAMIK (Dicipta Oleh Admin)
+# ASET KENDERAAN
+# ─────────────────────────────────────────────────────────────────
+class SyarikatServisKenderaan(models.Model):
+    nama_syarikat = models.CharField(max_length=200)
+    tempoh_kontrak = models.CharField(max_length=100)
+    tarikh_mula = models.DateField()
+    tarikh_tamat = models.DateField()
+    
+    @property
+    def status_kontrak(self):
+        sekarang = datetime.date.today()
+        baki_hari = (self.tarikh_tamat - sekarang).days
+        if baki_hari < 0: return 'tamat'
+        elif baki_hari <= 60: return 'hampir_tamat'
+        return 'aktif'
+
+class AsetKenderaan(models.Model):
+    JENIS = [('kereta', 'Kereta'), ('van', 'Van'), ('ambulan', 'Ambulan'), ('bas', 'Bas'), ('lori', 'Lori')]
+    STATUS = [('aktif', 'Aktif'), ('rosak', 'Rosak'), ('lupus', 'Lupus')]
+    
+    profil_fasiliti = models.ForeignKey(FacilityProfile, on_delete=models.CASCADE, related_name='senarai_kenderaan')
+    jenis_kenderaan = models.CharField(max_length=20, choices=JENIS)
+    model_kenderaan = models.CharField(max_length=150)
+    no_pendaftaran = models.CharField(max_length=20)
+    no_chasis = models.CharField(max_length=100, blank=True)
+    tahun_diterima = models.IntegerField()
+    status = models.CharField(max_length=20, choices=STATUS, default='aktif')
+    syarikat_servis = models.ForeignKey(SyarikatServisKenderaan, on_delete=models.SET_NULL, null=True, blank=True, related_name='kenderaan_diselenggara')
+    
+    @property
+    def umur_kenderaan(self): return datetime.date.today().year - self.tahun_diterima
+
+
+# ─────────────────────────────────────────────────────────────────
+# SOALAN DINAMIK
 # ─────────────────────────────────────────────────────────────────
 class SoalanTambahan(models.Model):
     MODUL_CHOICES = [
@@ -625,107 +389,20 @@ class SoalanTambahan(models.Model):
         ('sumber_manusia', 'Bahagian 4: Pengurusan Sumber Manusia'),
         ('perkhidmatan', 'Bahagian 5: Penyampaian Perkhidmatan'),
         ('kewangan', 'Bahagian 6: Kewangan & Perancangan'),
-        ('lain_lain', 'Bahagian 7: Lain-lain'),
+        ('digital', 'Bahagian 7: Rangkaian & Digital'), # Dikemaskini
     ]
+    JENIS = [('teks', 'Teks Ringkas'), ('textarea', 'Teks Panjang'), ('nombor', 'Nombor'), ('ya_tidak', 'Ya/Tidak'), ('dropdown', 'Dropdown'), ('fail', 'Muat Naik Fail')]
 
-    JENIS_INPUT_CHOICES = [
-        ('teks', 'Teks Ringkas'),
-        ('textarea', 'Teks Panjang / Huraian'),
-        ('nombor', 'Nombor'),
-        ('ya_tidak', 'Pilihan Ya / Tidak'),
-        ('dropdown', 'Pilihan Dropdown (Asingkan pilihan dengan koma)'),
-        ('fail', 'Muat Naik Fail / Dokumen'),
-    ]
-
-    modul = models.CharField(max_length=50, choices=MODUL_CHOICES, verbose_name="Modul / Bahagian")
-    teks_soalan = models.CharField(max_length=300, verbose_name="Teks Soalan")
-    jenis_input = models.CharField(max_length=20, choices=JENIS_INPUT_CHOICES, default='teks', verbose_name="Jenis Input")
-    pilihan_dropdown = models.TextField(blank=True, verbose_name="Pilihan Dropdown (Asingkan dengan koma: Pilihan A, Pilihan B)")
-    is_wajib = models.BooleanField(default=False, verbose_name="Wajib Diisi?")
-    is_aktif = models.BooleanField(default=True, verbose_name="Soalan Aktif?")
-    
+    modul = models.CharField(max_length=50, choices=MODUL_CHOICES)
+    teks_soalan = models.CharField(max_length=300)
+    jenis_input = models.CharField(max_length=20, choices=JENIS, default='teks')
+    pilihan_dropdown = models.TextField(blank=True)
+    is_wajib = models.BooleanField(default=False)
+    is_aktif = models.BooleanField(default=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"[{self.get_modul_display()}] {self.teks_soalan}"
-
-    class Meta:
-        verbose_name = "Soalan Tambahan Dinamik"
-        verbose_name_plural = "Soalan Tambahan Dinamik"
-
 
 class JawapanSoalanTambahan(models.Model):
     profil_fasiliti = models.ForeignKey(FacilityProfile, on_delete=models.CASCADE, related_name='jawapan_tambahan')
     soalan = models.ForeignKey(SoalanTambahan, on_delete=models.CASCADE, related_name='jawapan_set')
-    jawapan_teks = models.TextField(blank=True, verbose_name="Jawapan Teks / Pilihan")
-    jawapan_fail = models.FileField(upload_to='jawapan_tambahan_files/', null=True, blank=True, verbose_name="Fail Lampiran")
-    
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Jawapan Soalan Tambahan"
-        verbose_name_plural = "Jawapan Soalan Tambahan"
-        unique_together = ('profil_fasiliti', 'soalan')
-
-# Tambah kod ini di bahagian bawah fail models.py untuk aset kenderaan
-
-class SyarikatServisKenderaan(models.Model):
-    nama_syarikat = models.CharField(max_length=200, verbose_name="Nama Syarikat Servis")
-    tempoh_kontrak = models.CharField(max_length=100, verbose_name="Tempoh Kontrak (Contoh: 3 Tahun)")
-    tarikh_mula = models.DateField(verbose_name="Tarikh Mula Kontrak")
-    tarikh_tamat = models.DateField(verbose_name="Tarikh Tamat Kontrak")
-    
-    def __str__(self):
-        return self.nama_syarikat
-        
-    @property
-    def status_kontrak(self):
-        import datetime
-        sekarang = datetime.date.today()
-        baki_hari = (self.tarikh_tamat - sekarang).days
-        if baki_hari < 0:
-            return 'tamat'
-        elif baki_hari <= 60:
-            return 'hampir_tamat' # Amaran kuning/merah
-        return 'aktif'
-
-class AsetKenderaan(models.Model):
-    JENIS_KENDERAAN_CHOICES = [
-        ('kereta', 'Kereta'),
-        ('van', 'Van'),
-        ('ambulan', 'Ambulan'),
-        ('bas', 'Bas'),
-        ('lori', 'Lori'),
-    ]
-    STATUS_KENDERAAN_CHOICES = [
-        ('aktif', 'Aktif (Beroperasi)'),
-        ('rosak', 'Rosak / Sedang Diselenggara'),
-        ('lupus', 'Telah Dilupuskan / Syor Lupus'),
-    ]
-    
-    # Hubungkan kepada fasiliti
-    profil_fasiliti = models.ForeignKey(FacilityProfile, on_delete=models.CASCADE, related_name='senarai_kenderaan')
-    
-    jenis_kenderaan = models.CharField(max_length=20, choices=JENIS_KENDERAAN_CHOICES)
-    model_kenderaan = models.CharField(max_length=150, verbose_name="Model (Cth: Toyota Hiace)")
-    no_pendaftaran = models.CharField(max_length=20, verbose_name="No. Plat Pendaftaran")
-    no_chasis = models.CharField(max_length=100, blank=True, verbose_name="Nombor Chasis")
-    
-    tahun_diterima = models.IntegerField(verbose_name="Tahun Diterima")
-    status = models.CharField(max_length=20, choices=STATUS_KENDERAAN_CHOICES, default='aktif')
-    
-    syarikat_servis = models.ForeignKey(SyarikatServisKenderaan, on_delete=models.SET_NULL, null=True, blank=True, related_name='kenderaan_diselenggara')
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"{self.no_pendaftaran} - {self.get_jenis_kenderaan_display()}"
-        
-    @property
-    def umur_kenderaan(self):
-        # Pengiraan tahun automatik (seperti yang anda cadangkan)
-        import datetime
-        tahun_semasa = datetime.date.today().year
-        return tahun_semasa - self.tahun_diterima
+    jawapan_teks = models.TextField(blank=True)
+    jawapan_fail = models.FileField(upload_to='jawapan_tambahan_files/', null=True, blank=True)
