@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 # ==============================================================================
 # 1. SUIS KAWALAN PERSEKITARAN
 # ==============================================================================
-DEBUG = True  # <--- BUKA KEPADA TRUE SEMENTARA UNTUK KESAN RALAT DI RENDER
+DEBUG = False  # <--- BUKA KEPADA TRUE SEMENTARA UNTUK KESAN RALAT DI RENDER
 
 if DEBUG:
     ALLOWED_HOSTS = ['*']
