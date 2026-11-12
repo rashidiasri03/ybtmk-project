@@ -454,50 +454,52 @@
         {% endif %}
     </div>
 
-    <!-- ── 7. RANGKAIAN & DIGITAL ── -->
+    <!-- ── 7. SISTEM RANGKAIAN & PERALATAN DIGITAL ── -->
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div class="cluster-header bg-slate-100 border-b border-slate-200">
-            <div class="cluster-icon bg-slate-300 text-slate-700"><i class="fas fa-list-ul"></i></div>
+            <div class="cluster-icon bg-slate-300 text-slate-700"><i class="fas fa-laptop-medical"></i></div>
             <div>
-                <h3 class="font-bold text-slate-800 text-sm">Bahagian 7: Lain-lain</h3>
-                <p class="text-[11px] text-slate-500">Khusus, fail lampiran, dan arkib</p>
+                <h3 class="font-bold text-slate-800 text-sm">Bahagian 7: Sistem Rangkaian & Peralatan Digital</h3>
+                <p class="text-[11px] text-slate-500">Kecukupan peranti, kelajuan internet, dan sistem pendigitalan</p>
             </div>
         </div>
         {% if fp.k_digital %}
-        <div class="grid grid-cols-1 divide-y divide-slate-50">
-            <div class="px-6 py-4">
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Peranti Digital Mencukupi?</p>
-                <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.k_digital.peranti_mencukupi|yesno:"Ya,Tidak" }}</p>
-            </div>
-            <div class="px-6 py-4">
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Peranti Baik?</p>
-                <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{% if fp.k_digital.peranti_baik == False %}Tidak ({{ fp.k_digital.peranti_baik_nota }}){% else %}Ya{% endif %}</p>
-            </div>
+        <div class="grid grid-cols-2 divide-x divide-slate-50">
+            {% include 'home/_detail_row.html' with label="Peranti Digital Mencukupi?" value=fp.k_digital.peranti_mencukupi type="bool" %}
+            {% include 'home/_detail_row.html' with label="Kelajuan Internet Pantas & Stabil?" value=fp.k_digital.internet_pantas type="bool" %}
+            
+            {% if fp.k_digital.peranti_baik == False %}
+                {% with pb_txt="Tidak ("|add:fp.k_digital.peranti_baik_nota|add:")" %}
+                {% include 'home/_detail_row.html' with label="Semua Peranti Berkeadaan Baik?" value=pb_txt type="text" %}
+                {% endwith %}
+            {% else %}
+                {% include 'home/_detail_row.html' with label="Semua Peranti Berkeadaan Baik?" value=fp.k_digital.peranti_baik type="bool" %}
+            {% endif %}
 
-            <!-- Muat Turun Wishlist -->
-            {% if fp.k_digital.wishlist_fail %}
-            <div class="px-6 py-5 bg-blue-50/50">
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Lampiran Wishlist Fasiliti</p>
-                <a href="{{ fp.k_digital.wishlist_fail.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition shadow-sm">
-                    <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
-                </a>
-            </div>
+            {% if fp.k_digital.perlu_tambah_peranti == True %}
+                {% with pt_txt="Ya ("|add:fp.k_digital.perlu_tambah_nota|add:")" %}
+                {% include 'home/_detail_row.html' with label="Perlu Penambahan Peranti?" value=pt_txt type="text" %}
+                {% endwith %}
+            {% else %}
+                {% include 'home/_detail_row.html' with label="Perlu Penambahan Peranti?" value=fp.k_digital.perlu_tambah_peranti type="bool" %}
             {% endif %}
         </div>
+
+        <!-- Muat Turun Wishlist -->
+        {% if fp.k_digital.wishlist_fail %}
+        <div class="px-6 py-5 bg-blue-50/50 border-t border-slate-50 mt-2">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Lampiran Wishlist Peralatan ICT</p>
+            <a href="{{ fp.k_digital.wishlist_fail.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition shadow-sm">
+                <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
+            </a>
+        </div>
+        {% endif %}
         {% else %}
         <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
         {% endif %}
     </div>
 
-    <!-- ── Maklumat Tambahan (Arkib Lama) ── -->
-    <div class="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden mt-6 mb-8">
-        <div class="px-6 py-3 border-b border-slate-200">
-            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider"><i class="fas fa-archive mr-2"></i>Maklumat Tambahan (Arkib)</h4>
-        </div>
-        <div class="grid grid-cols-2 divide-x divide-slate-200">
-            {% include 'home/_detail_row.html' with label="Ada Bilik Mayat/Forensik?" value=fp.k_perkhidmatan.ada_forensik type="bool" %}
-        </div>
-    </div>
+    <!-- ── (BLOK ARKIB LAMA TELAH DIPADAMKAN) ── -->
 
     <!-- ── Peta (if location available) ── -->
     {% if fp.maklumat_asas.latitud %}
