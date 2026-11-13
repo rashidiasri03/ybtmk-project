@@ -652,37 +652,118 @@ def detail_fasiliti(request, pk):
 def fasiliti_api_detail(request, pk):
     """JSON API — return all kluster data for one FacilityProfile (used by peta popup drawer)."""
     from django.http import JsonResponse
-    fp = get_object_or_404(FacilityProfile.objects.select_related('maklumat_asas'), pk=pk)
+    fp = get_object_or_404(FacilityProfile.objects.select_related(
+        'maklumat_asas', 'k_infrastruktur', 'k_aset_perubatan', 
+        'k_sumber_manusia', 'k_perkhidmatan', 'k_kewangan', 'k_digital'
+    ), pk=pk)
 
     ma = fp.maklumat_asas
     def txt(val): return val if val else '—'
+    def yn(val): return 'Ya' if val else ('Tidak' if val == False else '—')
+
+    k1 = fp.k_infrastruktur
+    k2 = fp.k_sumber_manusia
+    k3 = fp.k_perkhidmatan
+    k4 = fp.k_aset_perubatan
+    k5 = fp.k_kewangan
+    k6 = fp.k_digital
 
     data = {
-        'pk':         fp.pk,
-        'status':     fp.status,
-        'tahun':      fp.tahun,
-        'edit_url':   f'/profiling/{fp.pk}/edit/',
-        'detail_url': f'/profiling/{fp.pk}/detail/',
+        'pk': fp.pk, 'status': fp.status, 'tahun': fp.tahun,
+        'edit_url': f'/profiling/{fp.pk}/edit/', 'detail_url': f'/profiling/{fp.pk}/detail/',
         'k0': {
-            'nama':   ma.nama_fasiliti if ma else '—',
-            'jenis':  ma.get_jenis_fasiliti_display() if ma else '—',
+            'nama': txt(ma.nama_fasiliti) if ma else '—',
+            'jenis': ma.get_jenis_fasiliti_display() if ma else '—',
             'negeri': ma.get_negeri_display() if ma else '—',
             'daerah': txt(ma.daerah) if ma else '—',
             'alamat': txt(ma.alamat) if ma else '—',
             'poskod': txt(ma.poskod) if ma else '—',
-            'lat':    ma.latitud if ma else None,
-            'lng':    ma.longitud if ma else None,
+            'lat': ma.latitud if ma else None,
+            'lng': ma.longitud if ma else None,
             'status_lawatan': fp.status_lawatan,
-            'nama_program':   fp.nama_program_lawatan or '',
+            'nama_program': fp.nama_program_lawatan or '',
             'tarikh_lawatan': str(fp.tarikh_lawatan) if fp.tarikh_lawatan else '',
-            'catatan':        fp.catatan_lawatan or '',
+            'catatan': fp.catatan_lawatan or '',
             'nama_responden': txt(ma.nama_responden) if ma else '—',
             'jawatan_responden': txt(ma.jawatan_responden) if ma else '—',
             'no_telefon_responden': txt(ma.no_telefon_responden) if ma else '—',
             'emel_responden': txt(ma.emel_responden) if ma else '—',
+            'zon': '—',
+            'parlimen': '—'
         },
-        # Hantar objek kosong (None) untuk elak JavaScript di frontend rosak
-        'k1': None, 'k2': None, 'k3': None, 'k4': None, 'k5': None, 'k6': None, 'k7': None,
+        'k1': {
+            'ukuran_tanah': txt(k1.keluasan_tapak) if k1 else '—',
+            'tanah_mencukupi': yn(k1.tanah_mencukupi) if k1 else '—',
+            'siling_okay': yn(k1.struktur_baik) if k1 else '—',
+            'siling_nota': txt(k1.struktur_nota) if k1 else '—',
+            'tahun_dibina': '—'
+        },
+        'k2': {
+            'jumlah_perjawatan': k2.jumlah_perjawatan if k2 else '—',
+            'jumlah_pengisian': k2.jumlah_pengisian if k2 else '—',
+            'jumlah_kekosongan': k2.jumlah_kekosongan if k2 else '—',
+            'ada_kakitangan_pinjaman': yn(k2.ada_kakitangan_pinjaman) if k2 else '—',
+            'nota_kakitangan_pinjaman': '—',
+            'ada_isu_kakitangan': yn(k2.ada_isu_petugas) if k2 else '—',
+            'ada_fasiliti_petugas': '—',
+            'jenis_shift': txt(k2.bilangan_shift) if k2 else '—',
+            'corak_penugasan': txt(k2.corak_penugasan) if k2 else '—',
+            'pengurusan_jadual': txt(k2.pengurusan_jadual) if k2 else '—',
+            'cara_minta_cuti': txt(k2.proses_cuti) if k2 else '—',
+            'isu_penempatan': txt(k2.isu_penjadualan) if k2 else '—',
+            'status_pertukaran_staf': txt(k2.status_pertukaran) if k2 else '—',
+            'waktu_beroperasi': '—'
+        },
+        'k3': {
+            'bekalan_ubat_mencukupi': yn(k4.ubat_mencukupi) if k4 else '—',
+            'ada_hemodialisis': yn(k4.ada_hemodialisis) if k4 else '—',
+            'kualiti_makanan': yn(k3.makanan_memuaskan) if k3 else '—',
+            'siapa_manage': txt(ma.ketua_fasiliti) if ma else '—',
+            'anggaran_pelawat_harian': k3.anggaran_pelawat if k3 else '—',
+            'masa_tunggu': txt(k3.anggaran_masa_tunggu) if k3 else '—',
+            'jenis_perkhidmatan': '—',
+            'jenis_penyakit_kerap': '—',
+            'wad_diasingkan': yn(k3.wad_asing_jantina) if k3 else '—',
+            'ruang_tunggu_selesa': yn(k3.ruang_menunggu_selesa) if k3 else '—',
+            'ruang_tunggu_nota': txt(k3.ruang_menunggu_nota) if k3 else '—',
+            'boleh_selesaikan_kes': yn(k3.boleh_selesai_kes) if k3 else '—',
+            'kekangan_rawatan': txt(k3.boleh_selesai_kes_nota) if k3 else '—'
+        },
+        'k4': {
+            'senarai_peralatan': '—',
+            'aset_tidak_ikut_spec': '—',
+            'disposable_mencukupi': yn(k4.consumables_mencukupi) if k4 else '—',
+            'ada_ambulans': '—',
+            'ambulans_nota': '—',
+            'sistem_pendigitalan': '—',
+            'gajet_ict_baik': yn(k6.peranti_baik) if k6 else '—',
+            'gajet_ict_nota': txt(k6.peranti_baik_nota) if k6 else '—',
+            'umur_komputer': '—'
+        },
+        'k5': {
+            'ruang_kerja_mencukupi': yn(k1.ruang_rawatan_mencukupi) if k1 else '—',
+            'ada_pantry': yn(k1.ada_pantry) if k1 else '—',
+            'ada_kantin': yn(k1.ada_kantin) if k1 else '—',
+            'ada_parking': yn(k1.ada_parking) if k1 else '—',
+            'parking_mencukupi': yn(k1.parking_mencukupi) if k1 else '—',
+            'ada_quarters': yn(k1.ada_kuarters) if k1 else '—',
+            'quarters_mencukupi': yn(k1.kuarters_baik) if k1 else '—',
+            'masalah_aircond': yn(k1.ada_aircond) if k1 else '—',
+            'aircond_nota': txt(k1.aircond_nota) if k1 else '—',
+            'masalah_kipas': yn(k1.ada_kipas) if k1 else '—',
+            'kipas_nota': txt(k1.kipas_nota) if k1 else '—',
+            'ada_bilik_mayat': '—',
+            'keadaan_perabot': '—'
+        },
+        'k6': {
+            'peranti_mencukupi': yn(k6.peranti_mencukupi) if k6 else '—',
+            'internet_pantas': yn(k6.internet_pantas) if k6 else '—',
+            'peranti_baik': yn(k6.peranti_baik) if k6 else '—',
+            'peranti_baik_nota': txt(k6.peranti_baik_nota) if k6 else '—',
+            'perlu_tambah_peranti': yn(k6.perlu_tambah_peranti) if k6 else '—',
+            'perlu_tambah_nota': txt(k6.perlu_tambah_nota) if k6 else '—',
+            'wishlist_fail_url': k6.wishlist_fail.url if k6 and k6.wishlist_fail else '',
+        }
     }
     return JsonResponse(data)
 
@@ -998,7 +1079,6 @@ def _save_facility_form(request, clusters, allowed_steps=None):
         try: return int(post.get(key, ''))
         except: return None
 
-    # Bahagian 1: Latar Belakang
     if in_scope(0):
         ma = clusters[0]
         ma.nama_responden = post.get('nama_responden', '').strip()
@@ -1011,6 +1091,8 @@ def _save_facility_form(request, clusters, allowed_steps=None):
         ma.daerah         = post.get('daerah', '').strip()
         ma.alamat         = post.get('alamat', '').strip()
         ma.poskod         = post.get('poskod', '').strip()
+        ma.kod_fasiliti   = post.get('kod_fasiliti', '').strip()
+        ma.ketua_fasiliti = post.get('siapa_manage', '').strip()
         try: ma.latitud  = float(post.get('latitud', ''))
         except ValueError: ma.latitud = None
         try: ma.longitud = float(post.get('longitud', ''))
@@ -1018,107 +1100,77 @@ def _save_facility_form(request, clusters, allowed_steps=None):
 
     if in_scope(1):
         k1 = clusters[1]
-        k1.kod_fasiliti = post.get('kod_fasiliti', '').strip()  # <--- TAMBAH BARIS INI
-        k1.tahun_dibina = intval('tahun_dibina')
-        k1.ukuran_tanah = post.get('ukuran_tanah', '').strip()
+        k1.keluasan_tapak = post.get('ukuran_tanah', '').strip()
         k1.tanah_mencukupi = yesno('tanah_mencukupi')
-        k1.siling_okay = yesno('siling_okay')
-        k1.siling_nota = post.get('siling_nota', '').strip()
+        k1.struktur_baik = yesno('siling_okay')
+        k1.struktur_nota = post.get('siling_nota', '').strip()
+        k1.ruang_rawatan_mencukupi = yesno('ruang_kerja_mencukupi')
+        k1.ada_ruang_rehat_pelawat = yesno('ada_ruang_rehat')
+        k1.ada_pantry = yesno('ada_pantry')
+        k1.ada_kantin = yesno('ada_kantin')
+        k1.ada_parking = yesno('ada_parking')
+        k1.parking_mencukupi = yesno('parking_mencukupi')
+        k1.ada_kuarters = yesno('ada_quarters')
+        k1.kuarters_baik = yesno('quarters_mencukupi')
+        k1.ada_aircond = yesno('masalah_aircond')
+        k1.aircond_nota = post.get('aircond_nota', '').strip()
+        k1.ada_kipas = yesno('masalah_kipas')
+        k1.kipas_nota = post.get('kipas_nota', '').strip()
 
-    # Bahagian 4: Sumber Manusia
     if in_scope(2):
         k2 = clusters[2]
-        k2.jumlah_perjawatan = intval('jumlah_perjawatan')
-        k2.jumlah_pengisian  = intval('jumlah_pengisian')
-        k2.jumlah_kekosongan = intval('jumlah_kekosongan')
-        k2.ada_kakitangan_pinjaman = yesno('ada_kakitangan_pinjaman')
-        k2.nota_kakitangan_pinjaman = post.get('nota_kakitangan_pinjaman', '').strip()
-        k2.ada_isu_kakitangan = yesno('ada_isu_kakitangan')
-        k2.ada_fasiliti_petugas = yesno('ada_fasiliti_petugas')
-        k2.jenis_shift = post.get('jenis_shift', '').strip()
-        k2.corak_penugasan = post.get('corak_penugasan', '').strip()
-        k2.pengurusan_jadual = post.get('pengurusan_jadual', '').strip()
-        k2.cara_minta_cuti = post.get('cara_minta_cuti', '').strip()
-        k2.isu_penempatan = post.get('isu_penempatan', '').strip()
-        k2.status_pertukaran_staf = post.get('status_pertukaran_staf', '').strip()
-        k2.waktu_beroperasi = post.get('waktu_beroperasi', '').strip()
-
-    # Bahagian 5: Perkhidmatan
+        k2.consumables_mencukupi = yesno('disposable_mencukupi')
+        k2.ubat_mencukupi = yesno('bekalan_ubat_mencukupi')
+        k2.ada_hemodialisis = yesno('ada_hemodialisis')
+        
     if in_scope(3):
         k3 = clusters[3]
-        k3.anggaran_pelawat_harian = intval('anggaran_pelawat_harian')
-        k3.jenis_perkhidmatan = post.get('jenis_perkhidmatan', '').strip()
-        k3.jenis_penyakit_kerap = post.get('jenis_penyakit_kerap', '').strip()
-        k3.wad_diasingkan = yesno('wad_diasingkan')
-        k3.ruang_tunggu_selesa = yesno('ruang_tunggu_selesa')
-        k3.ruang_tunggu_nota = post.get('ruang_tunggu_nota', '').strip()
-        k3.boleh_selesaikan_kes = yesno('boleh_selesaikan_kes')
-        k3.kekangan_rawatan = post.get('kekangan_rawatan', '').strip()
-        k3.masa_tunggu = post.get('masa_tunggu', '').strip()
-        k3.siapa_manage = post.get('siapa_manage', '').strip()
-        k3.ada_ruang_rehat = yesno('ada_ruang_rehat')
-        k3.ada_hemodialisis = yesno('ada_hemodialisis')
-        k3.bekalan_ubat_mencukupi = yesno('bekalan_ubat_mencukupi')
-        k3.kualiti_makanan = post.get('kualiti_makanan', '').strip()
+        k3.jumlah_perjawatan = intval('jumlah_perjawatan')
+        k3.jumlah_pengisian  = intval('jumlah_pengisian')
+        k3.jumlah_kekosongan = intval('jumlah_kekosongan')
+        k3.ada_kakitangan_pinjaman = yesno('ada_kakitangan_pinjaman')
+        k3.isu_petugas_nota = post.get('nota_kakitangan_pinjaman', '').strip()
+        k3.ada_isu_petugas = yesno('ada_isu_kakitangan')
+        k3.bilangan_shift = post.get('jenis_shift', '').strip()
+        k3.corak_penugasan = post.get('corak_penugasan', '').strip()
+        k3.pengurusan_jadual = post.get('pengurusan_jadual', '').strip()
+        k3.proses_cuti = post.get('cara_minta_cuti', '').strip()
+        k3.isu_penjadualan = post.get('isu_penempatan', '').strip()
+        k3.status_pertukaran = post.get('status_pertukaran_staf', '').strip()
 
-    # Bahagian 3: Aset
     if in_scope(4):
         k4 = clusters[4]
-        k4.senarai_peralatan = post.get('senarai_peralatan', '').strip()
-        k4.aset_tidak_ikut_spec = post.get('aset_tidak_ikut_spec', '').strip()
-        k4.disposable_mencukupi = yesno('disposable_mencukupi')
-        k4.ada_ambulans = yesno('ada_ambulans')
-        k4.ambulans_nota = post.get('ambulans_nota', '').strip()
-        k4.sistem_pendigitalan = post.get('sistem_pendigitalan', '').strip()
-        k4.gajet_ict_baik = yesno('gajet_ict_baik')
-        k4.gajet_ict_nota = post.get('gajet_ict_nota', '').strip()
-        k4.umur_komputer = post.get('umur_komputer', '').strip()
+        k4.anggaran_pelawat = intval('anggaran_pelawat_harian')
+        k4.wad_asing_jantina = yesno('wad_diasingkan')
+        k4.ruang_menunggu_selesa = yesno('ruang_tunggu_selesa')
+        k4.ruang_menunggu_nota = post.get('ruang_tunggu_nota', '').strip()
+        k4.boleh_selesai_kes = yesno('boleh_selesaikan_kes')
+        k4.boleh_selesai_kes_nota = post.get('kekangan_rawatan', '').strip()
+        k4.anggaran_masa_tunggu = post.get('masa_tunggu', '').strip()
 
-    # Bahagian 2: Fasiliti
     if in_scope(5):
         k5 = clusters[5]
-        k5.keadaan_perabot = post.get('keadaan_perabot', '').strip()
-        k5.ada_quarters = yesno('ada_quarters')
-        k5.quarters_mencukupi = yesno('quarters_mencukupi')
-        k5.ada_parking = yesno('ada_parking')
-        k5.parking_mencukupi = yesno('parking_mencukupi')
-        k5.masalah_aircond = yesno('masalah_aircond')
-        k5.aircond_nota = post.get('aircond_nota', '').strip()
-        k5.masalah_kipas = yesno('masalah_kipas')
-        k5.kipas_nota = post.get('kipas_nota', '').strip()
-        k5.ruang_kerja_mencukupi = yesno('ruang_kerja_mencukupi')
-        k5.ada_pantry = yesno('ada_pantry')
-        k5.ada_kantin = yesno('ada_kantin')
-        k5.ada_security = yesno('ada_security')
-        k5.ada_bilik_mayat = yesno('ada_bilik_mayat')
-
-    # Bahagian 6: Perancangan
+        k5.belanja_mengurus = post.get('belanja_mengurus', '').strip()
+        k5.belanja_pembangunan = post.get('belanja_pembangunan', '').strip()
+        k5.konsesi_lancar = yesno('maintenance_okay')
+        k5.isu_utama = post.get('masalah_utama', '').strip()
+        
     if in_scope(6):
         k6 = clusters[6]
-        k6.belanja_mengurus = post.get('belanja_mengurus', '').strip()
-        k6.belanja_pembangunan = post.get('belanja_pembangunan', '').strip()
-        k6.perkhidmatan_baru = post.get('perkhidmatan_baru', '').strip()
-        k6.fasiliti_diperlukan = post.get('fasiliti_diperlukan', '').strip()
+        k6.peranti_mencukupi = yesno('peranti_mencukupi')
+        k6.internet_pantas = yesno('internet_pantas')
+        k6.peranti_baik = yesno('peranti_baik')
+        k6.peranti_baik_nota = post.get('peranti_baik_nota', '').strip()
+        k6.perlu_tambah_peranti = yesno('perlu_tambah_peranti')
+        k6.perlu_tambah_nota = post.get('perlu_tambah_nota', '').strip()
 
-    # Bahagian 7: Konsesi & Lain-lain
-    if in_scope(7):
-        k7 = clusters[7]
-        k7.maintenance_okay = yesno('maintenance_okay')
-        k7.masalah_utama = post.get('masalah_utama', '').strip()
-        k7.prosedur_kes_dadah = post.get('prosedur_kes_dadah', '').strip()
-        k7.hemodialisis_nota = post.get('hemodialisis_nota', '').strip()
-        k7.status_bekalan_oksigen = post.get('status_bekalan_oksigen', '').strip()
-        k7.wishlist = post.get('wishlist_lama', '').strip()
-        
-        # Proses Muat Naik / Padam Fail Wishlist
         if post.get('delete_wishlist_fail') == '1':
-            if k7.wishlist_fail:
-                k7.wishlist_fail.delete(save=False)
-                
+            if k6.wishlist_fail:
+                k6.wishlist_fail.delete(save=False)
         if 'wishlist_fail' in files:
-            if k7.wishlist_fail:
-                k7.wishlist_fail.delete(save=False)
-            k7.wishlist_fail = files['wishlist_fail']
+            if k6.wishlist_fail:
+                k6.wishlist_fail.delete(save=False)
+            k6.wishlist_fail = files['wishlist_fail']
 
 
 # ─────────────────────────────────────────────────────────────────

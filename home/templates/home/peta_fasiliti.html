@@ -866,38 +866,28 @@ function renderDrawer(d) {
     if(kwHtml) html += section('fas fa-chart-line','#ca8a04','6. Kewangan & Perancangan', kwHtml);
 
 
-    // 7. LAIN-LAIN (Arkib + Fail)
+    // 7. SISTEM RANGKAIAN & PERALATAN DIGITAL
     let lnHtml = '';
-    if(d.k7) {
-        if(d.k7.prosedur_kes_dadah !== '—') lnHtml += cell('Prosedur Kes Dadah', d.k7.prosedur_kes_dadah, true);
-        if(d.k7.hemodialisis_nota !== '—') lnHtml += cell('Unit Mesin Hemodialisis', d.k7.hemodialisis_nota, true);
+    if(d.k6) {
+        lnHtml += cell('Peranti Digital Mencukupi?', d.k6.peranti_mencukupi);
+        lnHtml += cell('Internet Pantas & Stabil?', d.k6.internet_pantas);
         
-        if(d.k7.status_bekalan_oksigen !== '—') {
-            let oxClr = '#64748b';
-            if(d.k7.status_bekalan_oksigen.includes('Kritikal')) oxClr = '#dc2626';
-            else if(d.k7.status_bekalan_oksigen.includes('Terhad')) oxClr = '#d97706';
-            else if(d.k7.status_bekalan_oksigen.includes('Mencukupi')) oxClr = '#16a34a';
-            lnHtml += cell('Bekalan Oksigen', `<span style="color:${oxClr}; font-weight:700;">${d.k7.status_bekalan_oksigen}</span>`, true);
-        }
+        let pbDisplay = d.k6.peranti_baik;
+        if(d.k6.peranti_baik === 'Tidak' && d.k6.peranti_baik_nota !== '—') pbDisplay += ` <br><span style="font-size:0.65rem; color:#64748b;">${d.k6.peranti_baik_nota}</span>`;
+        lnHtml += cell('Semua Peranti Baik?', pbDisplay, true);
         
-        // Wishlist Download
-        if(d.k7.wishlist_fail_url) {
+        let ptDisplay = d.k6.perlu_tambah_peranti;
+        if(d.k6.perlu_tambah_peranti === 'Ya' && d.k6.perlu_tambah_nota !== '—') ptDisplay += ` <br><span style="font-size:0.65rem; color:#64748b;">${d.k6.perlu_tambah_nota}</span>`;
+        lnHtml += cell('Perlu Penambahan?', ptDisplay, true);
+        
+        if(d.k6.wishlist_fail_url) {
             lnHtml += `<div class="drawer-cell-full" style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:12px; display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
-                <div style="font-size:0.75rem; font-weight:700; color:#334155;"><i class="fas fa-file-download mr-2 text-slate-400"></i> Lampiran Wishlist Penambahbaikan</div>
-                <a href="${d.k7.wishlist_fail_url}" target="_blank" style="padding:6px 12px; background:#475569; color:#fff; border-radius:6px; font-size:0.7rem; font-weight:700; text-decoration:none;">Muat Turun Fail</a>
+                <div style="font-size:0.75rem; font-weight:700; color:#334155;"><i class="fas fa-file-download mr-2 text-slate-400"></i> Lampiran Wishlist ICT</div>
+                <a href="${d.k6.wishlist_fail_url}" target="_blank" style="padding:6px 12px; background:#475569; color:#fff; border-radius:6px; font-size:0.7rem; font-weight:700; text-decoration:none;">Muat Turun</a>
             </div>`;
         }
-        
-        // Arkib
-        let arkib = '';
-        if(d.k5 && d.k5.ada_bilik_mayat !== '—') arkib += `• Bilik Forensik: ${d.k5.ada_bilik_mayat}<br>`;
-        if(d.k3 && d.k3.kualiti_makanan !== '—') arkib += `• Kualiti Makanan: ${d.k3.kualiti_makanan}<br>`;
-        if(d.k4 && d.k4.umur_komputer !== '—') arkib += `• Umur Komputer: ${d.k4.umur_komputer}<br>`;
-        if(d.k7.wishlist !== '—') arkib += `• Wishlist Lama: ${d.k7.wishlist}<br>`;
-        
-        if(arkib) lnHtml += cell('Maklumat Tambahan (Arkib)', `<span style="color:#64748b; font-size:0.7rem;">${arkib}</span>`, true);
     }
-    if(lnHtml) html += section('fas fa-list-ul','#475569','7. Lain-lain & Lampiran', lnHtml);
+    if(lnHtml) html += section('fas fa-laptop-medical','#475569','7. Sistem Rangkaian & Digital', lnHtml);
 
     drawerBody.innerHTML = html;
 }

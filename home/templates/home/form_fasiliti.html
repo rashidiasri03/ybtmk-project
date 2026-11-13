@@ -618,59 +618,71 @@
                     </div>
                 </div>
 
-                <!-- ── BAHAGIAN 7: Lain-Lain ────────────────────── -->
+                <!-- ── BAHAGIAN 7: Sistem Rangkaian & Peralatan Digital ────────────────────── -->
                 <div class="step-panel" id="step-6">
                     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-7 space-y-4">
                         <div class="flex items-center gap-3 mb-2 pb-4 border-b border-slate-100">
-                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-list-ul text-slate-600"></i></div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center"><i class="fas fa-laptop-medical text-slate-600"></i></div>
                             <div>
-                                <h2 class="text-lg font-extrabold text-slate-800">Bahagian 7: Lain-lain & Arkib</h2>
-                                <p class="text-xs font-semibold text-slate-400">Prosedur khusus, muat naik wishlist, dan rekod arkib</p>
+                                <h2 class="text-lg font-extrabold text-slate-800">Bahagian 7: Sistem Rangkaian & Peralatan Digital</h2>
+                                <p class="text-xs font-semibold text-slate-400">Kecukupan peranti, kelajuan internet, dan pendigitalan</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="q-card">
+                                <label class="block text-xs font-bold text-slate-500 mb-2">Peranti Digital Mencukupi?</label>
+                                <div class="flex gap-2">
+                                    <div class="pill-item"><input type="radio" name="peranti_mencukupi" id="pd_ya" value="1"><label for="pd_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="pill-item"><input type="radio" name="peranti_mencukupi" id="pd_tidak" value="0"><label for="pd_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
+                            </div>
+                            <div class="q-card">
+                                <label class="block text-xs font-bold text-slate-500 mb-2">Kelajuan Internet Pantas & Stabil?</label>
+                                <div class="flex gap-2">
+                                    <div class="pill-item"><input type="radio" name="internet_pantas" id="int_ya" value="1"><label for="int_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                    <div class="pill-item"><input type="radio" name="internet_pantas" id="int_tidak" value="0"><label for="int_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="q-card">
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5">Prosedur Rawatan Kes Dadah</label>
-                            <textarea name="prosedur_kes_dadah" id="f_prosedur_kes_dadah" class="f-textarea"></textarea>
-                        </div>
-                        <div class="q-card">
-                            <label class="block text-xs font-bold text-slate-500 mb-1.5">Bilangan Unit Hemodialisis & Penggunaan</label>
-                            <textarea name="hemodialisis_nota" id="f_hemodialisis_nota" class="f-textarea" placeholder="Cth: Ya - 2 unit (3 kali sehari). Jika Tiada: N/A"></textarea>
-                        </div>
-
-                        <div class="q-card">
-                            <label class="block text-xs font-bold text-slate-500 mb-2">Status Bekalan Oksigen</label>
-                            <div class="flex flex-col gap-2">
-                                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" id="f_ox_mencukupi" value="Mencukupi - Bekalan sentiasa ada dan memenuhi keperluan harian" class="cb-input"><span class="cb-text text-green-600">Mencukupi (Bekalan sentiasa ada)</span></label>
-                                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" id="f_ox_terhad" value="Terhad / Tidak Mencukupi - Kerap berlaku kelewatan pengisian semula atau kekurangan tong / silinder" class="cb-input"><span class="cb-text text-amber-600">Terhad / Tidak Mencukupi</span></label>
-                                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" id="f_ox_kritikal" value="Kritikal - Tiada bekalan oksigen / bergantung sepenuhnya pada rujukan fasiliti lain" class="cb-input"><span class="cb-text text-red-600">Kritikal (Tiada bekalan oksigen)</span></label>
-                                <label class="cb-label"><input type="radio" name="status_bekalan_oksigen" id="f_ox_na" value="Tidak berkenaan" class="cb-input"><span class="cb-text text-slate-500">Tidak berkenaan</span></label>
+                            <label class="block text-xs font-bold text-slate-500 mb-2">Semua Peranti Berkeadaan Baik?</label>
+                            <div class="flex gap-2 mb-2">
+                                <div class="pill-item"><input type="radio" name="peranti_baik" id="pb_ya" value="1" onchange="toggleNote('pb_nota_wrap', false)"><label for="pb_ya" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                                <div class="pill-item"><input type="radio" name="peranti_baik" id="pb_tidak" value="0" onchange="toggleNote('pb_nota_wrap', true)"><label for="pb_tidak" class="other"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
                             </div>
+                            <div id="pb_nota_wrap" class="mt-2 hidden"><input type="text" name="peranti_baik_nota" id="f_peranti_baik_nota" class="f-input" placeholder="Cth: 3 unit komputer rosak..."></div>
+                        </div>
+                        
+                        <div class="q-card">
+                            <label class="block text-xs font-bold text-slate-500 mb-2">Perlu Penambahan Peranti?</label>
+                            <div class="flex gap-2 mb-2">
+                                <div class="pill-item"><input type="radio" name="perlu_tambah_peranti" id="ptp_ya" value="1" onchange="toggleNote('ptp_nota_wrap', true)"><label for="ptp_ya" class="other"><i class="fas fa-check"></i> Ya (Nyatakan)</label></div>
+                                <div class="pill-item"><input type="radio" name="perlu_tambah_peranti" id="ptp_tidak" value="0" onchange="toggleNote('ptp_nota_wrap', false)"><label for="ptp_tidak" class="ya"><i class="fas fa-times"></i> Tidak</label></div>
+                            </div>
+                            <div id="ptp_nota_wrap" class="mt-2 hidden"><input type="text" name="perlu_tambah_nota" id="f_perlu_tambah_nota" class="f-input" placeholder="Cth: Mohon 5 biji PC..."></div>
                         </div>
 
                         <!-- WISH LIST UPLOAD -->
                         <div class="q-card mt-6 border-blue-100 bg-blue-50/20">
-                            <label class="block text-xs font-extrabold text-blue-800 mb-1.5">Muat Naik Lampiran Wishlist</label>
+                            <label class="block text-xs font-extrabold text-blue-800 mb-1.5">Muat Naik Lampiran Wishlist Peralatan ICT</label>
                             <p class="text-[10px] text-slate-400 mb-3">Format PDF, Word, Excel, atau Imej dibenarkan.</p>
-
-                            <!-- Hidden Delete Flag -->
                             <input type="hidden" name="delete_wishlist_fail" id="delete_wishlist_fail" value="0">
 
-                            <!-- CURRENT FILE BOX -->
-                            {% if facility.k_konsesi.wishlist_fail %}
+                            {% if facility.k_digital.wishlist_fail %}
                             <div id="current_file_box" class="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-lg flex items-center justify-between">
                                 <span class="text-sm font-semibold text-blue-800 flex items-center gap-2">
-                                    <i class="fas fa-file-alt"></i> Semasa: <span class="text-xs font-mono ml-1">{{ facility.k_konsesi.wishlist_fail.name|slice:"15:" }}</span>
+                                    <i class="fas fa-file-alt"></i> Semasa: <span class="text-xs font-mono ml-1">{{ facility.k_digital.wishlist_fail.name|slice:"15:" }}</span>
                                 </span>
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ facility.k_konsesi.wishlist_fail.url }}" target="_blank" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">Lihat</a>
+                                    <a href="{{ facility.k_digital.wishlist_fail.url }}" target="_blank" class="px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">Lihat</a>
                                     <button type="button" onclick="padamFailSemasa()" class="px-3 py-1.5 bg-red-100 text-red-600 text-xs font-bold rounded-lg hover:bg-red-200 transition">Padam</button>
                                 </div>
                             </div>
                             {% endif %}
 
-                            <!-- UPLOAD NEW FILE BOX -->
-                            <div id="upload_box" class="{% if facility.k_konsesi.wishlist_fail %}hidden{% endif %}">
+                            <div id="upload_box" class="{% if facility.k_digital.wishlist_fail %}hidden{% endif %}">
                                 <div class="flex items-center gap-3">
                                     <input type="file" name="wishlist_fail" id="wishlist_input" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" 
                                            class="flex-1 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition cursor-pointer" 
@@ -681,35 +693,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- ARKIB LAMA -->
-                        <div class="mt-6 pt-4 border-t border-slate-200">
-                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3"><i class="fas fa-archive"></i> Maklumat Tambahan (Arkib)</h3>
-                            <div class="grid grid-cols-2 gap-3 mb-3">
-                                <div class="q-card">
-                                    <label class="block text-xs font-bold text-slate-500 mb-2">Bilik Forensik / Bilik Jenazah?</label>
-                                    <div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_bilik_mayat" id="bm_ya" value="1"><label for="bm_ya" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_bilik_mayat" id="bm_tidak" value="0"><label for="bm_tidak" class="tidak">Tidak</label></div></div>
-                                </div>
-                                <div class="q-card">
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Kualiti Makanan Pesakit</label>
-                                    <select name="kualiti_makanan" id="f_kualiti_makanan" class="f-input bg-white">
-                                        <option value="">-- Pilih --</option>
-                                        <option>Baik</option><option>Memuaskan</option><option>Perlu penambahbaikan</option><option>Lemah / Ada aduan</option><option>Tiada perkhidmatan makanan</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="q-card">
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Umur Komputer (Arkib)</label>
-                                    <input type="text" name="umur_komputer" id="f_umur_komputer" class="f-input">
-                                </div>
-                                <div class="q-card">
-                                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Wishlist (Teks Lama)</label>
-                                    <input type="text" name="wishlist_lama" id="f_wishlist" class="f-input">
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 
