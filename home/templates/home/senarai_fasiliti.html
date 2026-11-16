@@ -382,10 +382,19 @@
     
     <!-- Nav Links Desktop -->
     <div class="nav-links hidden md:flex">
+        {% if is_tm %}
         <a href="{% url 'home:tm_portal' %}" class="nav-link">
+        {% else %}
+        <a href="{% url 'home:dashboard_fasiliti' %}" class="nav-link">
+        {% endif %}
             <i class="fas fa-home"></i> Dashboard
         </a>
+        
+        {% if is_tm %}
         <a href="{% url 'home:peta_tm' %}" class="nav-link">
+        {% else %}
+        <a href="{% url 'home:peta_fasiliti' %}" class="nav-link">
+        {% endif %}
             <i class="fas fa-map-marked-alt"></i> Peta Fasiliti
         </a>
         <a href="{% url 'home:senarai_fasiliti' %}" class="nav-link active">
@@ -399,10 +408,19 @@
         </a>
     </div>
     
+    {% if is_tm %}
     <div class="tm-badge hidden lg:flex">
-        <i class="fas fa-shield-alt"></i>
-        Top Management
+        <i class="fas fa-shield-alt"></i> Top Management
     </div>
+    {% elif request.user.is_superuser %}
+    <div class="tm-badge hidden lg:flex" style="color:#a855f7; background:rgba(168,85,247,.1); border-color:rgba(168,85,247,.25);">
+        <i class="fas fa-user-shield"></i> Superadmin
+    </div>
+    {% elif request.user.is_staff %}
+    <div class="tm-badge hidden lg:flex" style="color:#22c55e; background:rgba(34,197,94,.1); border-color:rgba(34,197,94,.25);">
+        <i class="fas fa-user-cog"></i> Admin
+    </div>
+    {% endif %}
     
     <!-- User Section Desktop -->
     <div class="user-section hidden md:flex">
@@ -410,7 +428,9 @@
             <div class="user-avatar">{{ request.user.username|make_list|first|upper }}</div>
             <div>
                 <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
-                <div class="user-role">Top Management</div>
+                <div class="user-role">
+                    {% if is_tm %}Top Management{% elif request.user.is_superuser %}Superadmin{% elif request.user.is_staff %}Admin{% else %}Pengguna{% endif %}
+                </div>
             </div>
         </div>
         
@@ -448,10 +468,19 @@
 
     <!-- Pautan Navigasi Mobile -->
     <div class="flex flex-col gap-2 flex-1">
+        {% if is_tm %}
         <a href="{% url 'home:tm_portal' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+        {% else %}
+        <a href="{% url 'home:dashboard_fasiliti' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+        {% endif %}
             <i class="fas fa-home text-blue-400"></i> Dashboard
         </a>
+
+        {% if is_tm %}
         <a href="{% url 'home:peta_tm' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+        {% else %}
+        <a href="{% url 'home:peta_fasiliti' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 font-bold text-xs transition">
+        {% endif %}
             <i class="fas fa-map-marked-alt text-sky-400"></i> Peta Fasiliti
         </a>
         <a href="{% url 'home:senarai_fasiliti' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs transition shadow-lg shadow-blue-600/30">
@@ -546,9 +575,24 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'home:detail_fasiliti' fp.pk %}" class="action-btn btn-view">
-                            <i class="fas fa-eye"></i> Lihat
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'home:detail_fasiliti' fp.pk %}" class="action-btn btn-view">
+                                <i class="fas fa-eye"></i> Lihat
+                            </a>
+                            {% if not is_tm %}
+                            <a href="{% url 'home:pilih_modul' fp.pk %}" class="action-btn" style="background:#fef3c7; color:#d97706;" title="Edit">
+                                <i class="fas fa-pen"></i> Edit
+                            </a>
+                            {% if request.user.is_superuser or request.user.is_staff %}
+                            <form method="post" action="{% url 'home:padam_fasiliti' fp.pk %}" onsubmit="return confirm('Pasti mahu memadam profil ini?');" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn" style="background:#fee2e2; color:#dc2626;" title="Padam">
+                                    <i class="fas fa-trash"></i> Padam
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
