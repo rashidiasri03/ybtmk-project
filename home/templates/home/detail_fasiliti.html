@@ -211,21 +211,39 @@
                     </div>
                 </div>
                 
-                <div class="p-5 border-b border-slate-50 bg-slate-50 flex gap-6">
+                <div class="p-5 border-b border-slate-100 bg-slate-50">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-200 pb-2">1.1 Maklumat Responden</p>
                     {% if fp.maklumat_asas.nama_responden %}
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Penyedia Laporan (Responden)</p>
-                        <p class="text-sm font-semibold text-slate-800">{{ fp.maklumat_asas.nama_responden }}</p>
-                        <p class="text-xs text-slate-500">{{ fp.maklumat_asas.jawatan_responden }} &bull; {{ fp.maklumat_asas.no_telefon_responden }} &bull; {{ fp.maklumat_asas.emel_responden }}</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div><p class="text-[10px] text-slate-400 uppercase font-bold">i. Nama Penuh</p><p class="text-sm font-semibold text-slate-800 mt-0.5">{{ fp.maklumat_asas.nama_responden }}</p></div>
+                        <div><p class="text-[10px] text-slate-400 uppercase font-bold">ii. Jawatan</p><p class="text-sm font-semibold text-slate-800 mt-0.5">{{ fp.maklumat_asas.jawatan_responden|default:"-" }}</p></div>
+                        <div><p class="text-[10px] text-slate-400 uppercase font-bold">iii. No. Telefon</p><p class="text-sm font-semibold text-slate-800 mt-0.5">{{ fp.maklumat_asas.no_telefon_responden|default:"-" }}</p></div>
+                        <div><p class="text-[10px] text-slate-400 uppercase font-bold">iv. E-mel Rasmi</p><p class="text-sm font-semibold text-slate-800 mt-0.5">{{ fp.maklumat_asas.emel_responden|default:"-" }}</p></div>
                     </div>
+                    {% else %}
+                    <p class="text-sm font-semibold text-slate-400 italic">Belum Diisi</p>
                     {% endif %}
                 </div>
                 
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Nama Fasiliti" value=fp.maklumat_asas.nama_fasiliti type="text" %}
-                    {% include 'home/_detail_row.html' with label="Kelas Fasiliti" value=fp.maklumat_asas.get_jenis_fasiliti_display type="text" %}
-                    {% include 'home/_detail_row.html' with label="Tahun Dibina" value=fp.k_kejuruteraan.tahun_dibina type="text" %}
-                    {% include 'home/_detail_row.html' with label="Ketua Fasiliti (Person in Charge)" value=fp.k_perkhidmatan.siapa_manage type="text" %}
+                <div class="px-5 py-3 bg-slate-50/50 border-b border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">1.2 Maklumat Fasiliti & Lokasi</p>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-100">
+                    {% include 'home/_detail_row.html' with label="i. Nama Fasiliti Kesihatan" value=fp.maklumat_asas.nama_fasiliti type="text" %}
+                    {% include 'home/_detail_row.html' with label="ii. Kod Fasiliti" value=fp.maklumat_asas.kod_fasiliti type="text" %}
+                    {% include 'home/_detail_row.html' with label="iii. Kategori Fasiliti" value=fp.maklumat_asas.kategori_fasiliti type="text" %}
+                    {% include 'home/_detail_row.html' with label="iv. Jenis Fasiliti" value=fp.maklumat_asas.get_jenis_fasiliti_display type="text" %}
+                    
+                    <div class="col-span-2 border-t border-slate-100">
+                        {% include 'home/_detail_row.html' with label="v. Alamat Penuh" value=fp.maklumat_asas.alamat type="long" %}
+                    </div>
+                    
+                    {% include 'home/_detail_row.html' with label="vi. Poskod" value=fp.maklumat_asas.poskod type="text" %}
+                    {% include 'home/_detail_row.html' with label="vii. Daerah / Bandar" value=fp.maklumat_asas.daerah type="text" %}
+                    {% include 'home/_detail_row.html' with label="viii. Negeri" value=fp.maklumat_asas.get_negeri_display type="text" %}
+                    {% include 'home/_detail_row.html' with label="ix. Latitud" value=fp.maklumat_asas.latitud type="text" %}
+                    {% include 'home/_detail_row.html' with label="x. Longitud" value=fp.maklumat_asas.longitud type="text" %}
+                    {% include 'home/_detail_row.html' with label="xi. Ketua Fasiliti" value=fp.maklumat_asas.ketua_fasiliti type="text" %}
                 </div>
             </div>
 

@@ -58,49 +58,63 @@
 <div class="sec-group">
     <div class="sec-title"><div class="sec-dot bg-indigo-50 text-indigo-600">1.2</div><span class="sec-label font-extrabold text-slate-700">Maklumat Fasiliti & Lokasi</span></div>
     <div class="grid grid-cols-2 gap-4">
-        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">Nama Fasiliti Kesihatan <span class="text-red-500">*</span></label><input type="text" name="nama_fasiliti" class="f-input font-bold text-indigo-700" value="{{ fp.maklumat_asas.nama_fasiliti|default:'' }}" required></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Ketua Fasiliti</label><input type="text" name="ketua_fasiliti" class="f-input" value="{{ fp.maklumat_asas.ketua_fasiliti|default:'' }}"></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Kod Fasiliti</label><input type="text" name="kod_fasiliti" class="f-input" value="{{ fp.maklumat_asas.kod_fasiliti|default:'' }}"></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Kategori Fasiliti</label><input type="text" name="kategori_fasiliti" class="f-input" value="{{ fp.maklumat_asas.kategori_fasiliti|default:'' }}"></div>
+        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">i. Nama Fasiliti Kesihatan <span class="text-red-500">*</span></label><input type="text" name="nama_fasiliti" class="f-input font-bold text-indigo-700" value="{{ fp.maklumat_asas.nama_fasiliti|default:'' }}" required></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">ii. Kod Fasiliti</label><input type="text" name="kod_fasiliti" class="f-input" value="{{ fp.maklumat_asas.kod_fasiliti|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">iii. Kategori Fasiliti</label><input type="text" name="kategori_fasiliti" class="f-input" value="{{ fp.maklumat_asas.kategori_fasiliti|default:'' }}"></div>
         
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Jenis Fasiliti <span class="text-red-500">*</span></label>
+        <div class="q-card col-span-2">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iv. Jenis Fasiliti <span class="text-red-500">*</span></label>
             <select name="jenis_fasiliti" class="f-input bg-white" required>
                 <option value="">-- Pilih Jenis --</option>
                 <option value="hospital" {% if fp.maklumat_asas.jenis_fasiliti == 'hospital' %}selected{% endif %}>Hospital</option>
                 <option value="hospital_pakar" {% if fp.maklumat_asas.jenis_fasiliti == 'hospital_pakar' %}selected{% endif %}>Hospital Pakar</option>
                 <option value="klinik_kesihatan" {% if fp.maklumat_asas.jenis_fasiliti == 'klinik_kesihatan' %}selected{% endif %}>Klinik Kesihatan</option>
                 <option value="klinik_desa" {% if fp.maklumat_asas.jenis_fasiliti == 'klinik_desa' %}selected{% endif %}>Klinik Desa</option>
+                <option value="klinik_komuniti" {% if fp.maklumat_asas.jenis_fasiliti == 'klinik_komuniti' %}selected{% endif %}>Klinik Komuniti</option>
+                <option value="institusi_perubatan_khas" {% if fp.maklumat_asas.jenis_fasiliti == 'institusi_perubatan_khas' %}selected{% endif %}>Institusi Perubatan Khas</option>
+                <option value="institusi_latihan" {% if fp.maklumat_asas.jenis_fasiliti == 'institusi_latihan' %}selected{% endif %}>Institusi Latihan</option>
                 <option value="klinik_pergigian" {% if fp.maklumat_asas.jenis_fasiliti == 'klinik_pergigian' %}selected{% endif %}>Klinik Pergigian</option>
+                <option value="pkp" {% if fp.maklumat_asas.jenis_fasiliti == 'pkp' %}selected{% endif %}>Pejabat Kesihatan Pergigian</option>
                 <option value="lain" {% if fp.maklumat_asas.jenis_fasiliti == 'lain' %}selected{% endif %}>Lain-lain</option>
             </select>
         </div>
 
-        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">Alamat Penuh</label><textarea name="alamat" class="f-input h-20">{{ fp.maklumat_asas.alamat|default:'' }}</textarea></div>
+        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">v. Alamat Penuh</label><textarea name="alamat" class="f-input h-20">{{ fp.maklumat_asas.alamat|default:'' }}</textarea></div>
         
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Poskod</label><input type="text" name="poskod" class="f-input" value="{{ fp.maklumat_asas.poskod|default:'' }}"></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Daerah / Bandar</label><input type="text" name="daerah" class="f-input" value="{{ fp.maklumat_asas.daerah|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">vi. Poskod</label><input type="text" name="poskod" class="f-input" value="{{ fp.maklumat_asas.poskod|default:'' }}"></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">vii. Daerah / Bandar</label><input type="text" name="daerah" class="f-input" value="{{ fp.maklumat_asas.daerah|default:'' }}"></div>
         
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Negeri</label>
+        <div class="q-card col-span-2">
+            <label class="block text-xs font-bold text-slate-500 mb-2">viii. Negeri</label>
             <select name="negeri" class="f-input bg-white">
                 <option value="">-- Pilih Negeri --</option>
                 <option value="johor" {% if fp.maklumat_asas.negeri == 'johor' %}selected{% endif %}>Johor</option>
                 <option value="kedah" {% if fp.maklumat_asas.negeri == 'kedah' %}selected{% endif %}>Kedah</option>
-                <option value="selangor" {% if fp.maklumat_asas.negeri == 'selangor' %}selected{% endif %}>Selangor</option>
-                <option value="sarawak" {% if fp.maklumat_asas.negeri == 'sarawak' %}selected{% endif %}>Sarawak</option>
+                <option value="kelantan" {% if fp.maklumat_asas.negeri == 'kelantan' %}selected{% endif %}>Kelantan</option>
+                <option value="melaka" {% if fp.maklumat_asas.negeri == 'melaka' %}selected{% endif %}>Melaka</option>
+                <option value="negeri_sembilan" {% if fp.maklumat_asas.negeri == 'negeri_sembilan' %}selected{% endif %}>Negeri Sembilan</option>
+                <option value="pahang" {% if fp.maklumat_asas.negeri == 'pahang' %}selected{% endif %}>Pahang</option>
+                <option value="perak" {% if fp.maklumat_asas.negeri == 'perak' %}selected{% endif %}>Perak</option>
+                <option value="perlis" {% if fp.maklumat_asas.negeri == 'perlis' %}selected{% endif %}>Perlis</option>
+                <option value="pulau_pinang" {% if fp.maklumat_asas.negeri == 'pulau_pinang' %}selected{% endif %}>Pulau Pinang</option>
                 <option value="sabah" {% if fp.maklumat_asas.negeri == 'sabah' %}selected{% endif %}>Sabah</option>
+                <option value="sarawak" {% if fp.maklumat_asas.negeri == 'sarawak' %}selected{% endif %}>Sarawak</option>
+                <option value="selangor" {% if fp.maklumat_asas.negeri == 'selangor' %}selected{% endif %}>Selangor</option>
+                <option value="terengganu" {% if fp.maklumat_asas.negeri == 'terengganu' %}selected{% endif %}>Terengganu</option>
                 <option value="wp_kl" {% if fp.maklumat_asas.negeri == 'wp_kl' %}selected{% endif %}>W.P. Kuala Lumpur</option>
-                <!-- Anda boleh tambah senarai negeri penuh di sini -->
+                <option value="wp_putrajaya" {% if fp.maklumat_asas.negeri == 'wp_putrajaya' %}selected{% endif %}>W.P. Putrajaya</option>
+                <option value="wp_labuan" {% if fp.maklumat_asas.negeri == 'wp_labuan' %}selected{% endif %}>W.P. Labuan</option>
             </select>
         </div>
         
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Latitud & Longitud (Format: 3.123, 101.456)</label>
+        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">ix. & x. Latitud & Longitud (Format: 3.123, 101.456)</label>
             <div class="flex gap-2">
                 <input type="text" name="latitud" class="f-input" placeholder="Latitud" value="{{ fp.maklumat_asas.latitud|default:'' }}">
                 <input type="text" name="longitud" class="f-input" placeholder="Longitud" value="{{ fp.maklumat_asas.longitud|default:'' }}">
             </div>
         </div>
+        
+        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">xi. Ketua Fasiliti</label><input type="text" name="ketua_fasiliti" class="f-input" value="{{ fp.maklumat_asas.ketua_fasiliti|default:'' }}" placeholder="Cth: Dr. Ahmad - Pengarah Hospital"></div>
     </div>
 </div>
 
