@@ -70,7 +70,8 @@
     
     <!-- Table: Senarai Peralatan -->
     <div class="q-card mb-4">
-        <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Peralatan Perubatan</label>
+        <label class="block text-xs font-bold text-slate-500 mb-2">i. Senarai peralatan perubatan (unit, kekerapan penggunaan & keadaan)</label>
+        
         <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
             <table class="w-full text-left dyn-table">
                 <thead><tr><th>Peralatan</th><th>Unit</th><th>Kekerapan Penggunaan</th><th>Keadaan</th><th class="w-10"></th></tr></thead>
@@ -81,24 +82,24 @@
         <input type="hidden" name="json_peralatan_data" id="json_peralatan_data">
         
         <div class="mt-4 border-t border-slate-200 pt-4">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Atau Muat Naik Dokumen Senarai Peralatan</label>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Atau Muat Naik Dokumen Senarai Peralatan</label>
             <div class="file-upload-wrapper" id="wrap-peralatan">
                 <input type="file" name="fail_peralatan" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-peralatan')">
                 <div class="file-display" id="disp-peralatan">
                     {% if fp.k_aset_perubatan.fail_peralatan %}
-                        <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] truncate">{{ fp.k_aset_perubatan.fail_peralatan.name }}</p>
+                        <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">{{ fp.k_aset_perubatan.fail_peralatan.name|slice:"15:" }}</p>
                     {% else %}
                         <i class="fas fa-cloud-upload-alt text-3xl text-teal-400 mb-2"></i><p class="text-xs">Klik/Seret fail (Maksima 5MB)</p>
                     {% endif %}
                 </div>
             </div>
-            <a href="#" class="text-[10px] font-bold text-teal-600 hover:underline mt-1 block text-right"><i class="fas fa-download"></i> Muat Turun Templat</a>
         </div>
     </div>
 
     <!-- Table: Tidak ikut spec -->
     <div class="q-card mb-4">
-        <label class="block text-xs font-bold text-slate-500 mb-2">Aset/Peralatan Tidak Mengikut Spesifikasi KKM</label>
+        <label class="block text-xs font-bold text-slate-500 mb-2">ii. Aset/Peralatan Tidak Mengikut Spesifikasi KKM</label>
+        
         <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
             <table class="w-full text-left dyn-table">
                 <thead><tr><th>Nama Aset/Peralatan</th><th>Justifikasi / Catatan</th><th class="w-10"></th></tr></thead>
@@ -109,18 +110,17 @@
         <input type="hidden" name="json_aset_tidak_spec_data" id="json_aset_tidak_spec_data">
         
         <div class="mt-4 border-t border-slate-200 pt-4">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Atau Muat Naik Dokumen Senarai Aset Tidak Spec</label>
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Atau Muat Naik Dokumen Senarai Aset Tidak Spec</label>
             <div class="file-upload-wrapper" id="wrap-tidak-spec">
                 <input type="file" name="fail_aset_tidak_spec" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-tidak-spec')">
                 <div class="file-display" id="disp-tidak-spec">
                     {% if fp.k_aset_perubatan.fail_aset_tidak_spec %}
-                        <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] truncate">{{ fp.k_aset_perubatan.fail_aset_tidak_spec.name }}</p>
+                        <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">{{ fp.k_aset_perubatan.fail_aset_tidak_spec.name|slice:"15:" }}</p>
                     {% else %}
                         <i class="fas fa-cloud-upload-alt text-3xl text-teal-400 mb-2"></i><p class="text-xs">Klik/Seret fail (Maksima 5MB)</p>
                     {% endif %}
                 </div>
             </div>
-            <a href="#" class="text-[10px] font-bold text-teal-600 hover:underline mt-1 block text-right"><i class="fas fa-download"></i> Muat Turun Templat</a>
         </div>
     </div>
 </div>
@@ -129,12 +129,12 @@
 <div class="sec-group">
     <div class="sec-title"><div class="sec-dot bg-teal-50 text-teal-600">3.2</div><span class="sec-label">Bekalan & Kemudahan Rawatan</span></div>
     <div class="grid grid-cols-2 gap-4 mb-4">
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Bekalan bahan habis (consumables) mencukupi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="consumables_mencukupi" id="c_y" value="1" {% if fp.k_aset_perubatan.consumables_mencukupi == True %}checked{% endif %}><label for="c_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="consumables_mencukupi" id="c_t" value="0" {% if fp.k_aset_perubatan.consumables_mencukupi == False %}checked{% endif %}><label for="c_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Bekalan ubat-ubatan mencukupi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ubat_mencukupi" id="u_y" value="1" {% if fp.k_aset_perubatan.ubat_mencukupi == True %}checked{% endif %}><label for="u_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ubat_mencukupi" id="u_t" value="0" {% if fp.k_aset_perubatan.ubat_mencukupi == False %}checked{% endif %}><label for="u_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Mempunyai ruang simpanan bekalan darah?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_blood_bank" id="b_y" value="1" {% if fp.k_aset_perubatan.ada_blood_bank == True %}checked{% endif %}><label for="b_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_blood_bank" id="b_t" value="0" {% if fp.k_aset_perubatan.ada_blood_bank == False %}checked{% endif %}><label for="b_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Menyediakan rawatan hemodialisis?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_hemodialisis" id="h_y" value="1" {% if fp.k_aset_perubatan.ada_hemodialisis == True %}checked{% endif %}><label for="h_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_hemodialisis" id="h_t" value="0" {% if fp.k_aset_perubatan.ada_hemodialisis == False %}checked{% endif %}><label for="h_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Menyediakan perkhidmatan radiologi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_radiologi" id="r_y" value="1" {% if fp.k_aset_perubatan.ada_radiologi == True %}checked{% endif %}><label for="r_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_radiologi" id="r_t" value="0" {% if fp.k_aset_perubatan.ada_radiologi == False %}checked{% endif %}><label for="r_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Mempunyai makmal?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_makmal" id="m_y" value="1" {% if fp.k_aset_perubatan.ada_makmal == True %}checked{% endif %}><label for="m_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_makmal" id="m_t" value="0" {% if fp.k_aset_perubatan.ada_makmal == False %}checked{% endif %}><label for="m_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">iii. Adakah bekalan bahan habis perubatan (medical consumable supplies) di fasiliti ini mencukupi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="consumables_mencukupi" id="c_y" value="1" {% if fp.k_aset_perubatan.consumables_mencukupi == True %}checked{% endif %}><label for="c_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="consumables_mencukupi" id="c_t" value="0" {% if fp.k_aset_perubatan.consumables_mencukupi == False %}checked{% endif %}><label for="c_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">iv. Adakah bekalan ubat-ubatan di fasiliti ini mencukupi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ubat_mencukupi" id="u_y" value="1" {% if fp.k_aset_perubatan.ubat_mencukupi == True %}checked{% endif %}><label for="u_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ubat_mencukupi" id="u_t" value="0" {% if fp.k_aset_perubatan.ubat_mencukupi == False %}checked{% endif %}><label for="u_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">v. Adakah fasiliti ini mempunyai ruang penyimpanan bekalan darah?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_blood_bank" id="b_y" value="1" {% if fp.k_aset_perubatan.ada_blood_bank == True %}checked{% endif %}><label for="b_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_blood_bank" id="b_t" value="0" {% if fp.k_aset_perubatan.ada_blood_bank == False %}checked{% endif %}><label for="b_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">vi. Adakah fasiliti ini menyediakan rawatan hemodialisis?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_hemodialisis" id="h_y" value="1" {% if fp.k_aset_perubatan.ada_hemodialisis == True %}checked{% endif %}><label for="h_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_hemodialisis" id="h_t" value="0" {% if fp.k_aset_perubatan.ada_hemodialisis == False %}checked{% endif %}><label for="h_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">vii. Adakah fasiliti ini menyediakan perkhidmatan radiologi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_radiologi" id="r_y" value="1" {% if fp.k_aset_perubatan.ada_radiologi == True %}checked{% endif %}><label for="r_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_radiologi" id="r_t" value="0" {% if fp.k_aset_perubatan.ada_radiologi == False %}checked{% endif %}><label for="r_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">viii. Adakah fasiliti ini mempunyai makmal?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_makmal" id="m_y" value="1" {% if fp.k_aset_perubatan.ada_makmal == True %}checked{% endif %}><label for="m_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_makmal" id="m_t" value="0" {% if fp.k_aset_perubatan.ada_makmal == False %}checked{% endif %}><label for="m_t" class="tidak">Tidak</label></div></div></div>
     </div>
 </div>
 

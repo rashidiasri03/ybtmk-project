@@ -58,34 +58,39 @@
 <form method="post" enctype="multipart/form-data" id="kewanganForm" class="space-y-6">
 {% csrf_token %}
 
+<!-- 6.1 Peruntukan Kewangan -->
 <div class="sec-group">
-    <div class="sec-title"><div class="sec-dot bg-amber-50 text-amber-600">6.1</div><span class="sec-label">Peruntukan Kewangan & Konsesi</span></div>
+    <div class="sec-title"><div class="sec-dot bg-amber-50 text-amber-600">6.1</div><span class="sec-label">Peruntukan Kewangan</span></div>
     
     <div class="grid grid-cols-2 gap-4 mb-4">
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Belanja Mengurus (Operational Expenditure)</label>
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Belanja Mengurus (Operational Expenditure)</label>
             <input type="text" name="belanja_mengurus" class="f-input" placeholder="Cth: RM 500,000" value="{{ fp.k_kewangan.belanja_mengurus|default:'' }}">
         </div>
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Belanja Pembangunan (Development Expenditure)</label>
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Belanja Pembangunan (Development Expenditure)</label>
             <input type="text" name="belanja_pembangunan" class="f-input" placeholder="Cth: RM 200,000" value="{{ fp.k_kewangan.belanja_pembangunan|default:'' }}">
-        </div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Adakah perkhidmatan penyelenggaraan konsesi berjalan lancar?</label>
-            <div class="flex gap-2"><div class="pill-item"><input type="radio" name="konsesi_lancar" id="kl_y" value="1" {% if fp.k_kewangan.konsesi_lancar == True %}checked{% endif %}><label for="kl_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="konsesi_lancar" id="kl_t" value="0" {% if fp.k_kewangan.konsesi_lancar == False %}checked{% endif %}><label for="kl_t" class="tidak">Tidak</label></div></div>
-        </div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Nyatakan isu/masalah utama yang dihadapi</label>
-            <input type="text" name="isu_utama" class="f-input" placeholder="Cth: Kelewatan alat ganti..." value="{{ fp.k_kewangan.isu_utama|default:'' }}">
         </div>
     </div>
 </div>
 
+<!-- 6.2 Perkhidmatan Konsesi & Isu Utama -->
 <div class="sec-group">
-    <div class="sec-title"><div class="sec-dot bg-amber-50 text-amber-600">6.2</div><span class="sec-label">Perancangan Masa Depan</span></div>
+    <div class="sec-title"><div class="sec-dot bg-amber-50 text-amber-600">6.2</div><span class="sec-label">Perkhidmatan Konsesi & Isu Utama</span></div>
     
-    <div class="q-card mb-4">
-        <label class="block text-xs font-bold text-slate-500 mb-2">Adakah fasiliti ini memerlukan penambahan infrastruktur/peralatan baharu?</label>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Adakah perkhidmatan penyelenggaraan konsesi berjalan lancar?</label>
+            <div class="flex gap-2"><div class="pill-item"><input type="radio" name="konsesi_lancar" id="kl_y" value="1" {% if fp.k_kewangan.konsesi_lancar == True %}checked{% endif %}><label for="kl_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="konsesi_lancar" id="kl_t" value="0" {% if fp.k_kewangan.konsesi_lancar == False %}checked{% endif %}><label for="kl_t" class="tidak">Tidak</label></div></div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Nyatakan isu/masalah utama yang dihadapi berkaitan penyampaian fasiliti ini.</label>
+            <input type="text" name="isu_utama" class="f-input" placeholder="Cth: Kelewatan alat ganti..." value="{{ fp.k_kewangan.isu_utama|default:'' }}">
+        </div>
+    </div>
+    
+    <div class="q-card mb-4 mt-2">
+        <label class="block text-xs font-bold text-slate-500 mb-2">iii. Adakah fasiliti ini memerlukan penambahan infrastruktur/peralatan baharu?</label>
         <div class="flex gap-2 mb-3"><div class="pill-item"><input type="radio" name="perlu_tambah_infrastruktur" id="pti_y" value="1" onchange="toggleNote('infra_baru_wrap', false)" {% if fp.k_kewangan.perlu_tambah_infrastruktur == True %}checked{% endif %}><label for="pti_y" class="ya">Ya (Sila senaraikan)</label></div><div class="pill-item"><input type="radio" name="perlu_tambah_infrastruktur" id="pti_t" value="0" onchange="toggleNote('infra_baru_wrap', true)" {% if fp.k_kewangan.perlu_tambah_infrastruktur == False %}checked{% endif %}><label for="pti_t" class="tidak">Tidak</label></div></div>
         
         <div id="infra_baru_wrap" class="{% if fp.k_kewangan.perlu_tambah_infrastruktur != True %}hidden{% endif %}">
@@ -95,7 +100,7 @@
                     <tbody id="tb-infra"></tbody>
                 </table>
             </div>
-            <button type="button" onclick="addRow('tb-infra', ['Cth: Mesin X-Ray', 'Cth: Mesin lama kerap rosak'])" class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
+            <button type="button" onclick="addRow('tb-infra', ['Cth: Mesin X-Ray', 'Cth: Mesin lama kerap rosak'])" class="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg transition">+ Tambah Baris</button>
             <input type="hidden" name="json_infrastruktur_baru_data" id="json_infrastruktur_baru_data">
         </div>
     </div>

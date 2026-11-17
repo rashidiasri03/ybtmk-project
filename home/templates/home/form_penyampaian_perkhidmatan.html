@@ -12,41 +12,88 @@
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
         body { background: #f0f4fa; }
+
         .pill-item input[type="radio"] { display:none; }
-        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:9px 22px; border-radius:99px;
+            border:2px solid #e2e8f0; cursor:pointer;
+            font-size:.8rem; font-weight:700; color:#64748b; background:#fff;
+            transition:all .15s ease; user-select:none;
+        }
         .pill-item label:hover { border-color:#94a3b8; }
-        .pill-item input:checked + label.ya { border-color:#e11d48; background:#fff1f2; color:#be123c; }
-        .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
-        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
-        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(190,18,60,.05); }
-        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
-        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
-        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; outline:none; transition:all .15s; }
+        .pill-item input:checked + label.ya    { border-color:#e11d48; background:#fff1f2; color:#be123c; }
+        .pill-item input:checked + label.tidak { border-color:#94a3b8; background:#f1f5f9; color:#475569; }
+        .pill-item input:checked + label.other { border-color:#d97706; background:#fffbeb; color:#b45309; }
+
+        .q-card {
+            background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px;
+            padding:16px 18px; transition:box-shadow .2s, border-color .2s;
+        }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(225,29,72,.08); border-color:#fecdd3; }
+
+        .sec-group {
+            background:#fff; border:1.5px solid #e4eaf5; border-radius:20px;
+            padding:20px 20px 18px; box-shadow:0 2px 16px rgba(225,29,72,.05);
+        }
+        .sec-title {
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:14px; padding-bottom:13px;
+            border-bottom:1.5px solid #f0f4fb;
+        }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; font-weight:bold; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; text-transform:uppercase; }
+
+        .f-input {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
         .f-input:focus { border-color:#e11d48; box-shadow:0 0 0 3px rgba(225,29,72,.1); }
-        .btn-submit { background:linear-gradient(110deg,#be123c,#e11d48); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; }
-        
-        .file-upload-wrapper { position: relative; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; background: #f8fafc; transition: all 0.2s; cursor: pointer; }
+
+        .btn-submit {
+            background:linear-gradient(110deg,#e11d48,#be123c); color:#fff;
+            border:none; border-radius:14px; padding:13px 36px;
+            font-size:.9rem; font-weight:800; cursor:pointer;
+            transition:all .2s; box-shadow:0 4px 20px rgba(225,29,72,.3);
+        }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+
+        /* File Upload */
+        .file-upload-wrapper { position: relative; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; background: #f8fafc; transition: all 0.2s; cursor: pointer; overflow: hidden; }
         .file-upload-wrapper:hover { border-color: #e11d48; background: #fff1f2; }
         .file-upload-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
         .file-display { pointer-events: none; }
-        
+
+        /* Dynamic Table */
         .dyn-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; }
         .dyn-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
-        .dyn-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; }
+        .dyn-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; transition: border 0.2s; }
+        .dyn-input:focus { border-color: #e11d48; }
     </style>
 </head>
 <body class="min-h-screen">
+
+<!-- TOP BAR -->
 <nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
     <div class="px-8 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
-            <div><p class="text-[9px] font-bold tracking-widest text-rose-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Penyampaian Perkhidmatan</p></div>
+            <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-widest text-rose-500 uppercase leading-none">KKM</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">Penyampaian Perkhidmatan</p>
+            </div>
         </div>
-        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali
+        </a>
     </div>
 </nav>
 
-<div class="bg-gradient-to-r from-rose-700 via-rose-600 to-rose-500 relative overflow-hidden">
+<!-- HERO STRIP -->
+<div class="bg-gradient-to-r from-rose-700 via-rose-600 to-pink-500 relative overflow-hidden">
     <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
     <div class="relative z-10 px-10 py-7">
         <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 5: PENYAMPAIAN PERKHIDMATAN</h1>
@@ -54,8 +101,8 @@
     </div>
 </div>
 
-<main class="px-8 pb-16 pt-6">
-<form method="post" enctype="multipart/form-data" id="perkForm" class="space-y-6">
+<main class="px-8 pb-16 pt-6 max-w-7xl mx-auto">
+<form method="post" enctype="multipart/form-data" id="svForm" class="space-y-6">
 {% csrf_token %}
 
 <!-- 5.1 Operasi & Pesakit -->
@@ -63,56 +110,48 @@
     <div class="sec-title"><div class="sec-dot bg-rose-50 text-rose-600">5.1</div><span class="sec-label">Operasi & Pesakit</span></div>
     
     <div class="grid grid-cols-2 gap-4 mb-4">
-        <!-- Waktu Operasi -->
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Waktu Operasi</label>
+        <div class="q-card col-span-2">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Waktu Operasi</label>
             <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
                 <table class="w-full text-left dyn-table">
-                    <thead><tr><th>Hari</th><th>Masa Mula</th><th>Masa Tamat</th><th class="w-8"></th></tr></thead>
-                    <tbody id="tb-waktu"></tbody>
+                    <thead><tr><th>Hari</th><th>Waktu Mula</th><th>Waktu Tamat</th><th class="w-10"></th></tr></thead>
+                    <tbody id="tbody-operasi"></tbody>
                 </table>
             </div>
-            <button type="button" onclick="addRow('tb-waktu', ['Cth: Isnin-Jumaat', 'Cth: 08:00 AM', 'Cth: 05:00 PM'])" class="text-[10px] font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
-            <input type="hidden" name="json_waktu_operasi_data" id="json_waktu_operasi_data">
+            <button type="button" onclick="addRow('tbody-operasi', ['Cth: Isnin - Jumaat', '8.00 pagi', '5.00 petang'])" class="text-[10px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition border border-rose-200 shadow-sm">+ Tambah Jadual Operasi</button>
+            <input type="hidden" name="json_waktu_operasi" id="json_waktu_operasi">
         </div>
         
-        <!-- Anggaran Pelawat -->
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Anggaran Pelawat Sehari</label>
-            <input type="number" name="anggaran_pelawat" class="f-input mb-3" value="{{ fp.k_perkhidmatan.anggaran_pelawat|default:'' }}">
+        <div class="q-card col-span-2">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">ii. Anggaran Pelawat Sehari</label>
+            <input type="number" name="anggaran_pelawat" class="f-input" min="0" placeholder="0" value="{{ fp.k_perkhidmatan.anggaran_pelawat|default:'' }}">
         </div>
 
-        <!-- Program Disediakan -->
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Program / Perkhidmatan Disediakan</label>
-            <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
-                <table class="w-full text-left dyn-table">
-                    <thead><tr><th>Nama Program</th><th>Kekerapan</th><th class="w-8"></th></tr></thead>
-                    <tbody id="tb-program"></tbody>
-                </table>
-            </div>
-            <button type="button" onclick="addRow('tb-program', ['Cth: Klinik Ibu Mengandung', 'Cth: Setiap Selasa'])" class="text-[10px] font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
-            <input type="hidden" name="json_program_data" id="json_program_data">
-            <div class="mt-3 border-t border-slate-200 pt-3">
-                <div class="file-upload-wrapper" id="w-prog"><input type="file" name="fail_program" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-prog')">
-                <div class="file-display" id="d-prog">{% if fp.k_perkhidmatan.fail_program %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_perkhidmatan.fail_program.name }}</p>{% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Atau Muat Naik Dokumen Program</p>{% endif %}</div></div>
+        <div class="q-card border-rose-100 bg-rose-50/20">
+            <label class="block text-xs font-extrabold text-rose-800 mb-2">iii. Program / Perkhidmatan Disediakan</label>
+            <div class="file-upload-wrapper" id="wrap-program">
+                <input type="file" name="fail_program" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-program')">
+                <div class="file-display" id="disp-program">
+                    {% if fp.k_perkhidmatan.fail_program %}
+                        <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">{{ fp.k_perkhidmatan.fail_program.name|slice:"15:" }}</p>
+                    {% else %}
+                        <i class="fas fa-cloud-upload-alt text-3xl text-rose-400 mb-2"></i><p class="text-xs">Klik/Seret fail ke sini (Maksima 5MB)</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
-        <!-- Jenis Penyakit Kerap -->
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Jenis Penyakit Kerap Dilaporkan</label>
-            <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
-                <table class="w-full text-left dyn-table">
-                    <thead><tr><th>Jenis Penyakit</th><th>Anggaran Kes/Bulan</th><th class="w-8"></th></tr></thead>
-                    <tbody id="tb-penyakit"></tbody>
-                </table>
-            </div>
-            <button type="button" onclick="addRow('tb-penyakit', ['Cth: Denggi', 'Cth: 50'])" class="text-[10px] font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
-            <input type="hidden" name="json_penyakit_data" id="json_penyakit_data">
-            <div class="mt-3 border-t border-slate-200 pt-3">
-                <div class="file-upload-wrapper" id="w-peny"><input type="file" name="fail_penyakit" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-peny')">
-                <div class="file-display" id="d-peny">{% if fp.k_perkhidmatan.fail_penyakit %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_perkhidmatan.fail_penyakit.name }}</p>{% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Atau Muat Naik Dokumen Penyakit</p>{% endif %}</div></div>
+        <div class="q-card border-rose-100 bg-rose-50/20">
+            <label class="block text-xs font-extrabold text-rose-800 mb-2">iv. Jenis Penyakit Kerap Dilaporkan</label>
+            <div class="file-upload-wrapper" id="wrap-penyakit">
+                <input type="file" name="fail_penyakit" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-penyakit')">
+                <div class="file-display" id="disp-penyakit">
+                    {% if fp.k_perkhidmatan.fail_penyakit %}
+                        <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">{{ fp.k_perkhidmatan.fail_penyakit.name|slice:"15:" }}</p>
+                    {% else %}
+                        <i class="fas fa-cloud-upload-alt text-3xl text-rose-400 mb-2"></i><p class="text-xs">Klik/Seret fail ke sini (Maksima 5MB)</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -123,42 +162,91 @@
     <div class="sec-title"><div class="sec-dot bg-rose-50 text-rose-600">5.2</div><span class="sec-label">Kapasiti Rawatan & Keselesaan</span></div>
     
     <div class="grid grid-cols-2 gap-4 mb-4">
-        <!-- Ruang Menunggu -->
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Ruang menunggu mencukupi dan selesa?</label>
-            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="ruang_menunggu_selesa" id="rm_y" value="1" onchange="toggleNote('rm_nota', false)" {% if fp.k_perkhidmatan.ruang_menunggu_selesa == True %}checked{% endif %}><label for="rm_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ruang_menunggu_selesa" id="rm_t" value="0" onchange="toggleNote('rm_nota', true)" {% if fp.k_perkhidmatan.ruang_menunggu_selesa == False %}checked{% endif %}><label for="rm_t" class="tidak">Tidak</label></div></div>
-            <div id="rm_nota" class="{% if fp.k_perkhidmatan.ruang_menunggu_selesa != False %}hidden{% endif %} mt-2"><input type="text" name="ruang_menunggu_nota" class="f-input" placeholder="Nyatakan masalah (Cth: Panas/Sempit)..." value="{{ fp.k_perkhidmatan.ruang_menunggu_nota|default:'' }}"></div>
-        </div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Fasiliti menyediakan wad untuk pesakit?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_wad" id="aw_y" value="1" {% if fp.k_perkhidmatan.ada_wad == True %}checked{% endif %}><label for="aw_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_wad" id="aw_t" value="0" {% if fp.k_perkhidmatan.ada_wad == False %}checked{% endif %}><label for="aw_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Wad lelaki dan perempuan diasingkan?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="wad_asing_jantina" id="wa_y" value="1" {% if fp.k_perkhidmatan.wad_asing_jantina == True %}checked{% endif %}><label for="wa_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="wad_asing_jantina" id="wa_t" value="0" {% if fp.k_perkhidmatan.wad_asing_jantina == False %}checked{% endif %}><label for="wa_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Katil wad mencukupi untuk pesakit?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="katil_mencukupi" id="km_y" value="1" {% if fp.k_perkhidmatan.katil_mencukupi == True %}checked{% endif %}><label for="km_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="katil_mencukupi" id="km_t" value="0" {% if fp.k_perkhidmatan.katil_mencukupi == False %}checked{% endif %}><label for="km_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Menyediakan perkhidmatan kaunseling?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_kaunseling" id="ka_y" value="1" {% if fp.k_perkhidmatan.ada_kaunseling == True %}checked{% endif %}><label for="ka_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_kaunseling" id="ka_t" value="0" {% if fp.k_perkhidmatan.ada_kaunseling == False %}checked{% endif %}><label for="ka_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Menyediakan perkhidmatan rehabilitasi?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_rehabilitasi" id="rh_y" value="1" {% if fp.k_perkhidmatan.ada_rehabilitasi == True %}checked{% endif %}><label for="rh_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_rehabilitasi" id="rh_t" value="0" {% if fp.k_perkhidmatan.ada_rehabilitasi == False %}checked{% endif %}><label for="rh_t" class="tidak">Tidak</label></div></div></div>
-        
-        <!-- Selesai Kes -->
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Rawatan bagi setiap penyakit dapat diselesaikan sepenuhnya?</label>
-            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="boleh_selesai_kes" id="bs_y" value="1" onchange="toggleNote('bs_nota', false)" {% if fp.k_perkhidmatan.boleh_selesai_kes == True %}checked{% endif %}><label for="bs_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="boleh_selesai_kes" id="bs_t" value="0" onchange="toggleNote('bs_nota', true)" {% if fp.k_perkhidmatan.boleh_selesai_kes == False %}checked{% endif %}><label for="bs_t" class="tidak">Tidak (Nyatakan)</label></div></div>
-            <div id="bs_nota" class="{% if fp.k_perkhidmatan.boleh_selesai_kes != False %}hidden{% endif %} mt-2"><input type="text" name="boleh_selesai_kes_nota" class="f-input" placeholder="Cth: Kekurangan pakar, perlu rujuk ke Hospital X..." value="{{ fp.k_perkhidmatan.boleh_selesai_kes_nota|default:'' }}"></div>
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Adakah ruang menunggu mencukupi dan selesa?</label>
+            <div class="flex gap-2 mb-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="ruang_menunggu_selesa" id="rm_y" value="1" onchange="toggleNote('rm_nota_wrap', false)" {% if fp.k_perkhidmatan.ruang_menunggu_selesa == True %}checked{% endif %}><label for="rm_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ruang_menunggu_selesa" id="rm_t" value="0" onchange="toggleNote('rm_nota_wrap', true)" {% if fp.k_perkhidmatan.ruang_menunggu_selesa == False %}checked{% endif %}><label for="rm_t" class="other"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+            </div>
+            <div id="rm_nota_wrap" class="{% if fp.k_perkhidmatan.ruang_menunggu_selesa != False %}hidden{% endif %} mt-2">
+                <input type="text" name="ruang_menunggu_nota" class="f-input" placeholder="Nyatakan kenapa tidak selesa..." value="{{ fp.k_perkhidmatan.ruang_menunggu_nota|default:'' }}">
+            </div>
         </div>
         
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Anggaran Masa Menunggu Rawatan</label><select name="anggaran_masa_tunggu" class="f-input"><option value="">-- Pilih --</option><option value="Kurang 30 Minit" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == 'Kurang 30 Minit' %}selected{% endif %}>Kurang 30 Minit</option><option value="30 Minit - 1 Jam" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == '30 Minit - 1 Jam' %}selected{% endif %}>30 Minit - 1 Jam</option><option value="1 - 2 Jam" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == '1 - 2 Jam' %}selected{% endif %}>1 - 2 Jam</option><option value="Lebih 2 Jam" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == 'Lebih 2 Jam' %}selected{% endif %}>Lebih 2 Jam</option></select></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Adakah fasiliti ini menyediakan wad untuk pesakit?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_wad" id="aw_y" value="1" {% if fp.k_perkhidmatan.ada_wad == True %}checked{% endif %}><label for="aw_y" class="ya">Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_wad" id="aw_t" value="0" {% if fp.k_perkhidmatan.ada_wad == False %}checked{% endif %}><label for="aw_t" class="tidak">Tidak</label></div>
+            </div>
+        </div>
         
-        <!-- Fasiliti Terdekat -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iii. Adakah wad lelaki dan perempuan diasingkan?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="wad_asing_jantina" id="waj_y" value="1" {% if fp.k_perkhidmatan.wad_asing_jantina == True %}checked{% endif %}><label for="waj_y" class="ya">Ya</label></div>
+                <div class="pill-item"><input type="radio" name="wad_asing_jantina" id="waj_t" value="0" {% if fp.k_perkhidmatan.wad_asing_jantina == False %}checked{% endif %}><label for="waj_t" class="tidak">Tidak</label></div>
+            </div>
+        </div>
+        
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iv. Adakah katil wad mencukupi untuk pesakit?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="katil_mencukupi" id="km_y" value="1" {% if fp.k_perkhidmatan.katil_mencukupi == True %}checked{% endif %}><label for="km_y" class="ya">Ya</label></div>
+                <div class="pill-item"><input type="radio" name="katil_mencukupi" id="km_t" value="0" {% if fp.k_perkhidmatan.katil_mencukupi == False %}checked{% endif %}><label for="km_t" class="tidak">Tidak</label></div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">v. Adakah fasiliti ini menyediakan perkhidmatan kaunseling?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_kaunseling" id="kaun_y" value="1" {% if fp.k_perkhidmatan.ada_kaunseling == True %}checked{% endif %}><label for="kaun_y" class="ya">Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kaunseling" id="kaun_t" value="0" {% if fp.k_perkhidmatan.ada_kaunseling == False %}checked{% endif %}><label for="kaun_t" class="tidak">Tidak</label></div>
+            </div>
+        </div>
+        
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">vi. Adakah fasiliti ini menyediakan perkhidmatan rehabilitasi?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_rehab" id="rehab_y" value="1" {% if fp.k_perkhidmatan.ada_rehab == True %}checked{% endif %}><label for="rehab_y" class="ya">Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_rehab" id="rehab_t" value="0" {% if fp.k_perkhidmatan.ada_rehab == False %}checked{% endif %}><label for="rehab_t" class="tidak">Tidak</label></div>
+            </div>
+        </div>
+
         <div class="q-card col-span-2">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Fasiliti Terdekat (Rujukan/Kecemasan)</label>
-            <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
-                <table class="w-full text-left dyn-table">
-                    <thead><tr><th>Nama Fasiliti</th><th>Jenis Fasiliti</th><th>Jarak (KM)</th><th class="w-8"></th></tr></thead>
-                    <tbody id="tb-fasi"></tbody>
-                </table>
+            <label class="block text-xs font-bold text-slate-500 mb-2">vii. Adakah rawatan bagi setiap penyakit dapat diselesaikan sepenuhnya?</label>
+            <div class="flex gap-2 mb-2 flex-wrap">
+                <div class="pill-item"><input type="radio" name="boleh_selesai_kes" id="bsk_y" value="1" onchange="toggleNote('bsk_nota_wrap', false)" {% if fp.k_perkhidmatan.boleh_selesai_kes == True %}checked{% endif %}><label for="bsk_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="boleh_selesai_kes" id="bsk_t" value="0" onchange="toggleNote('bsk_nota_wrap', true)" {% if fp.k_perkhidmatan.boleh_selesai_kes == False %}checked{% endif %}><label for="bsk_t" class="other"><i class="fas fa-times"></i> Tidak (Nyatakan Kekangan)</label></div>
             </div>
-            <button type="button" onclick="addRow('tb-fasi', ['Cth: Hospital Besar X', 'Cth: Hospital Pakar', 'Cth: 15'])" class="text-[10px] font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
-            <input type="hidden" name="json_fasiliti_terdekat_data" id="json_fasiliti_terdekat_data">
-            <div class="mt-3 border-t border-slate-200 pt-3">
-                <div class="file-upload-wrapper" id="w-fasi"><input type="file" name="fail_fasiliti_terdekat" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-fasi')">
-                <div class="file-display" id="d-fasi">{% if fp.k_perkhidmatan.fail_fasiliti_terdekat %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_perkhidmatan.fail_fasiliti_terdekat.name }}</p>{% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Atau Muat Naik Dokumen Senarai Fasiliti</p>{% endif %}</div></div>
+            <div id="bsk_nota_wrap" class="{% if fp.k_perkhidmatan.boleh_selesai_kes != False %}hidden{% endif %} mt-2">
+                <input type="text" name="boleh_selesai_kes_nota" class="f-input" placeholder="Nyatakan kekangan yang ada..." value="{{ fp.k_perkhidmatan.boleh_selesai_kes_nota|default:'' }}">
             </div>
+        </div>
+
+        <div class="q-card border-rose-100 bg-rose-50/20">
+            <label class="block text-xs font-extrabold text-rose-800 mb-2">viii. Senarai Fasiliti Terdekat (Nama, Jenis, Jarak)</label>
+            <div class="file-upload-wrapper" id="wrap-fasiliti-terdekat">
+                <input type="file" name="fail_fasiliti_terdekat" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-fasiliti-terdekat')">
+                <div class="file-display" id="disp-fasiliti-terdekat">
+                    {% if fp.k_perkhidmatan.fail_fasiliti_terdekat %}
+                        <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">{{ fp.k_perkhidmatan.fail_fasiliti_terdekat.name|slice:"15:" }}</p>
+                    {% else %}
+                        <i class="fas fa-cloud-upload-alt text-3xl text-rose-400 mb-2"></i><p class="text-xs">Klik/Seret fail ke sini (Maksima 5MB)</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">ix. Anggaran Masa Menunggu Rawatan</label>
+            <select name="anggaran_masa_tunggu" class="f-input">
+                <option value="">-- Sila Pilih --</option>
+                <option value="Kurang daripada 1 jam" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == 'Kurang daripada 1 jam' %}selected{% endif %}>Kurang daripada 1 jam</option>
+                <option value="1 hingga 2 jam" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == '1 hingga 2 jam' %}selected{% endif %}>1 hingga 2 jam</option>
+                <option value="2 hingga 3 jam" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == '2 hingga 3 jam' %}selected{% endif %}>2 hingga 3 jam</option>
+                <option value="Lebih daripada 3 jam" {% if fp.k_perkhidmatan.anggaran_masa_tunggu == 'Lebih daripada 3 jam' %}selected{% endif %}>Lebih daripada 3 jam</option>
+            </select>
         </div>
     </div>
 </div>
@@ -168,13 +256,30 @@
     <div class="sec-title"><div class="sec-dot bg-rose-50 text-rose-600">5.3</div><span class="sec-label">Maklumat Tambahan</span></div>
     
     <div class="grid grid-cols-2 gap-4">
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Mempunyai unit forensik (bilik jenazah)?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_forensik" id="af_y" value="1" {% if fp.k_perkhidmatan.ada_forensik == True %}checked{% endif %}><label for="af_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_forensik" id="af_t" value="0" {% if fp.k_perkhidmatan.ada_forensik == False %}checked{% endif %}><label for="af_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Menyediakan perkhidmatan makanan?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="sedia_makanan" id="sm_y" value="1" {% if fp.k_perkhidmatan.sedia_makanan == True %}checked{% endif %}><label for="sm_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="sedia_makanan" id="sm_t" value="0" {% if fp.k_perkhidmatan.sedia_makanan == False %}checked{% endif %}><label for="sm_t" class="tidak">Tidak</label></div></div></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Adakah fasiliti ini mempunyai unit forensik (bilik jenazah)?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_forensik" id="for_y" value="1" {% if fp.k_perkhidmatan.ada_forensik == True %}checked{% endif %}><label for="for_y" class="ya">Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_forensik" id="for_t" value="0" {% if fp.k_perkhidmatan.ada_forensik == False %}checked{% endif %}><label for="for_t" class="tidak">Tidak</label></div>
+            </div>
+        </div>
         
-        <div class="q-card col-span-2">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Kualiti perkhidmatan makanan memuaskan?</label>
-            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="makanan_memuaskan" id="mm_y" value="1" onchange="toggleNote('mm_nota', false)" {% if fp.k_perkhidmatan.makanan_memuaskan == True %}checked{% endif %}><label for="mm_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="makanan_memuaskan" id="mm_t" value="0" onchange="toggleNote('mm_nota', true)" {% if fp.k_perkhidmatan.makanan_memuaskan == False %}checked{% endif %}><label for="mm_t" class="tidak">Tidak (Nyatakan)</label></div></div>
-            <div id="mm_nota" class="{% if fp.k_perkhidmatan.makanan_memuaskan != False %}hidden{% endif %} mt-2"><input type="text" name="makanan_nota" class="f-input" placeholder="Nyatakan komen/isu..." value="{{ fp.k_perkhidmatan.makanan_nota|default:'' }}"></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Adakah fasiliti ini menyediakan perkhidmatan makanan?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_makanan" id="mak_y" value="1" onchange="toggleNote('mak_kualiti_wrap', true)" {% if fp.k_perkhidmatan.ada_makanan == True %}checked{% endif %}><label for="mak_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_makanan" id="mak_t" value="0" onchange="toggleNote('mak_kualiti_wrap', false)" {% if fp.k_perkhidmatan.ada_makanan == False %}checked{% endif %}><label for="mak_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+            <div id="mak_kualiti_wrap" class="{% if fp.k_perkhidmatan.ada_makanan != True %}hidden{% endif %} mt-3 pt-3 border-t border-slate-200">
+                <label class="block text-xs font-bold text-slate-500 mb-2">iii. Adakah kualiti perkhidmatan makanan memuaskan?</label>
+                <div class="flex gap-2 mb-2 flex-wrap">
+                    <div class="pill-item"><input type="radio" name="makanan_memuaskan" id="mm_y" value="1" onchange="toggleNote('mm_nota_wrap', false)" {% if fp.k_perkhidmatan.makanan_memuaskan == True %}checked{% endif %}><label for="mm_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                    <div class="pill-item"><input type="radio" name="makanan_memuaskan" id="mm_t" value="0" onchange="toggleNote('mm_nota_wrap', true)" {% if fp.k_perkhidmatan.makanan_memuaskan == False %}checked{% endif %}><label for="mm_t" class="other"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+                </div>
+                <div id="mm_nota_wrap" class="{% if fp.k_perkhidmatan.makanan_memuaskan != False %}hidden{% endif %} mt-2">
+                    <input type="text" name="makanan_nota" class="f-input" placeholder="Nyatakan sebab tidak memuaskan..." value="{{ fp.k_perkhidmatan.makanan_nota|default:'' }}">
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -187,9 +292,9 @@
             <input type="file" name="fail_wishlist" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-wishlist')">
             <div class="file-display" id="disp-wishlist">
                 {% if fp.k_perkhidmatan.fail_wishlist %}
-                    <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] truncate">{{ fp.k_perkhidmatan.fail_wishlist.name }}</p>
+                    <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">{{ fp.k_perkhidmatan.fail_wishlist.name|slice:"15:" }}</p>
                 {% else %}
-                    <i class="fas fa-cloud-upload-alt text-3xl text-rose-400 mb-2"></i><p class="text-xs">Klik/Seret dokumen Wishlist (Maksima 5MB)</p>
+                    <i class="fas fa-cloud-upload-alt text-3xl text-rose-400 mb-2"></i><p class="text-xs">Klik/Seret fail Wishlist (Maksima 5MB)</p>
                 {% endif %}
             </div>
         </div>
@@ -198,7 +303,7 @@
 
 <!-- SUBMIT -->
 <div class="flex items-center justify-between pt-2">
-    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Batal</a>
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">Batal</a>
     <button type="submit" onclick="prepareSubmit()" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Perkhidmatan</button>
 </div>
 
@@ -206,21 +311,26 @@
 </main>
 
 <script>
+    // ── FILE UPLOAD LOGIC ──
     function handleFile(inputElement, displayId) {
         const file = inputElement.files[0];
         const display = document.getElementById(displayId);
         if (!file) return;
-        if (file.size > 5 * 1024 * 1024) { alert("Ralat: Saiz fail melebihi had maksima 5MB."); inputElement.value = ""; return; }
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Ralat: Saiz fail melebihi had maksima 5MB.");
+            inputElement.value = ""; return;
+        }
         const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        display.innerHTML = `<p class="text-[10px] font-bold text-emerald-600 truncate"><i class="fas fa-check-circle"></i> ${file.name} (${sizeMB} MB)</p>`;
+        display.innerHTML = `<i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">${file.name} (${sizeMB} MB)</p>`;
         inputElement.parentElement.classList.add('border-emerald-400', 'bg-emerald-50');
     }
 
     function toggleNote(id, show) {
         const wrap = document.getElementById(id);
-        if(wrap) { if(!show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+        if(wrap) { if(show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
     }
 
+    // ── JADUAL DINAMIK WAKTU OPERASI ──
     function addRow(tbodyId, placeholders, existingData = null) {
         const tbody = document.getElementById(tbodyId);
         const tr = document.createElement('tr');
@@ -229,38 +339,34 @@
             const val = existingData ? existingData[index] : '';
             html += `<td><input type="text" class="dyn-input" placeholder="${ph}" value="${val}"></td>`;
         });
-        html += `<td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 p-1"><i class="fas fa-trash-alt"></i></button></td>`;
+        html += `<td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-slate-400 hover:text-red-500 p-1"><i class="fas fa-trash-alt"></i></button></td>`;
         tr.innerHTML = html;
         tbody.appendChild(tr);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        const populateTable = (rawStr, tBody, cols) => {
-            if(rawStr && rawStr !== '""' && rawStr !== '[]') {
-                try { JSON.parse(rawStr).forEach(row => addRow(tBody, cols, row)); } catch(e) {}
-            }
-        };
-        populateTable('{{ fp.k_perkhidmatan.json_waktu_operasi|safe|escapejs }}', 'tb-waktu', ['Cth: Isnin-Jumaat', 'Cth: 08:00 AM', 'Cth: 05:00 PM']);
-        populateTable('{{ fp.k_perkhidmatan.json_program|safe|escapejs }}', 'tb-program', ['Cth: Klinik Ibu Mengandung', 'Cth: Setiap Selasa']);
-        populateTable('{{ fp.k_perkhidmatan.json_penyakit|safe|escapejs }}', 'tb-penyakit', ['Cth: Denggi', 'Cth: 50']);
-        populateTable('{{ fp.k_perkhidmatan.json_fasiliti_terdekat|safe|escapejs }}', 'tb-fasi', ['Cth: Hospital Besar X', 'Cth: Hospital Pakar', 'Cth: 15']);
+        const rawOperasi = '{{ fp.k_perkhidmatan.json_waktu_operasi|safe|escapejs }}';
+        if(rawOperasi && rawOperasi !== '""' && rawOperasi !== '[]' && rawOperasi !== 'None') {
+            try {
+                const dataOp = JSON.parse(rawOperasi.replace(/"/g,'"'));
+                if(Array.isArray(dataOp)) {
+                    dataOp.forEach(row => addRow('tbody-operasi', ['Cth: Isnin - Jumaat', '8.00 pagi', '5.00 petang'], row));
+                    return;
+                }
+            } catch(e) { console.error("Ralat parse JSON jadual", e); }
+        }
+        addRow('tbody-operasi', ['Cth: Isnin - Jumaat', '8.00 pagi', '5.00 petang']);
     });
 
-    function getTableData(tbodyId) {
-        let data = [];
-        Array.from(document.getElementById(tbodyId).rows).forEach(tr => {
+    function prepareSubmit() {
+        const tbody = document.getElementById('tbody-operasi');
+        let finalData = [];
+        Array.from(tbody.rows).forEach(tr => {
             let rowVals = [];
             tr.querySelectorAll('input').forEach(inp => rowVals.push(inp.value.trim()));
-            if(rowVals.some(v => v !== '')) data.push(rowVals);
+            if(rowVals.some(v => v !== '')) { finalData.push(rowVals); }
         });
-        return JSON.stringify(data);
-    }
-
-    function prepareSubmit() {
-        document.getElementById('json_waktu_operasi_data').value = getTableData('tb-waktu');
-        document.getElementById('json_program_data').value = getTableData('tb-program');
-        document.getElementById('json_penyakit_data').value = getTableData('tb-penyakit');
-        document.getElementById('json_fasiliti_terdekat_data').value = getTableData('tb-fasi');
+        document.getElementById('json_waktu_operasi').value = JSON.stringify(finalData);
     }
 </script>
 </body>

@@ -324,35 +324,46 @@
                         <p class="text-[11px] text-slate-500">Peralatan, stok, ubat, dan aset sokongan</p>
                     </div>
                 </div>
-                {% if fp.k_aset %}
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Senarai Peralatan (Ada Isu)" value=fp.k_aset.senarai_peralatan type="long" %}
-                    {% include 'home/_detail_row.html' with label="Aset Tidak Ikut Spec KKM" value=fp.k_aset.aset_tidak_ikut_spec type="long" %}
-                    {% include 'home/_detail_row.html' with label="Disposable Assets Mencukupi?" value=fp.k_aset.disposable_mencukupi type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Bekalan Ubat Mencukupi?" value=fp.k_perkhidmatan.bekalan_ubat_mencukupi type="bool" %}
-                    
-                    {% if fp.k_aset.ada_ambulans %}
-                        {% with amb_txt="Ya ("|add:fp.k_aset.ambulans_nota|add:")" %}
-                        {% include 'home/_detail_row.html' with label="Perkhidmatan Ambulans?" value=amb_txt type="text" %}
-                        {% endwith %}
-                    {% else %}
-                        {% include 'home/_detail_row.html' with label="Perkhidmatan Ambulans?" value=fp.k_aset.ada_ambulans type="bool" %}
-                    {% endif %}
-                    
-                    {% include 'home/_detail_row.html' with label="Keadaan Perabot Ruang Menunggu/Wad" value=fp.k_fasiliti.keadaan_perabot type="long" %}
-                    {% include 'home/_detail_row.html' with label="Sistem Pendigitalan Digunakan" value=fp.k_aset.sistem_pendigitalan type="text" %}
+                {% if fp.k_aset_perubatan %}
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-50">
+                    <!-- Muat Turun Senarai (i & ii) -->
+                    <div class="col-span-2 px-6 py-4 flex flex-wrap gap-4 bg-slate-50/50">
+                        <div class="flex-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">i. Senarai Peralatan Perubatan</p>
+                            {% if fp.k_aset_perubatan.fail_peralatan %}
+                            <a href="{{ fp.k_aset_perubatan.fail_peralatan.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-teal-600 hover:bg-teal-50 transition shadow-sm mt-1"><i class="fas fa-download"></i> Muat Turun Senarai</a>
+                            {% else %}
+                            <p class="text-xs text-slate-500 font-medium">Tiada lampiran disertakan.</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 border-l border-slate-200 pl-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ii. Aset Tidak Ikut Spec</p>
+                            {% if fp.k_aset_perubatan.fail_aset_tidak_spec %}
+                            <a href="{{ fp.k_aset_perubatan.fail_aset_tidak_spec.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition shadow-sm mt-1"><i class="fas fa-download"></i> Muat Turun Senarai</a>
+                            {% else %}
+                            <p class="text-xs text-slate-500 font-medium">Tiada lampiran disertakan.</p>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                    {% if fp.k_aset.gajet_ict_baik == False %}
-                        {% with ict_txt="Tidak ("|add:fp.k_aset.gajet_ict_nota|add:")" %}
-                        {% include 'home/_detail_row.html' with label="Gajet ICT Baik & Selamat?" value=ict_txt type="text" %}
-                        {% endwith %}
-                    {% else %}
-                        {% include 'home/_detail_row.html' with label="Gajet ICT Baik & Selamat?" value=fp.k_aset.gajet_ict_baik type="bool" %}
-                    {% endif %}
-
-                    {% include 'home/_detail_row.html' with label="Kawalan Keselamatan (Security)?" value=fp.k_fasiliti.ada_security type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Perkhidmatan Hemodialisis?" value=fp.k_perkhidmatan.ada_hemodialisis type="bool" %}
+                    {% include 'home/_detail_row.html' with label="iii. Bekalan Bahan Habis (Consumables) Mencukupi?" value=fp.k_aset_perubatan.consumables_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="iv. Bekalan Ubat-Ubatan Mencukupi?" value=fp.k_aset_perubatan.ubat_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="v. Ruang Simpanan Bekalan Darah?" value=fp.k_aset_perubatan.ada_blood_bank type="bool" %}
+                    {% include 'home/_detail_row.html' with label="vi. Rawatan Hemodialisis?" value=fp.k_aset_perubatan.ada_hemodialisis type="bool" %}
+                    {% include 'home/_detail_row.html' with label="vii. Perkhidmatan Radiologi?" value=fp.k_aset_perubatan.ada_radiologi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="viii. Mempunyai Makmal?" value=fp.k_aset_perubatan.ada_makmal type="bool" %}
                 </div>
+
+                <!-- Muat Turun Wishlist -->
+                {% if fp.k_aset_perubatan.fail_wishlist %}
+                <div class="px-6 py-5 bg-teal-50/50 border-t border-teal-100">
+                    <p class="text-[10px] font-bold text-teal-600 uppercase tracking-widest mb-2"><i class="fas fa-star text-amber-400 mr-1"></i> Wishlist Aset Perubatan</p>
+                    <a href="{{ fp.k_aset_perubatan.fail_wishlist.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-xs font-bold rounded-lg hover:bg-teal-700 transition shadow-sm">
+                        <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
+                    </a>
+                </div>
+                {% endif %}
+
                 {% else %}
                 <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
                 {% endif %}
@@ -373,118 +384,85 @@
                 <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row gap-6 items-center justify-between">
                     <div class="flex gap-6 w-full md:w-auto justify-center md:justify-start">
                         <div class="text-center">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Perjawatan</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">i. Perjawatan</p>
                             <p class="text-2xl font-black text-slate-700">{{ fp.k_sumber_manusia.jumlah_perjawatan|default:"0" }}</p>
                         </div>
                         <div class="text-center border-l border-slate-200 pl-6">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pengisian</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">ii. Pengisian</p>
                             <p class="text-2xl font-black text-purple-600">{{ fp.k_sumber_manusia.jumlah_pengisian|default:"0" }}</p>
                         </div>
                         <div class="text-center border-l border-slate-200 pl-6">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Kekosongan</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">iii. Kekosongan</p>
                             <p class="text-2xl font-black text-red-500">{{ fp.k_sumber_manusia.jumlah_kekosongan|default:"0" }}</p>
                         </div>
                     </div>
                     
-                    <div class="bg-white px-5 py-3 rounded-xl border {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}border-red-200 shadow-red-100{% else %}border-emerald-100 shadow-emerald-50{% endif %} shadow-sm flex items-center gap-4 w-full md:w-auto justify-center">
-                        <div class="w-10 h-10 rounded-full {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}bg-red-50 text-red-500{% else %}bg-emerald-50 text-emerald-500{% endif %} flex items-center justify-center text-lg"><i class="fas fa-{% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}exclamation-triangle{% else %}check-circle{% endif %}"></i></div>
-                        <div>
-                            <p class="text-[10px] font-bold {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}text-red-400{% else %}text-emerald-500{% endif %} uppercase tracking-widest">Kadar Kekosongan</p>
-                            <p class="text-xl font-black {% if fp.k_sumber_manusia.peratus_kekosongan > 15 %}text-red-600{% else %}text-emerald-600{% endif %}">{{ fp.k_sumber_manusia.peratus_kekosongan }}%</p>
+                    <div class="bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 w-full md:w-auto justify-center">
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">iv. Senarai Kakitangan</p>
+                            {% if fp.k_sumber_manusia.fail_kakitangan %}
+                            <a href="{{ fp.k_sumber_manusia.fail_kakitangan.url }}" target="_blank" class="text-xs font-bold text-purple-600 hover:underline mt-1 inline-block"><i class="fas fa-download"></i> Muat Turun</a>
+                            {% else %}
+                            <p class="text-xs font-medium text-slate-500 mt-1">Tiada Fail</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-
-                <!-- JADUAL BERENAMA MENGIKUT SKIM -->
-                {% if fp.k_sumber_manusia.senarai_staf.exists %}
-                <div class="p-6 border-b border-slate-100">
-                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-4"><i class="fas fa-clipboard-list text-purple-500 mr-2"></i>Pecahan Staf Mengikut Skim</h4>
-                    
-                    <!-- Fungsi regroup menyusun data mengikut kategori skim secara automatik -->
-                    {% regroup fp.k_sumber_manusia.senarai_staf.all by get_skim_display as skim_list %}
-                    
-                    <div class="space-y-4">
-                        {% for skim in skim_list %}
-                        <div class="border border-slate-200 rounded-xl overflow-hidden">
-                            <div class="bg-slate-100 px-4 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-700 flex justify-between items-center">
-                                <span>{{ skim.grouper }}</span>
-                                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-md">{{ skim.list|length }} Orang</span>
-                            </div>
-                            <div class="divide-y divide-slate-100">
-                                {% for staf in skim.list %}
-                                <div class="px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between hover:bg-slate-50 transition gap-2">
-                                    <div>
-                                        <p class="text-sm font-bold text-slate-800">{{ staf.nama_staf }} <span class="text-[10px] text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded ml-1">{{ staf.gred }}</span></p>
-                                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5 tracking-wide">{{ staf.no_pengenalan|default:"Tiada ID" }}</p>
-                                    </div>
-                                    <div class="flex items-center gap-2 flex-wrap sm:justify-end">
-                                        {% if staf.catatan_mobilisasi %}
-                                        <span class="text-[10px] font-semibold text-slate-500 italic pr-2 border-r border-slate-200">
-                                            {{ staf.catatan_mobilisasi }}
-                                        </span>
-                                        {% endif %}
-                                        
-                                        <span class="text-[10px] font-bold px-2 py-1 rounded-md border
-                                            {% if staf.status_lantikan == 'tetap' %}bg-emerald-50 text-emerald-600 border-emerald-100
-                                            {% elif staf.status_lantikan == 'kontrak' or staf.status_lantikan == 'mystep' %}bg-amber-50 text-amber-600 border-amber-100
-                                            {% else %}bg-sky-50 text-sky-600 border-sky-100{% endif %}">
-                                            {{ staf.get_status_lantikan_display }}
-                                        </span>
-                                        
-                                        {% if staf.is_kontrak_tamat_hampir %}
-                                        <span class="text-[10px] font-bold px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 shadow-sm" title="Tamat pada {{ staf.tarikh_tamat_perkhidmatan }}">
-                                            <i class="fas fa-clock mr-1 animate-pulse"></i> Tamat Hampir ({{ staf.tarikh_tamat_perkhidmatan|date:"d M Y" }})
-                                        </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
 
                 <!-- MAKLUMAT OPERASI & ISU -->
                 <div class="grid grid-cols-1 divide-y divide-slate-50">
                     <div class="px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Terdapat Pinjaman Staf?</p>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">v. Terdapat Pinjaman Staf?</p>
                             <p class="text-sm font-bold text-slate-700">{% if fp.k_sumber_manusia.ada_kakitangan_pinjaman %}Ya ({{ fp.k_sumber_manusia.nota_kakitangan_pinjaman }}){% else %}Tidak{% endif %}</p>
                         </div>
                         <div>
-                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Krisis Kakitangan?</p>
-                            <p class="text-sm font-bold text-slate-700">{% if fp.k_sumber_manusia.ada_isu_kakitangan %}<span class="text-red-500">Ya, terdapat krisis</span>{% else %}<span class="text-emerald-500">Tiada Krisis</span>{% endif %}</p>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">vi. Krisis Kakitangan?</p>
+                            <p class="text-sm font-bold text-slate-700">{% if fp.k_sumber_manusia.ada_isu_petugas %}<span class="text-red-500">Ya, terdapat krisis ({{fp.k_sumber_manusia.isu_petugas_nota}})</span>{% else %}<span class="text-emerald-500">Tiada Krisis</span>{% endif %}</p>
                         </div>
                     </div>
+                    
                     <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Bilangan Shift Kerja</p>
-                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.jenis_shift|default:"—"|linebreaksbr }}</p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">vii. Status Pertukaran Petugas (1 Tahun)</p>
+                        <p class="text-sm font-bold {% if 'Kritikal' in fp.k_sumber_manusia.status_pertukaran %}text-red-600{% elif 'Sederhana' in fp.k_sumber_manusia.status_pertukaran %}text-amber-600{% else %}text-green-600{% endif %}">
+                            {{ fp.k_sumber_manusia.status_pertukaran|default:"—" }}
+                        </p>
+                    </div>
+
+                    <div class="px-6 py-3 bg-slate-50/50"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">4.2 Penjadualan & Syif</p></div>
+                    
+                    <div class="px-6 py-4">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">i. Bilangan Shift Kerja</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.bilangan_shift|default:"—"|linebreaksbr }}</p>
                     </div>
                     <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Corak Penugasan</p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">ii. Corak Penugasan</p>
                         <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.corak_penugasan|default:"—"|linebreaksbr }}</p>
                     </div>
                     <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Jadual Giliran (Duty Roster)</p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">iii. Pengurusan Jadual (Duty Roster)</p>
                         <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.pengurusan_jadual|default:"—"|linebreaksbr }}</p>
                     </div>
                     <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Proses Merekod Cuti</p>
-                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.cara_minta_cuti|default:"—"|linebreaksbr }}</p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">iv. Proses Merekod Cuti</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.proses_cuti|default:"—"|linebreaksbr }}</p>
                     </div>
                     <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Isu Penjadualan & Cuti</p>
-                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.isu_penempatan|default:"—"|linebreaksbr }}</p>
-                    </div>
-                    <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Status Pertukaran Petugas (1 Tahun)</p>
-                        <p class="text-sm font-bold {% if 'Kritikal' in fp.k_sumber_manusia.status_pertukaran_staf %}text-red-600{% elif 'Sederhana' in fp.k_sumber_manusia.status_pertukaran_staf %}text-amber-600{% else %}text-green-600{% endif %}">
-                            {{ fp.k_sumber_manusia.status_pertukaran_staf|default:"—" }}
-                        </p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">v. Isu Penjadualan & Syif</p>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ fp.k_sumber_manusia.isu_penjadualan|default:"—"|linebreaksbr }}</p>
                     </div>
                 </div>
+
+                <!-- Muat Turun Wishlist -->
+                {% if fp.k_sumber_manusia.fail_wishlist %}
+                <div class="px-6 py-5 bg-purple-50/50 border-t border-purple-100">
+                    <p class="text-[10px] font-bold text-purple-600 uppercase tracking-widest mb-2"><i class="fas fa-star text-amber-400 mr-1"></i> Wishlist Sumber Manusia</p>
+                    <a href="{{ fp.k_sumber_manusia.fail_wishlist.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 transition shadow-sm">
+                        <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
+                    </a>
+                </div>
+                {% endif %}
+
                 {% else %}
                 <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
                 {% endif %}
@@ -496,35 +474,134 @@
                     <div class="w-9 h-9 rounded-xl bg-rose-200 flex items-center justify-center text-rose-700 text-sm"><i class="fas fa-briefcase-medical"></i></div>
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">Bahagian 5: Penyampaian Perkhidmatan</h3>
-                        <p class="text-[11px] text-slate-500">Waktu operasi, perkhidmatan, dan keselesaan pesakit</p>
+                        <p class="text-[11px] text-slate-500">Waktu operasi, kapasiti, rawatan, dan maklumat tambahan</p>
                     </div>
                 </div>
                 {% if fp.k_perkhidmatan %}
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Waktu Operasi" value=fp.k_sumber_manusia.waktu_beroperasi type="text" %}
-                    {% include 'home/_detail_row.html' with label="Anggaran Pelawat Sehari" value=fp.k_perkhidmatan.anggaran_pelawat_harian type="text" %}
-                    {% include 'home/_detail_row.html' with label="Program / Perkhidmatan" value=fp.k_perkhidmatan.jenis_perkhidmatan type="long" %}
-                    {% include 'home/_detail_row.html' with label="Penyakit Sering Dilaporkan" value=fp.k_perkhidmatan.jenis_penyakit_kerap type="long" %}
-                    {% include 'home/_detail_row.html' with label="Wad Lelaki & Perempuan Diasingkan?" value=fp.k_perkhidmatan.wad_diasingkan type="bool" %}
+                
+                <!-- 5.1 Operasi & Pesakit -->
+                <div class="px-6 py-3 bg-slate-50/50 border-b border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">5.1 Operasi & Pesakit</p>
+                </div>
+                
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-50">
+                    <div class="col-span-2 px-6 py-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">i. Waktu Operasi</p>
+                        <div id="waktu-operasi-container-{{ fp.pk }}" class="text-sm font-semibold text-slate-700">
+                            <span class="italic text-slate-400 text-xs">Memuatkan jadual operasi...</span>
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const container = document.getElementById("waktu-operasi-container-{{ fp.pk }}");
+                                const rawData = '{{ fp.k_perkhidmatan.json_waktu_operasi|safe|escapejs }}';
+                                if(rawData && rawData !== '""' && rawData !== '[]' && rawData !== 'None') {
+                                    try {
+                                        const data = JSON.parse(rawData.replace(/"/g,'"'));
+                                        if(Array.isArray(data) && data.length > 0) {
+                                            let tableHTML = '<table class="w-full text-left text-sm mt-1 border border-slate-200 rounded-lg overflow-hidden"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Hari</th><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Mula</th><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Tamat</th></tr></thead><tbody class="divide-y divide-slate-100">';
+                                            data.forEach(row => { tableHTML += `<tr><td class="px-3 py-2 font-medium">${row[0]}</td><td class="px-3 py-2">${row[1]}</td><td class="px-3 py-2">${row[2]}</td></tr>`; });
+                                            tableHTML += '</tbody></table>';
+                                            container.innerHTML = tableHTML;
+                                            return;
+                                        }
+                                    } catch(e) {}
+                                }
+                                container.innerHTML = '<span class="italic text-slate-400 text-xs">Tiada jadual direkodkan.</span>';
+                            });
+                        </script>
+                    </div>
                     
-                    {% if fp.k_perkhidmatan.ruang_tunggu_selesa == False %}
-                        {% with rt_txt="Tidak ("|add:fp.k_perkhidmatan.ruang_tunggu_nota|add:")" %}
-                        {% include 'home/_detail_row.html' with label="Ruang Menunggu Selesa?" value=rt_txt type="text" %}
+                    {% include 'home/_detail_row.html' with label="ii. Anggaran Pelawat Sehari" value=fp.k_perkhidmatan.anggaran_pelawat type="text" %}
+                    <div class="col-span-1 border-t border-slate-50"></div>
+                    
+                    <div class="col-span-2 px-6 py-4 flex flex-wrap gap-4 bg-slate-50/50 border-t border-slate-100">
+                        <div class="flex-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">iii. Program / Perkhidmatan Disediakan</p>
+                            {% if fp.k_perkhidmatan.fail_program %}
+                            <a href="{{ fp.k_perkhidmatan.fail_program.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition shadow-sm mt-1"><i class="fas fa-download"></i> Muat Turun Senarai</a>
+                            {% else %}
+                            <p class="text-xs text-slate-500 font-medium">Tiada lampiran.</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 border-l border-slate-200 pl-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">iv. Jenis Penyakit Kerap Dilaporkan</p>
+                            {% if fp.k_perkhidmatan.fail_penyakit %}
+                            <a href="{{ fp.k_perkhidmatan.fail_penyakit.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition shadow-sm mt-1"><i class="fas fa-download"></i> Muat Turun Senarai</a>
+                            {% else %}
+                            <p class="text-xs text-slate-500 font-medium">Tiada lampiran.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5.2 Kapasiti Rawatan -->
+                <div class="px-6 py-3 bg-slate-50/50 border-y border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">5.2 Kapasiti Rawatan & Keselesaan</p>
+                </div>
+                
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-50">
+                    {% if fp.k_perkhidmatan.ruang_menunggu_selesa == False %}
+                        {% with rm_txt="Tidak ("|add:fp.k_perkhidmatan.ruang_menunggu_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="i. Ruang Menunggu Selesa?" value=rm_txt type="text" %}
                         {% endwith %}
                     {% else %}
-                        {% include 'home/_detail_row.html' with label="Ruang Menunggu Selesa?" value=fp.k_perkhidmatan.ruang_tunggu_selesa type="bool" %}
+                        {% include 'home/_detail_row.html' with label="i. Ruang Menunggu Selesa?" value=fp.k_perkhidmatan.ruang_menunggu_selesa type="bool" %}
                     {% endif %}
 
-                    {% if fp.k_perkhidmatan.boleh_selesaikan_kes == False %}
-                        {% with sk_txt="Tidak (Kekangan: "|add:fp.k_perkhidmatan.kekangan_rawatan|add:")" %}
-                        {% include 'home/_detail_row.html' with label="Pesakit Dapat Dirawat Sepenuhnya?" value=sk_txt type="text" %}
+                    {% include 'home/_detail_row.html' with label="ii. Sediakan Wad Untuk Pesakit?" value=fp.k_perkhidmatan.ada_wad type="bool" %}
+                    {% include 'home/_detail_row.html' with label="iii. Wad Lelaki & Perempuan Diasingkan?" value=fp.k_perkhidmatan.wad_asing_jantina type="bool" %}
+                    {% include 'home/_detail_row.html' with label="iv. Katil Wad Mencukupi?" value=fp.k_perkhidmatan.katil_mencukupi type="bool" %}
+                    {% include 'home/_detail_row.html' with label="v. Perkhidmatan Kaunseling?" value=fp.k_perkhidmatan.ada_kaunseling type="bool" %}
+                    {% include 'home/_detail_row.html' with label="vi. Perkhidmatan Rehabilitasi?" value=fp.k_perkhidmatan.ada_rehab type="bool" %}
+
+                    {% if fp.k_perkhidmatan.boleh_selesai_kes == False %}
+                        {% with sk_txt="Tidak ("|add:fp.k_perkhidmatan.boleh_selesai_kes_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="vii. Rawatan Selesai Sepenuhnya?" value=sk_txt type="text" %}
                         {% endwith %}
                     {% else %}
-                        {% include 'home/_detail_row.html' with label="Pesakit Dapat Dirawat Sepenuhnya?" value=fp.k_perkhidmatan.boleh_selesaikan_kes type="bool" %}
+                        {% include 'home/_detail_row.html' with label="vii. Rawatan Selesai Sepenuhnya?" value=fp.k_perkhidmatan.boleh_selesai_kes type="bool" %}
                     {% endif %}
-                    
-                    {% include 'home/_detail_row.html' with label="Masa Menunggu Rawatan" value=fp.k_perkhidmatan.masa_tunggu type="text" %}
+
+                    {% include 'home/_detail_row.html' with label="ix. Anggaran Masa Menunggu Rawatan" value=fp.k_perkhidmatan.anggaran_masa_tunggu type="text" %}
+
+                    <div class="col-span-2 px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">viii. Senarai Fasiliti Terdekat</p>
+                        {% if fp.k_perkhidmatan.fail_fasiliti_terdekat %}
+                        <a href="{{ fp.k_perkhidmatan.fail_fasiliti_terdekat.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition shadow-sm mt-1"><i class="fas fa-download"></i> Muat Turun Senarai</a>
+                        {% else %}
+                        <p class="text-xs text-slate-500 font-medium">Tiada lampiran disertakan.</p>
+                        {% endif %}
+                    </div>
                 </div>
+
+                <!-- 5.3 Maklumat Tambahan -->
+                <div class="px-6 py-3 bg-slate-50/50 border-y border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">5.3 Maklumat Tambahan</p>
+                </div>
+                
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-50 border-b border-slate-100">
+                    {% include 'home/_detail_row.html' with label="i. Mempunyai Unit Forensik?" value=fp.k_perkhidmatan.ada_forensik type="bool" %}
+                    {% include 'home/_detail_row.html' with label="ii. Sediakan Perkhidmatan Makanan?" value=fp.k_perkhidmatan.ada_makanan type="bool" %}
+                    
+                    {% if fp.k_perkhidmatan.makanan_memuaskan == False %}
+                        {% with mak_txt="Tidak ("|add:fp.k_perkhidmatan.makanan_nota|add:")" %}
+                        {% include 'home/_detail_row.html' with label="iii. Kualiti Makanan Memuaskan?" value=mak_txt type="text" %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'home/_detail_row.html' with label="iii. Kualiti Makanan Memuaskan?" value=fp.k_perkhidmatan.makanan_memuaskan type="bool" %}
+                    {% endif %}
+                </div>
+
+                <!-- Muat Turun Wishlist -->
+                {% if fp.k_perkhidmatan.fail_wishlist %}
+                <div class="px-6 py-5 bg-rose-50/50">
+                    <p class="text-[10px] font-bold text-rose-600 uppercase tracking-widest mb-2"><i class="fas fa-star text-amber-400 mr-1"></i> Wishlist Penyampaian Perkhidmatan</p>
+                    <a href="{{ fp.k_perkhidmatan.fail_wishlist.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition shadow-sm">
+                        <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
+                    </a>
+                </div>
+                {% endif %}
+
                 {% else %}
                 <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
                 {% endif %}
@@ -536,70 +613,153 @@
                     <div class="w-9 h-9 rounded-xl bg-yellow-200 flex items-center justify-center text-yellow-700 text-sm"><i class="fas fa-chart-line"></i></div>
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">Bahagian 6: Kewangan, Konsesi & Perancangan</h3>
-                        <p class="text-[11px] text-slate-500">Peruntukan (OE/DE) dan perancangan masa depan</p>
+                        <p class="text-[11px] text-slate-500">Peruntukan (OE/DE), konsesi, dan infrastruktur masa depan</p>
                     </div>
                 </div>
-                {% if fp.k_perancangan %}
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Belanja Mengurus (OE)" value=fp.k_perancangan.belanja_mengurus type="text" %}
-                    {% include 'home/_detail_row.html' with label="Belanja Pembangunan (DE)" value=fp.k_perancangan.belanja_pembangunan type="text" %}
-                    {% include 'home/_detail_row.html' with label="Penyelenggaraan Konsesi Memuaskan?" value=fp.k_konsesi.maintenance_okay type="bool" %}
+                {% if fp.k_kewangan %}
+                
+                <div class="px-6 py-3 bg-slate-50/50 border-b border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">6.1 Peruntukan Kewangan</p>
                 </div>
-                <div class="divide-y divide-slate-50 border-t border-slate-50">
-                    <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Isu / Masalah Utama</p>
-                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.k_konsesi.masalah_utama|default:"—" }}</p>
-                    </div>
-                    <div class="px-6 py-4">
-                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Fasiliti / Infrastruktur Masa Depan</p>
-                        <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{{ fp.k_perancangan.fasiliti_diperlukan|default:"—" }}</p>
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="i. Belanja Mengurus (OE)" value=fp.k_kewangan.belanja_mengurus type="text" %}
+                    {% include 'home/_detail_row.html' with label="ii. Belanja Pembangunan (DE)" value=fp.k_kewangan.belanja_pembangunan type="text" %}
+                </div>
+
+                <div class="px-6 py-3 bg-slate-50/50 border-y border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">6.2 Perkhidmatan Konsesi & Isu Utama</p>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-50 border-b border-slate-100">
+                    {% include 'home/_detail_row.html' with label="i. Penyelenggaraan Konsesi Lancar?" value=fp.k_kewangan.konsesi_lancar type="bool" %}
+                    {% include 'home/_detail_row.html' with label="ii. Isu / Masalah Utama Dihadapi" value=fp.k_kewangan.isu_utama type="long" %}
+                    
+                    <div class="col-span-2 px-6 py-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">iii. Senarai Keperluan Penambahan Infrastruktur / Peralatan</p>
+                        <div id="keperluan-infra-container-{{ fp.pk }}" class="text-sm font-semibold text-slate-700">
+                            <span class="italic text-slate-400 text-xs">Memuatkan senarai keperluan...</span>
+                        </div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                const container = document.getElementById("keperluan-infra-container-{{ fp.pk }}");
+                                const rawData = '{{ fp.k_kewangan.json_infrastruktur_baru|safe|escapejs }}';
+                                if(rawData && rawData !== '""' && rawData !== '[]' && rawData !== 'None') {
+                                    try {
+                                        const data = JSON.parse(rawData.replace(/"/g,'"'));
+                                        if(Array.isArray(data) && data.length > 0) {
+                                            let tableHTML = '<table class="w-full text-left text-sm mt-1 border border-slate-200 rounded-lg overflow-hidden"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Infrastruktur / Peralatan</th><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Justifikasi</th></tr></thead><tbody class="divide-y divide-slate-100">';
+                                            data.forEach(row => { tableHTML += `<tr><td class="px-3 py-2 font-medium w-1/3">${row[0]}</td><td class="px-3 py-2 text-slate-500">${row[1]}</td></tr>`; });
+                                            tableHTML += '</tbody></table>';
+                                            container.innerHTML = tableHTML;
+                                            return;
+                                        }
+                                    } catch(e) {}
+                                }
+                                container.innerHTML = '<span class="italic text-slate-400 text-xs">Tiada keperluan tambahan direkodkan.</span>';
+                            });
+                        </script>
                     </div>
                 </div>
+
+                <!-- Muat Turun Wishlist -->
+                {% if fp.k_kewangan.fail_wishlist %}
+                <div class="px-6 py-5 bg-amber-50/50">
+                    <p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-2"><i class="fas fa-star text-amber-500 mr-1"></i> Wishlist Kewangan & Perancangan</p>
+                    <a href="{{ fp.k_kewangan.fail_wishlist.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 text-white text-xs font-bold rounded-lg hover:bg-amber-600 transition shadow-sm">
+                        <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
+                    </a>
+                </div>
+                {% endif %}
+
                 {% else %}
                 <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
                 {% endif %}
             </div>
 
             <!-- ── 7. SISTEM RANGKAIAN & PERALATAN DIGITAL ── -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-200 bg-slate-100">
-                    <div class="w-9 h-9 rounded-xl bg-slate-300 flex items-center justify-center text-slate-700 text-sm"><i class="fas fa-laptop-medical"></i></div>
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
+                <div class="flex items-center gap-3 px-6 py-4 border-b border-cyan-100 bg-cyan-50">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-200 flex items-center justify-center text-cyan-700 text-sm"><i class="fas fa-laptop-medical"></i></div>
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">Bahagian 7: Sistem Rangkaian & Peralatan Digital</h3>
                         <p class="text-[11px] text-slate-500">Kecukupan peranti, kelajuan internet, dan sistem pendigitalan</p>
                     </div>
                 </div>
                 {% if fp.k_digital %}
-                <div class="grid grid-cols-2 divide-x divide-slate-50">
-                    {% include 'home/_detail_row.html' with label="Peranti Digital Mencukupi?" value=fp.k_digital.peranti_mencukupi type="bool" %}
-                    {% include 'home/_detail_row.html' with label="Kelajuan Internet Pantas & Stabil?" value=fp.k_digital.internet_pantas type="bool" %}
+                
+                <div class="px-6 py-3 bg-slate-50/50 border-b border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">7.1 Peranti Digital</p>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-y divide-slate-50">
+                    {% include 'home/_detail_row.html' with label="i. Peranti Komputer Mencukupi?" value=fp.k_digital.peranti_mencukupi type="bool" %}
                     
                     {% if fp.k_digital.peranti_baik == False %}
                         {% with pb_txt="Tidak ("|add:fp.k_digital.peranti_baik_nota|add:")" %}
-                        {% include 'home/_detail_row.html' with label="Semua Peranti Berkeadaan Baik?" value=pb_txt type="text" %}
+                        {% include 'home/_detail_row.html' with label="ii. Keadaan Peranti Baik & Dikemaskini?" value=pb_txt type="text" %}
                         {% endwith %}
                     {% else %}
-                        {% include 'home/_detail_row.html' with label="Semua Peranti Berkeadaan Baik?" value=fp.k_digital.peranti_baik type="bool" %}
+                        {% include 'home/_detail_row.html' with label="ii. Keadaan Peranti Baik & Dikemaskini?" value=fp.k_digital.peranti_baik type="bool" %}
                     {% endif %}
 
                     {% if fp.k_digital.perlu_tambah_peranti == True %}
                         {% with pt_txt="Ya ("|add:fp.k_digital.perlu_tambah_nota|add:")" %}
-                        {% include 'home/_detail_row.html' with label="Perlu Penambahan Peranti?" value=pt_txt type="text" %}
+                        {% include 'home/_detail_row.html' with label="iii. Keperluan Penambahan Peranti?" value=pt_txt type="text" %}
                         {% endwith %}
                     {% else %}
-                        {% include 'home/_detail_row.html' with label="Perlu Penambahan Peranti?" value=fp.k_digital.perlu_tambah_peranti type="bool" %}
+                        {% include 'home/_detail_row.html' with label="iii. Keperluan Penambahan Peranti?" value=fp.k_digital.perlu_tambah_peranti type="bool" %}
                     {% endif %}
+
+                    {% include 'home/_detail_row.html' with label="iv. Capaian Rangkaian / Internet Mudah?" value=fp.k_digital.internet_pantas type="bool" %}
+                    
+                    <div class="col-span-2 px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">v. Senarai Peranti Digital</p>
+                        {% if fp.k_digital.fail_peranti %}
+                        <a href="{{ fp.k_digital.fail_peranti.url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-cyan-600 hover:bg-cyan-50 transition shadow-sm mt-1"><i class="fas fa-download"></i> Muat Turun Senarai</a>
+                        {% else %}
+                        <p class="text-xs text-slate-500 font-medium">Tiada lampiran disertakan.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="px-6 py-3 bg-slate-50/50 border-y border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">7.2 Sistem Pendigitalan</p>
+                </div>
+                
+                <div class="px-6 py-4 border-b border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">i. Senarai Sistem yang digunakan di Fasiliti</p>
+                    <div id="senarai-sistem-container-{{ fp.pk }}" class="text-sm font-semibold text-slate-700">
+                        <span class="italic text-slate-400 text-xs">Memuatkan senarai sistem...</span>
+                    </div>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            const container = document.getElementById("senarai-sistem-container-{{ fp.pk }}");
+                            const rawData = '{{ fp.k_digital.json_sistem|safe|escapejs }}';
+                            if(rawData && rawData !== '""' && rawData !== '[]' && rawData !== 'None') {
+                                try {
+                                    const data = JSON.parse(rawData.replace(/"/g,'"'));
+                                    if(Array.isArray(data) && data.length > 0) {
+                                        let tableHTML = '<table class="w-full text-left text-sm mt-1 border border-slate-200 rounded-lg overflow-hidden"><thead class="bg-slate-50 border-b border-slate-200"><tr><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Nama Sistem</th><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Kegunaan / Modul Utama</th><th class="px-3 py-2 text-[10px] uppercase text-slate-500">Status</th></tr></thead><tbody class="divide-y divide-slate-100">';
+                                        data.forEach(row => { tableHTML += `<tr><td class="px-3 py-2 font-medium w-1/4">${row[0]}</td><td class="px-3 py-2 text-slate-500">${row[1]}</td><td class="px-3 py-2 text-slate-500">${row[2]}</td></tr>`; });
+                                        tableHTML += '</tbody></table>';
+                                        container.innerHTML = tableHTML;
+                                        return;
+                                    }
+                                } catch(e) {}
+                            }
+                            container.innerHTML = '<span class="italic text-slate-400 text-xs">Tiada sistem tambahan direkodkan.</span>';
+                        });
+                    </script>
                 </div>
 
                 <!-- Muat Turun Wishlist -->
-                {% if fp.k_digital.wishlist_fail %}
-                <div class="px-6 py-5 bg-blue-50/50 border-t border-slate-50 mt-2">
-                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Lampiran Wishlist Peralatan ICT</p>
-                    <a href="{{ fp.k_digital.wishlist_fail.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition shadow-sm">
+                {% if fp.k_digital.fail_wishlist %}
+                <div class="px-6 py-5 bg-cyan-50/50">
+                    <p class="text-[10px] font-bold text-cyan-600 uppercase tracking-widest mb-2"><i class="fas fa-star text-amber-400 mr-1"></i> Wishlist Rangkaian & Digital</p>
+                    <a href="{{ fp.k_digital.fail_wishlist.url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white text-xs font-bold rounded-lg hover:bg-cyan-700 transition shadow-sm">
                         <i class="fas fa-file-download"></i> Muat Turun Lampiran Wishlist
                     </a>
                 </div>
                 {% endif %}
+
                 {% else %}
                 <p class="px-6 py-4 text-slate-400 text-sm italic">Maklumat belum diisi.</p>
                 {% endif %}

@@ -63,8 +63,7 @@
     </div>
 </div>
 
-<main class="px-8 pb-16 pt-6">
-<!-- Wajib letak enctype untuk upload fail -->
+<main class="px-8 pb-16 pt-6 max-w-7xl mx-auto">
 <form method="post" enctype="multipart/form-data" id="infraForm" class="space-y-6">
 {% csrf_token %}
 
@@ -72,20 +71,164 @@
 <div class="sec-group">
     <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.1</div><span class="sec-label">Bangunan & Ruang Tapak</span></div>
     <div class="grid grid-cols-2 gap-3 mb-3">
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-1.5">Keluasan Tapak Fasiliti (Hektar/Ekar)</label><input type="text" name="keluasan_tapak" class="f-input" value="{{ fp.k_infrastruktur.keluasan_tapak|default:'' }}"></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Adakah keluasan mencukupi untuk menambah fasiliti?</label>
-            <div class="flex gap-2"><div class="pill-item"><input type="radio" name="tanah_mencukupi" id="tm_y" value="1" {% if fp.k_infrastruktur.tanah_mencukupi == True %}checked{% endif %}><label for="tm_y" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="tanah_mencukupi" id="tm_t" value="0" {% if fp.k_infrastruktur.tanah_mencukupi == False %}checked{% endif %}><label for="tm_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">i. Keluasan Tapak Fasiliti (Hektar/Ekar)</label>
+            <input type="text" name="keluasan_tapak" class="f-input" value="{{ fp.k_infrastruktur.keluasan_tapak|default:'' }}">
         </div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Struktur bangunan dalam keadaan baik?</label>
-            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="struktur_baik" id="sb_y" value="1" onchange="toggleNote('sb_nota', false)" {% if fp.k_infrastruktur.struktur_baik == True %}checked{% endif %}><label for="sb_y" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="struktur_baik" id="sb_t" value="0" onchange="toggleNote('sb_nota', true)" {% if fp.k_infrastruktur.struktur_baik == False %}checked{% endif %}><label for="sb_t" class="tidak"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div></div>
-            <div id="sb_nota" class="{% if fp.k_infrastruktur.struktur_baik != False %}hidden{% endif %} mt-2"><input type="text" name="struktur_nota" class="f-input" placeholder="Nyatakan masalah..." value="{{ fp.k_infrastruktur.struktur_nota|default:'' }}"></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Adakah keluasan mencukupi untuk menambah fasiliti?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="tanah_mencukupi" id="tm_y" value="1" {% if fp.k_infrastruktur.tanah_mencukupi == True %}checked{% endif %}><label for="tm_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="tanah_mencukupi" id="tm_t" value="0" {% if fp.k_infrastruktur.tanah_mencukupi == False %}checked{% endif %}><label for="tm_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
         </div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Lif berfungsi dengan baik? (Jika ada)</label>
-            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="lif_berfungsi" id="lif_y" value="1" onchange="toggleNote('lif_nota', false)" {% if fp.k_infrastruktur.lif_berfungsi == True %}checked{% endif %}><label for="lif_y" class="ya"><i class="fas fa-check"></i> Ya</label></div><div class="pill-item"><input type="radio" name="lif_berfungsi" id="lif_t" value="0" onchange="toggleNote('lif_nota', true)" {% if fp.k_infrastruktur.lif_berfungsi == False %}checked{% endif %}><label for="lif_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div></div>
-            <div id="lif_nota" class="{% if fp.k_infrastruktur.lif_berfungsi != False %}hidden{% endif %} mt-2"><input type="text" name="lif_nota" class="f-input" placeholder="Nyatakan masalah lif..." value="{{ fp.k_infrastruktur.lif_nota|default:'' }}"></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iii. Adakah struktur bangunan (termasuk dinding, siling, lantai, atap) masih dalam keadaan baik?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="struktur_baik" id="sb_y" value="1" onchange="toggleNote('sb_nota', false)" {% if fp.k_infrastruktur.struktur_baik == True %}checked{% endif %}><label for="sb_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="struktur_baik" id="sb_t" value="0" onchange="toggleNote('sb_nota', true)" {% if fp.k_infrastruktur.struktur_baik == False %}checked{% endif %}><label for="sb_t" class="tidak"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+            </div>
+            <div id="sb_nota" class="{% if fp.k_infrastruktur.struktur_baik != False %}hidden{% endif %} mt-2">
+                <input type="text" name="struktur_nota" class="f-input" placeholder="Nyatakan masalah..." value="{{ fp.k_infrastruktur.struktur_nota|default:'' }}">
+            </div>
         </div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Mempunyai Uninterruptible Power Supply (UPS)?</label>
-            <div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_ups" id="ups_y" value="1" {% if fp.k_infrastruktur.ada_ups == True %}checked{% endif %}><label for="ups_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_ups" id="ups_t" value="0" {% if fp.k_infrastruktur.ada_ups == False %}checked{% endif %}><label for="ups_t" class="tidak">Tidak</label></div></div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iv. Sekiranya fasiliti ini mempunyai lif, adakah lif berfungsi dengan baik?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="lif_berfungsi" id="lif_y" value="1" onchange="toggleNote('lif_nota', false)" {% if fp.k_infrastruktur.lif_berfungsi == True %}checked{% endif %}><label for="lif_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="lif_berfungsi" id="lif_t" value="0" onchange="toggleNote('lif_nota', true)" {% if fp.k_infrastruktur.lif_berfungsi == False %}checked{% endif %}><label for="lif_t" class="tidak"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+            </div>
+            <div id="lif_nota" class="{% if fp.k_infrastruktur.lif_berfungsi != False %}hidden{% endif %} mt-2">
+                <input type="text" name="lif_nota" class="f-input" placeholder="Nyatakan masalah lif..." value="{{ fp.k_infrastruktur.lif_nota|default:'' }}">
+            </div>
+        </div>
+        <div class="q-card col-span-2">
+            <label class="block text-xs font-bold text-slate-500 mb-2">v. Adakah fasiliti ini mempunyai Uninterruptible Power Supply (UPS)?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_ups" id="ups_y" value="1" {% if fp.k_infrastruktur.ada_ups == True %}checked{% endif %}><label for="ups_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_ups" id="ups_t" value="0" {% if fp.k_infrastruktur.ada_ups == False %}checked{% endif %}><label for="ups_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2.2 Kemudahan Fasiliti -->
+<div class="sec-group">
+    <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.2</div><span class="sec-label">Kemudahan Fasiliti</span></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Adakah ruang perkhidmatan / bilik rawatan mencukupi?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ruang_rawatan_mencukupi" id="rr_y" value="1" {% if fp.k_infrastruktur.ruang_rawatan_mencukupi == True %}checked{% endif %}><label for="rr_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ruang_rawatan_mencukupi" id="rr_t" value="0" {% if fp.k_infrastruktur.ruang_rawatan_mencukupi == False %}checked{% endif %}><label for="rr_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Adakah terdapat ruang rehat untuk pelawat?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_ruang_rehat_pelawat" id="rrp_y" value="1" {% if fp.k_infrastruktur.ada_ruang_rehat_pelawat == True %}checked{% endif %}><label for="rrp_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_ruang_rehat_pelawat" id="rrp_t" value="0" {% if fp.k_infrastruktur.ada_ruang_rehat_pelawat == False %}checked{% endif %}><label for="rrp_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iii. Adakah terdapat kantin / kedai (mini mart) disediakan?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_kantin" id="knt_y" value="1" {% if fp.k_infrastruktur.ada_kantin == True %}checked{% endif %}><label for="knt_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kantin" id="knt_t" value="0" {% if fp.k_infrastruktur.ada_kantin == False %}checked{% endif %}><label for="knt_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iv. Adakah terdapat ruangan rehat staf (pantry) disediakan?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_pantry" id="pnt_y" value="1" {% if fp.k_infrastruktur.ada_pantry == True %}checked{% endif %}><label for="pnt_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_pantry" id="pnt_t" value="0" {% if fp.k_infrastruktur.ada_pantry == False %}checked{% endif %}><label for="pnt_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">v. Adakah terdapat ruangan solat (surau/musala) disediakan?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_surau" id="sur_y" value="1" {% if fp.k_infrastruktur.ada_surau == True %}checked{% endif %}><label for="sur_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_surau" id="sur_t" value="0" {% if fp.k_infrastruktur.ada_surau == False %}checked{% endif %}><label for="sur_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">vi. Adakah tandas berada dalam keadaan baik dan bersih?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="tandas_baik" id="tnd_y" value="1" {% if fp.k_infrastruktur.tandas_baik == True %}checked{% endif %}><label for="tnd_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="tandas_baik" id="tnd_t" value="0" {% if fp.k_infrastruktur.tandas_baik == False %}checked{% endif %}><label for="tnd_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2.3 Kemudahan Tambahan & Utiliti -->
+<div class="sec-group">
+    <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.3</div><span class="sec-label">Kemudahan Tambahan & Utiliti</span></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+        <div class="q-card col-span-2">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Adakah sistem pengudaraan berada dalam keadaan baik?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="pengudaraan_baik" id="png_y" value="1" {% if fp.k_infrastruktur.pengudaraan_baik == True %}checked{% endif %}><label for="png_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="pengudaraan_baik" id="png_t" value="0" {% if fp.k_infrastruktur.pengudaraan_baik == False %}checked{% endif %}><label for="png_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Adakah terdapat penghawa dingin di fasiliti ini? Jika ya, adakah berfungsi dengan baik?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_aircond" id="ac_y" value="1" onchange="toggleNote('ac_nota', false)" {% if fp.k_infrastruktur.ada_aircond == True %}checked{% endif %}><label for="ac_y" class="ya"><i class="fas fa-check"></i> Ya, Berfungsi Baik</label></div>
+                <div class="pill-item"><input type="radio" name="ada_aircond" id="ac_t" value="0" onchange="toggleNote('ac_nota', true)" {% if fp.k_infrastruktur.ada_aircond == False %}checked{% endif %}><label for="ac_t" class="tidak"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+            </div>
+            <div id="ac_nota" class="{% if fp.k_infrastruktur.ada_aircond != False %}hidden{% endif %} mt-2">
+                <input type="text" name="aircond_nota" class="f-input" placeholder="Nyatakan masalah..." value="{{ fp.k_infrastruktur.aircond_nota|default:'' }}">
+            </div>
+        </div>
+        
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iii. Adakah terdapat kipas di fasiliti ini? Jika ya, adakah berfungsi dengan baik?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_kipas" id="kp_y" value="1" onchange="toggleNote('kp_nota', false)" {% if fp.k_infrastruktur.ada_kipas == True %}checked{% endif %}><label for="kp_y" class="ya"><i class="fas fa-check"></i> Ya, Berfungsi Baik</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kipas" id="kp_t" value="0" onchange="toggleNote('kp_nota', true)" {% if fp.k_infrastruktur.ada_kipas == False %}checked{% endif %}><label for="kp_t" class="tidak"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+            </div>
+            <div id="kp_nota" class="{% if fp.k_infrastruktur.ada_kipas != False %}hidden{% endif %} mt-2">
+                <input type="text" name="kipas_nota" class="f-input" placeholder="Nyatakan masalah..." value="{{ fp.k_infrastruktur.kipas_nota|default:'' }}">
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iv. Adakah terdapat kemudahan tempat letak kenderaan kepada pengunjung/pelawat?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_parking" id="prk_y" value="1" onchange="toggleNote('prk_mencukupi', true)" {% if fp.k_infrastruktur.ada_parking == True %}checked{% endif %}><label for="prk_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_parking" id="prk_t" value="0" onchange="toggleNote('prk_mencukupi', false)" {% if fp.k_infrastruktur.ada_parking == False %}checked{% endif %}><label for="prk_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+            <div id="prk_mencukupi" class="{% if fp.k_infrastruktur.ada_parking != True %}hidden{% endif %} mt-3 pt-3 border-t border-slate-200">
+                <label class="block text-xs font-bold text-slate-500 mb-2">v. Adakah tempat letak kenderaan mencukupi?</label>
+                <div class="flex gap-2 mb-2">
+                    <div class="pill-item"><input type="radio" name="parking_mencukupi" id="prk_m_y" value="1" onchange="toggleNote('prk_nota', false)" {% if fp.k_infrastruktur.parking_mencukupi == True %}checked{% endif %}><label for="prk_m_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                    <div class="pill-item"><input type="radio" name="parking_mencukupi" id="prk_m_t" value="0" onchange="toggleNote('prk_nota', true)" {% if fp.k_infrastruktur.parking_mencukupi == False %}checked{% endif %}><label for="prk_m_t" class="tidak"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+                </div>
+                <div id="prk_nota" class="{% if fp.k_infrastruktur.parking_mencukupi != False %}hidden{% endif %}">
+                    <input type="text" name="parking_nota" class="f-input" placeholder="Nyatakan masalah parking..." value="{{ fp.k_infrastruktur.parking_nota|default:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">vi. Adakah fasiliti ini menyediakan kuarters/tempat tinggal kepada staf?</label>
+            <div class="flex gap-2 mb-2">
+                <div class="pill-item"><input type="radio" name="ada_kuarters" id="qr_y" value="1" onchange="toggleNote('qr_mencukupi', true)" {% if fp.k_infrastruktur.ada_kuarters == True %}checked{% endif %}><label for="qr_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kuarters" id="qr_t" value="0" onchange="toggleNote('qr_mencukupi', false)" {% if fp.k_infrastruktur.ada_kuarters == False %}checked{% endif %}><label for="qr_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+            <div id="qr_mencukupi" class="{% if fp.k_infrastruktur.ada_kuarters != True %}hidden{% endif %} mt-3 pt-3 border-t border-slate-200">
+                <label class="block text-xs font-bold text-slate-500 mb-2">vii. Jika ya, adakah kuarters berada dalam keadaan yang baik?</label>
+                <div class="flex gap-2 mb-2">
+                    <div class="pill-item"><input type="radio" name="kuarters_baik" id="qr_b_y" value="1" onchange="toggleNote('qr_nota', false)" {% if fp.k_infrastruktur.kuarters_baik == True %}checked{% endif %}><label for="qr_b_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                    <div class="pill-item"><input type="radio" name="kuarters_baik" id="qr_b_t" value="0" onchange="toggleNote('qr_nota', true)" {% if fp.k_infrastruktur.kuarters_baik == False %}checked{% endif %}><label for="qr_b_t" class="tidak"><i class="fas fa-times"></i> Tidak (Nyatakan)</label></div>
+                </div>
+                <div id="qr_nota" class="{% if fp.k_infrastruktur.kuarters_baik != False %}hidden{% endif %}">
+                    <input type="text" name="kuarters_nota" class="f-input" placeholder="Nyatakan keadaan kuarters..." value="{{ fp.k_infrastruktur.kuarters_nota|default:'' }}">
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -96,18 +239,18 @@
     <div class="grid grid-cols-2 gap-4">
         <!-- Aset Alih -->
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Aset Alih (Unit & Keadaan)</label>
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Senarai Aset Alih (Unit & Keadaan)</label>
             <div class="file-upload-wrapper" id="wrap-alih">
                 <input type="file" name="fail_aset_alih" id="file-alih" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-alih')">
                 <div class="file-display" id="disp-alih">
                     {% if fp.k_infrastruktur.fail_aset_alih %}
                         <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i>
                         <p class="text-xs font-bold text-emerald-600">Fail Semasa Tersimpan</p>
-                        <p class="text-[10px] text-slate-400 mt-1 truncate">{{ fp.k_infrastruktur.fail_aset_alih.name }}</p>
+                        <p class="text-[10px] text-slate-400 mt-1 truncate">{{ fp.k_infrastruktur.fail_aset_alih.name|slice:"22:" }}</p>
                     {% else %}
                         <i class="fas fa-cloud-upload-alt text-3xl text-blue-400 mb-2"></i>
                         <p class="text-xs font-bold text-slate-600">Klik/Seret dokumen ke sini</p>
-                        <p class="text-[10px] text-slate-400 mt-1">Siz Maksima: 5MB</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Format dibenarkan: .pdf, .xls, .doc (Maks: 5MB)</p>
                     {% endif %}
                 </div>
             </div>
@@ -118,18 +261,18 @@
         
         <!-- Aset Tak Alih -->
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Aset Tak Alih (Unit & Keadaan)</label>
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Senarai Aset Tak Alih (Unit & Keadaan)</label>
             <div class="file-upload-wrapper" id="wrap-tak-alih">
                 <input type="file" name="fail_aset_tak_alih" id="file-tak-alih" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-tak-alih')">
                 <div class="file-display" id="disp-tak-alih">
                     {% if fp.k_infrastruktur.fail_aset_tak_alih %}
                         <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i>
                         <p class="text-xs font-bold text-emerald-600">Fail Semasa Tersimpan</p>
-                        <p class="text-[10px] text-slate-400 mt-1 truncate">{{ fp.k_infrastruktur.fail_aset_tak_alih.name }}</p>
+                        <p class="text-[10px] text-slate-400 mt-1 truncate">{{ fp.k_infrastruktur.fail_aset_tak_alih.name|slice:"22:" }}</p>
                     {% else %}
                         <i class="fas fa-cloud-upload-alt text-3xl text-blue-400 mb-2"></i>
                         <p class="text-xs font-bold text-slate-600">Klik/Seret dokumen ke sini</p>
-                        <p class="text-[10px] text-slate-400 mt-1">Siz Maksima: 5MB</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Format dibenarkan: .pdf, .xls, .doc (Maks: 5MB)</p>
                     {% endif %}
                 </div>
             </div>
@@ -146,38 +289,155 @@
         <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl shrink-0"><i class="fas fa-ambulance"></i></div>
         <div>
             <h3 class="text-sm font-extrabold text-slate-800 mb-1">2.5 Aset Kenderaan</h3>
-            <p class="text-xs font-medium text-slate-600 mb-3 leading-relaxed">Pengurusan profil aset kenderaan, pendaftaran, dan status operasi telah dinaik taraf ke <b>Modul Visual Master-Detail</b> yang berasingan. Sila klik butang di bawah untuk menyemak atau menambah rekod kenderaan fasiliti ini.</p>
-            <a href="{% url 'home:aset_kenderaan_list' %}?fasiliti={{ fp.nama_fasiliti|urlencode }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition">
-                Ke Pengurusan Aset Kenderaan <i class="fas fa-arrow-right"></i>
+            <p class="text-xs font-medium text-slate-600 mb-3 leading-relaxed">Pengurusan profil aset kenderaan (seperti ambulans, van, kereta pacuan empat roda) telah dinaik taraf ke <b>Modul Visual Master-Detail</b> yang berasingan. Sila klik butang di bawah untuk menyemak, menambah, atau membuang rekod kenderaan fasiliti ini.</p>
+            <a href="{% url 'home:aset_kenderaan_list' %}?fasiliti={{ fp.maklumat_asas.nama_fasiliti|urlencode }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm">
+                Buka Pengurusan Aset Kenderaan <i class="fas fa-arrow-right"></i>
             </a>
         </div>
     </div>
 </div>
 
-<!-- 2.6 Keselamatan (ADDING ROW) -->
+<!-- 2.6 Keselamatan -->
 <div class="sec-group">
     <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.6</div><span class="sec-label">Keselamatan</span></div>
     
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Adakah fasiliti ini mempunyai perkhidmatan keselamatan (security)?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_security" id="sec_y" value="1" {% if fp.k_infrastruktur.ada_security == True %}checked{% endif %}><label for="sec_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_security" id="sec_t" value="0" {% if fp.k_infrastruktur.ada_security == False %}checked{% endif %}><label for="sec_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Adakah fasiliti ini dilengkapi dengan CCTV?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_cctv" id="cctv_y" value="1" {% if fp.k_infrastruktur.ada_cctv == True %}checked{% endif %}><label for="cctv_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_cctv" id="cctv_t" value="0" {% if fp.k_infrastruktur.ada_cctv == False %}checked{% endif %}><label for="cctv_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+    </div>
+    
     <div class="q-card mb-4">
-        <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Pekerja Perkhidmatan Keselamatan</label>
+        <label class="block text-xs font-bold text-slate-500 mb-3">iii. Senarai Pekerja Perkhidmatan Keselamatan</label>
         
-        <!-- Jadual Dinamik -->
         <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
-            <table class="w-full text-left dyn-table" id="tbl-security">
-                <thead><tr><th>Nama Pekerja</th><th>Syarikat</th><th>Syif</th><th class="w-10"></th></tr></thead>
+            <table class="w-full text-left dyn-table">
+                <thead><tr><th>Nama Pekerja</th><th>Syarikat / Agensi</th><th>Syif (Pagi/Malam)</th><th class="w-10"></th></tr></thead>
                 <tbody id="tbody-security"></tbody>
             </table>
         </div>
-        <button type="button" onclick="addRow('tbody-security', ['Nama', 'Syarikat', 'Syif Pagi/Malam'])" class="text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">+ Tambah Baris</button>
-        <!-- Input Tersembunyi untuk hantar data ke Django -->
+        <div class="flex items-center justify-between">
+            <button type="button" onclick="addRow('tbody-security', ['Ali Bin Abu', 'Agensi Keselamatan XYZ', 'Malam'])" class="text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition border border-blue-200 shadow-sm">+ Tambah Pekerja</button>
+            <span class="text-[10px] font-semibold text-slate-400">Atau muat naik dokumen di bawah:</span>
+        </div>
         <input type="hidden" name="json_pekerja_security_data" id="json_pekerja_security_data">
+        
+        <div class="file-upload-wrapper mt-3 p-3" id="wrap-sec-doc">
+            <input type="file" name="fail_pekerja_security" id="file-sec-doc" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-sec-doc')">
+            <div class="file-display" id="disp-sec-doc">
+                {% if fp.k_infrastruktur.fail_pekerja_security %}
+                    <i class="fas fa-file-check text-2xl text-emerald-500 mb-1"></i>
+                    <p class="text-[11px] font-bold text-emerald-600">Fail Semasa: {{ fp.k_infrastruktur.fail_pekerja_security.name|slice:"22:" }}</p>
+                {% else %}
+                    <i class="fas fa-cloud-upload-alt text-2xl text-slate-400 mb-1"></i>
+                    <p class="text-[11px] font-bold text-slate-500">Muat Naik Dokumen Pekerja (Jika Ada)</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- SUBMIT -->
+<!-- 2.7 Tindak Balas Kecemasan -->
+<div class="sec-group">
+    <div class="sec-title"><div class="sec-dot bg-blue-50 text-blue-600">2.7</div><span class="sec-label">Tindak Balas Kecemasan</span></div>
+    
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Adakah fasiliti ini dilengkapi dengan sistem perlindungan kebakaran?</label>
+            <div class="flex gap-2">
+                <div class="pill-item"><input type="radio" name="ada_sistem_kebakaran" id="fire_y" value="1" {% if fp.k_infrastruktur.ada_sistem_kebakaran == True %}checked{% endif %}><label for="fire_y" class="ya"><i class="fas fa-check"></i> Ya</label></div>
+                <div class="pill-item"><input type="radio" name="ada_sistem_kebakaran" id="fire_t" value="0" {% if fp.k_infrastruktur.ada_sistem_kebakaran == False %}checked{% endif %}><label for="fire_t" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iv. Bilakah kali terakhir fasiliti ini menjalankan latihan kebakaran (fire drill)?</label>
+            <input type="date" name="tarikh_fire_drill" class="f-input" value="{{ fp.k_infrastruktur.tarikh_fire_drill|date:'Y-m-d'|default:'' }}">
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-3">ii. Senarai Sistem Perlindungan Kebakaran Aktif (Unit & Keadaan)</label>
+            <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
+                <table class="w-full text-left dyn-table">
+                    <thead><tr><th>Jenis (Cth: Fire Extinguisher)</th><th>Unit</th><th>Keadaan</th><th class="w-10"></th></tr></thead>
+                    <tbody id="tbody-kebakaran-aktif"></tbody>
+                </table>
+            </div>
+            <button type="button" onclick="addRow('tbody-kebakaran-aktif', ['Alat Pemadam Api', '5', 'Baik'])" class="text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition border border-blue-200 shadow-sm">+ Tambah Sistem Aktif</button>
+            <input type="hidden" name="json_kebakaran_aktif_data" id="json_kebakaran_aktif_data">
+        </div>
+        
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-3">iii. Senarai Sistem Perlindungan Kebakaran Pasif (Unit & Keadaan)</label>
+            <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
+                <table class="w-full text-left dyn-table">
+                    <thead><tr><th>Jenis (Cth: Pintu Rintangan Api)</th><th>Unit</th><th>Keadaan</th><th class="w-10"></th></tr></thead>
+                    <tbody id="tbody-kebakaran-pasif"></tbody>
+                </table>
+            </div>
+            <button type="button" onclick="addRow('tbody-kebakaran-pasif', ['Pintu Kecemasan', '2', 'Baik'])" class="text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition border border-blue-200 shadow-sm">+ Tambah Sistem Pasif</button>
+            <input type="hidden" name="json_kebakaran_pasif_data" id="json_kebakaran_pasif_data">
+        </div>
+    </div>
+
+    <div class="q-card">
+        <label class="block text-xs font-bold text-slate-500 mb-2">v. Adakah fasiliti ini pernah berhadapan dengan situasi kecemasan (kebakaran, banjir, dll)?</label>
+        <div class="flex gap-2 mb-3">
+            <div class="pill-item"><input type="radio" name="pernah_kecemasan" id="emr_y" value="1" onchange="toggleNote('emr_history', true)" {% if fp.k_infrastruktur.pernah_kecemasan == True %}checked{% endif %}><label for="emr_y" class="other"><i class="fas fa-check"></i> Ya, Pernah (Sila isikan butiran)</label></div>
+            <div class="pill-item"><input type="radio" name="pernah_kecemasan" id="emr_t" value="0" onchange="toggleNote('emr_history', false)" {% if fp.k_infrastruktur.pernah_kecemasan == False %}checked{% endif %}><label for="emr_t" class="ya"><i class="fas fa-times"></i> Tidak Pernah</label></div>
+        </div>
+        
+        <div id="emr_history" class="{% if fp.k_infrastruktur.pernah_kecemasan != True %}hidden{% endif %}">
+            <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
+                <table class="w-full text-left dyn-table">
+                    <thead><tr><th>Jenis Kecemasan (Banjir/Api)</th><th>Tahun/Tarikh Kejadian</th><th>Impak / Kemusnahan Terlibat</th><th class="w-10"></th></tr></thead>
+                    <tbody id="tbody-sejarah-kecemasan"></tbody>
+                </table>
+            </div>
+            <button type="button" onclick="addRow('tbody-sejarah-kecemasan', ['Banjir Kilat', 'Disember 2021', 'Kerosakan fail pesakit & 2 unit PC'])" class="text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition border border-blue-200 shadow-sm">+ Tambah Rekod Kecemasan</button>
+            <input type="hidden" name="json_sejarah_kecemasan_data" id="json_sejarah_kecemasan_data">
+        </div>
+    </div>
+</div>
+
+<!-- WISHLIST (INFRASTRUKTUR) -->
+<div class="sec-group bg-blue-50/50">
+    <div class="sec-title"><div class="sec-dot bg-blue-100 text-blue-700"><i class="fas fa-star"></i></div><span class="sec-label">Wishlist Berkaitan Infrastruktur Fasiliti</span></div>
+    <div class="q-card border-blue-200 bg-white">
+        <label class="block text-xs font-bold text-slate-500 mb-2">Muat Naik Dokumen Wishlist Fasiliti Anda (Format PDF, Excel, atau Word)</label>
+        <div class="file-upload-wrapper" id="wrap-wishlist">
+            <input type="file" name="fail_wishlist" id="file-wishlist" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-wishlist')">
+            <div class="file-display" id="disp-wishlist">
+                {% if fp.k_infrastruktur.fail_wishlist %}
+                    <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i>
+                    <p class="text-xs font-bold text-emerald-600">Fail Semasa Tersimpan</p>
+                    <p class="text-[10px] text-slate-400 mt-1 truncate">{{ fp.k_infrastruktur.fail_wishlist.name|slice:"15:" }}</p>
+                {% else %}
+                    <i class="fas fa-cloud-upload-alt text-3xl text-blue-400 mb-2"></i>
+                    <p class="text-xs font-bold text-slate-600">Klik / Seret fail wishlist ke sini</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Siz Maksima: 5MB</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SUBMIT BUTTONS -->
 <div class="flex items-center justify-between pt-2">
-    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Batal</a>
-    <button type="submit" onclick="prepareSubmit()" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Infrastruktur</button>
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">Batal</a>
+    <button type="submit" onclick="prepareSubmit()" class="btn-submit"><i class="fas fa-save mr-2"></i> Simpan Maklumat Infrastruktur</button>
 </div>
 
 </form>
@@ -190,15 +450,13 @@
         const display = document.getElementById(displayId);
         if (!file) return;
 
-        // Validasi 5MB (5 * 1024 * 1024 bytes)
-        const maxSize = 5 * 1024 * 1024;
+        const maxSize = 5 * 1024 * 1024; // 5MB
         if (file.size > maxSize) {
             alert("Ralat: Saiz fail melebihi had maksima 5MB.");
-            inputElement.value = ""; // Reset input
+            inputElement.value = ""; 
             return;
         }
 
-        // Papar maklumat fail
         const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
         display.innerHTML = `
             <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i>
@@ -226,41 +484,58 @@
         });
         
         // Butang Buang (Delete Row)
-        html += `<td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 p-1"><i class="fas fa-trash-alt"></i></button></td>`;
+        html += `<td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 p-1 transition"><i class="fas fa-trash-alt"></i></button></td>`;
         
         tr.innerHTML = html;
         tbody.appendChild(tr);
     }
 
-    // Papar data JSON sedia ada dari database (jika edit)
+    // Load Existing JSON Data
     document.addEventListener("DOMContentLoaded", function() {
-        const rawSecurity = '{{ fp.k_infrastruktur.json_pekerja_security|safe|escapejs }}';
-        if(rawSecurity && rawSecurity !== '""' && rawSecurity !== '[]') {
-            try {
-                const dataSecurity = JSON.parse(rawSecurity);
-                dataSecurity.forEach(row => addRow('tbody-security', ['Nama', 'Syarikat', 'Syif Pagi/Malam'], row));
-            } catch(e) { console.error("Ralat parse JSON security", e); }
+        // Fungsi helper untuk elak ralat JSON parse
+        function loadJSONtoTable(rawStr, tbodyId, placeholders) {
+            if(rawStr && rawStr !== '""' && rawStr !== '[]' && rawStr !== 'None') {
+                try {
+                    const data = JSON.parse(rawStr.replace(/"/g,'"'));
+                    if(Array.isArray(data)) {
+                        data.forEach(row => addRow(tbodyId, placeholders, row));
+                        return; // Jika berjaya load dari DB, tamatkan fungsi
+                    }
+                } catch(e) { console.error("Ralat parse JSON jadual", e); }
+            }
+            // Jika kosong, masukkan 1 baris kosong sebagai panduan pengguna
+            addRow(tbodyId, placeholders);
         }
+
+        loadJSONtoTable('{{ fp.k_infrastruktur.json_pekerja_security|safe|escapejs }}', 'tbody-security', ['Cth: Ali Bin Abu', 'Cth: Agensi XYZ', 'Cth: Malam']);
+        loadJSONtoTable('{{ fp.k_infrastruktur.json_kebakaran_aktif|safe|escapejs }}', 'tbody-kebakaran-aktif', ['Cth: Alat Pemadam Api', 'Cth: 5', 'Cth: Baik / Expired']);
+        loadJSONtoTable('{{ fp.k_infrastruktur.json_kebakaran_pasif|safe|escapejs }}', 'tbody-kebakaran-pasif', ['Cth: Pintu Rintangan Api', 'Cth: 2', 'Cth: Memuaskan']);
+        loadJSONtoTable('{{ fp.k_infrastruktur.json_sejarah_kecemasan|safe|escapejs }}', 'tbody-sejarah-kecemasan', ['Cth: Banjir Kilat', 'Cth: Disember 2021', 'Cth: 2 unit PC rosak']);
     });
 
-    // Proses semua jadual kepada JSON sebelum Form dihantar (Submit)
+    // Proses Data Jadual Dinamik Semasa Submit
     function prepareSubmit() {
-        const tbodySec = document.getElementById('tbody-security');
-        let secData = [];
-        
-        // Tarik data Security
-        Array.from(tbodySec.rows).forEach(tr => {
-            const inputs = tr.querySelectorAll('input');
-            let rowVals = [];
-            inputs.forEach(inp => rowVals.push(inp.value.trim()));
-            // Simpan jika baris tidak kosong sepenuhnya
-            if(rowVals.some(v => v !== '')) {
-                secData.push(rowVals);
-            }
+        const tableConfigs = [
+            { tbodyId: 'tbody-security', inputId: 'json_pekerja_security_data' },
+            { tbodyId: 'tbody-kebakaran-aktif', inputId: 'json_kebakaran_aktif_data' },
+            { tbodyId: 'tbody-kebakaran-pasif', inputId: 'json_kebakaran_pasif_data' },
+            { tbodyId: 'tbody-sejarah-kecemasan', inputId: 'json_sejarah_kecemasan_data' }
+        ];
+
+        tableConfigs.forEach(cfg => {
+            const tbody = document.getElementById(cfg.tbodyId);
+            let finalData = [];
+            Array.from(tbody.rows).forEach(tr => {
+                const inputs = tr.querySelectorAll('input');
+                let rowVals = [];
+                inputs.forEach(inp => rowVals.push(inp.value.trim()));
+                // Hanya simpan row yang sekurang-kurangnya 1 kotak tidak kosong
+                if(rowVals.some(v => v !== '')) {
+                    finalData.push(rowVals);
+                }
+            });
+            document.getElementById(cfg.inputId).value = JSON.stringify(finalData);
         });
-        
-        // Simpan ke input hidden
-        document.getElementById('json_pekerja_security_data').value = JSON.stringify(secData);
     }
 </script>
 </body>

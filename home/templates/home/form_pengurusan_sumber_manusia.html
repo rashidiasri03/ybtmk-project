@@ -12,41 +12,94 @@
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
         body { background: #f0f4fa; }
+
         .pill-item input[type="radio"] { display:none; }
-        .pill-item label { display:inline-flex; align-items:center; gap:7px; padding:9px 22px; border-radius:99px; border:2px solid #e2e8f0; cursor:pointer; font-size:.8rem; font-weight:700; color:#64748b; background:#fff; transition:all .15s ease; user-select:none; }
+        .pill-item label {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:9px 22px; border-radius:99px;
+            border:2px solid #e2e8f0; cursor:pointer;
+            font-size:.8rem; font-weight:700; color:#64748b; background:#fff;
+            transition:all .15s ease; user-select:none;
+        }
         .pill-item label:hover { border-color:#94a3b8; }
-        .pill-item input:checked + label.ya { border-color:#7c3aed; background:#f5f3ff; color:#6d28d9; }
+        .pill-item input:checked + label.ya    { border-color:#7c3aed; background:#f5f3ff; color:#6d28d9; }
         .pill-item input:checked + label.tidak { border-color:#ef4444; background:#fef2f2; color:#dc2626; }
-        .q-card { background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px; padding:16px 18px; transition:box-shadow .2s, border-color .2s; }
-        .sec-group { background:#fff; border:1.5px solid #e4eaf5; border-radius:20px; padding:20px 20px 18px; box-shadow:0 2px 16px rgba(124,58,237,.05); }
-        .sec-title { display:flex; align-items:center; gap:10px; margin-bottom:14px; padding-bottom:13px; border-bottom:1.5px solid #f0f4fb; }
-        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:bold; flex-shrink:0; }
-        .f-input { width:100%; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:.85rem; outline:none; transition:all .15s; }
+        .pill-item input:checked + label.other { border-color:#d97706; background:#fffbeb; color:#b45309; }
+
+        .cb-label { display:flex; align-items:center; gap:10px; cursor:pointer; padding:10px; border-radius:8px; transition:background .15s; }
+        .cb-label:hover { background:#f8fafc; }
+        .cb-input { width:16px; height:16px; accent-color:#7c3aed; }
+        .cb-text { font-size:.85rem; font-weight:600; color:#334155; }
+
+        .q-card {
+            background:#f8fafd; border:1.5px solid #edf1f8; border-radius:12px;
+            padding:16px 18px; transition:box-shadow .2s, border-color .2s, background .2s;
+        }
+        .q-card:focus-within { background:#fff; box-shadow:0 3px 14px rgba(124,58,237,.08); border-color:#ddd6fe; }
+
+        .sec-group {
+            background:#fff; border:1.5px solid #e4eaf5; border-radius:20px;
+            padding:20px 20px 18px; box-shadow:0 2px 16px rgba(124,58,237,.05);
+        }
+        .sec-title {
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:14px; padding-bottom:13px;
+            border-bottom:1.5px solid #f0f4fb;
+        }
+        .sec-dot { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; font-weight:bold; }
+        .sec-label { font-size:.8rem; font-weight:800; color:#334155; text-transform:uppercase; }
+
+        .f-input {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
         .f-input:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.1); }
-        .btn-submit { background:linear-gradient(110deg,#7c3aed,#8b5cf6); color:#fff; border:none; border-radius:14px; padding:13px 36px; font-size:.9rem; font-weight:800; cursor:pointer; }
-        
-        .file-upload-wrapper { position: relative; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; text-align: center; background: #f8fafc; transition: all 0.2s; cursor: pointer; }
+        .f-textarea {
+            width:100%; border:1.5px solid #e2e8f0; border-radius:10px;
+            padding:10px 14px; font-size:.85rem; color:#1e293b; outline:none;
+            resize:vertical; min-height:80px;
+            transition:border-color .15s, box-shadow .15s; background:#fff;
+        }
+        .f-textarea:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,.1); }
+
+        .btn-submit {
+            background:linear-gradient(110deg,#7c3aed,#6d28d9); color:#fff;
+            border:none; border-radius:14px; padding:13px 36px;
+            font-size:.9rem; font-weight:800; cursor:pointer;
+            transition:all .2s; box-shadow:0 4px 20px rgba(109,40,217,.3);
+        }
+        .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+
+        /* File Upload Styles */
+        .file-upload-wrapper { position: relative; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; text-align: center; background: #f8fafc; transition: all 0.2s; cursor: pointer; overflow: hidden; }
         .file-upload-wrapper:hover { border-color: #7c3aed; background: #f5f3ff; }
         .file-upload-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10; }
         .file-display { pointer-events: none; }
-        
-        .dyn-table th { padding: 8px 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; }
-        .dyn-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
-        .dyn-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; }
     </style>
 </head>
 <body class="min-h-screen">
+
+<!-- TOP BAR -->
 <nav class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-40">
     <div class="px-8 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 overflow-hidden"><img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain"></div>
-            <div><p class="text-[9px] font-bold tracking-widest text-purple-600 uppercase leading-none">KKM</p><p class="text-sm font-extrabold text-slate-800 leading-none">Sumber Manusia</p></div>
+            <div class="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="{% static 'home/images/jata negara.png' %}" alt="KKM" class="w-6 h-6 object-contain">
+            </div>
+            <div>
+                <p class="text-[9px] font-bold tracking-widest text-purple-600 uppercase leading-none">KKM</p>
+                <p class="text-sm font-extrabold text-slate-800 leading-none">Sumber Manusia</p>
+            </div>
         </div>
-        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"><i class="fas fa-arrow-left text-xs"></i> Kembali</a>
+        <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            <i class="fas fa-arrow-left text-xs"></i> Kembali
+        </a>
     </div>
 </nav>
 
-<div class="bg-gradient-to-r from-purple-700 via-purple-600 to-purple-500 relative overflow-hidden">
+<!-- HERO STRIP -->
+<div class="bg-gradient-to-r from-purple-700 via-purple-600 to-violet-500 relative overflow-hidden">
     <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:24px 24px;"></div>
     <div class="relative z-10 px-10 py-7">
         <h1 class="text-white text-xl font-extrabold mb-1">BAHAGIAN 4: PENGURUSAN SUMBER MANUSIA</h1>
@@ -54,7 +107,7 @@
     </div>
 </div>
 
-<main class="px-8 pb-16 pt-6">
+<main class="px-8 pb-16 pt-6 max-w-7xl mx-auto">
 <form method="post" enctype="multipart/form-data" id="smForm" class="space-y-6">
 {% csrf_token %}
 
@@ -62,135 +115,137 @@
 <div class="sec-group">
     <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.1</div><span class="sec-label">Bilangan & Penempatan Staf</span></div>
     
-    <div class="grid grid-cols-3 gap-4 mb-4">
-        <!-- Perjawatan -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Jumlah Warta Perjawatan</label>
-            <input type="number" name="jumlah_perjawatan" class="f-input mb-3 font-bold text-lg text-purple-700" value="{{ fp.k_sumber_manusia.jumlah_perjawatan|default:'' }}">
-            <div class="file-upload-wrapper p-2" id="w-perj">
-                <input type="file" name="fail_perjawatan" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-perj')">
-                <div class="file-display" id="d-perj">
-                    {% if fp.k_sumber_manusia.fail_perjawatan %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_sumber_manusia.fail_perjawatan.name }}</p>
-                    {% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Muat Naik Dokumen Sokongan</p>{% endif %}
-                </div>
-            </div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">i. Jumlah Warta Perjawatan</label>
+            <input type="number" name="jumlah_perjawatan" class="f-input" min="0" placeholder="0" value="{{ fp.k_sumber_manusia.jumlah_perjawatan|default:'' }}">
         </div>
-        <!-- Pengisian -->
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Jumlah Pengisian</label>
-            <input type="number" name="jumlah_pengisian" class="f-input mb-3 font-bold text-lg text-teal-600" value="{{ fp.k_sumber_manusia.jumlah_pengisian|default:'' }}">
-            <div class="file-upload-wrapper p-2" id="w-peng">
-                <input type="file" name="fail_pengisian" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-peng')">
-                <div class="file-display" id="d-peng">
-                    {% if fp.k_sumber_manusia.fail_pengisian %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_sumber_manusia.fail_pengisian.name }}</p>
-                    {% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Muat Naik Dokumen Sokongan</p>{% endif %}
-                </div>
-            </div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">ii. Jumlah Pengisian</label>
+            <input type="number" name="jumlah_pengisian" class="f-input" min="0" placeholder="0" value="{{ fp.k_sumber_manusia.jumlah_pengisian|default:'' }}">
         </div>
-        <!-- Kekosongan -->
         <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Jumlah Kekosongan</label>
-            <input type="number" name="jumlah_kekosongan" class="f-input mb-3 font-bold text-lg text-rose-500" value="{{ fp.k_sumber_manusia.jumlah_kekosongan|default:'' }}">
-            <div class="file-upload-wrapper p-2" id="w-keko">
-                <input type="file" name="fail_kekosongan" class="file-upload-input" accept=".pdf,.xls,.xlsx" onchange="handleFile(this, 'd-keko')">
-                <div class="file-display" id="d-keko">
-                    {% if fp.k_sumber_manusia.fail_kekosongan %}<p class="text-[10px] text-emerald-600 font-bold truncate"><i class="fas fa-check-circle"></i> {{ fp.k_sumber_manusia.fail_kekosongan.name }}</p>
-                    {% else %}<p class="text-[10px] text-slate-400"><i class="fas fa-upload"></i> Muat Naik Dokumen Sokongan</p>{% endif %}
-                </div>
-            </div>
+            <label class="block text-xs font-bold text-slate-500 mb-1.5">iii. Jumlah Kekosongan</label>
+            <input type="number" name="jumlah_kekosongan" class="f-input" min="0" placeholder="0" value="{{ fp.k_sumber_manusia.jumlah_kekosongan|default:'' }}">
         </div>
     </div>
 
-    <!-- Senarai Staf JSON -->
-    <div class="q-card mb-4">
-        <label class="block text-xs font-bold text-slate-500 mb-2">Senarai Kakitangan Berenama</label>
-        <div class="border border-slate-200 rounded-lg overflow-hidden mb-3">
-            <table class="w-full text-left dyn-table">
-                <thead><tr><th>Nama Pekerja</th><th>Jawatan / Gred</th><th>Status (Tetap/Kontrak/Dll)</th><th class="w-10"></th></tr></thead>
-                <tbody id="tbody-kakitangan"></tbody>
-            </table>
-        </div>
-        <button type="button" onclick="addRow('tbody-kakitangan', ['Nama', 'Jawatan / Gred', 'Status'])" class="text-[10px] font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg">+ Tambah Baris</button>
-        <input type="hidden" name="json_kakitangan_data" id="json_kakitangan_data">
-        
-        <div class="mt-4 border-t border-slate-200 pt-4">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Atau Muat Naik Dokumen Senarai Staf Berenama</label>
-            <div class="file-upload-wrapper" id="w-kak">
-                <input type="file" name="fail_kakitangan" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'd-kak')">
-                <div class="file-display" id="d-kak">
-                    {% if fp.k_sumber_manusia.fail_kakitangan %}<i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] truncate">{{ fp.k_sumber_manusia.fail_kakitangan.name }}</p>
-                    {% else %}<i class="fas fa-cloud-upload-alt text-3xl text-purple-400 mb-2"></i><p class="text-xs">Klik/Seret fail (Maksima 5MB)</p>{% endif %}
-                </div>
+    <!-- Upload Fail Kakitangan Berenama -->
+    <div class="q-card mb-4 border-purple-100 bg-purple-50/20">
+        <label class="block text-xs font-extrabold text-purple-800 mb-2">iv. Senarai Kakitangan Berenama (Dokumen / Excel)</label>
+        <div class="file-upload-wrapper" id="wrap-staf">
+            <input type="file" name="fail_kakitangan" class="file-upload-input" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFile(this, 'disp-staf')">
+            <div class="file-display" id="disp-staf">
+                {% if fp.k_sumber_manusia.fail_kakitangan %}
+                    <i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">{{ fp.k_sumber_manusia.fail_kakitangan.name|slice:"15:" }}</p>
+                {% else %}
+                    <i class="fas fa-cloud-upload-alt text-3xl text-purple-400 mb-2"></i><p class="text-xs">Klik/Seret fail ke sini (Maksima 5MB)</p>
+                {% endif %}
             </div>
-            <a href="#" class="text-[10px] font-bold text-purple-600 hover:underline mt-1 block text-right"><i class="fas fa-download"></i> Muat Turun Templat</a>
+        </div>
+        <a href="{% static 'templates/Senarai_Kakitangan.xlsx' %}" class="text-[10px] font-bold text-purple-600 hover:underline mt-2 block text-right"><i class="fas fa-download"></i> Muat Turun Templat Excel</a>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">v. Terdapat kakitangan pinjaman fasiliti lain?</label>
+            <div class="flex gap-2 flex-wrap mb-2">
+                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_ya" value="1" onchange="toggleNote('pinjam_nota_wrap', true)" {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman == True %}checked{% endif %}><label for="pinjam_ya" class="other"><i class="fas fa-check"></i> Ya (Nyatakan)</label></div>
+                <div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pinjam_tidak" value="0" onchange="toggleNote('pinjam_nota_wrap', false)" {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman == False %}checked{% endif %}><label for="pinjam_tidak" class="tidak"><i class="fas fa-times"></i> Tidak</label></div>
+            </div>
+            <div id="pinjam_nota_wrap" class="{% if fp.k_sumber_manusia.ada_kakitangan_pinjaman != True %}hidden{% endif %} mt-2">
+                <input type="text" name="nota_kakitangan_pinjaman" id="f_nota_kakitangan_pinjaman" class="f-input" placeholder="Nyatakan jawatan dan dari mana..." value="{{ fp.k_sumber_manusia.nota_kakitangan_pinjaman|default:'' }}">
+            </div>
+        </div>
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">vi. Terdapat isu / krisis kepada petugas?</label>
+            <div class="flex gap-2 flex-wrap mb-2">
+                <div class="pill-item"><input type="radio" name="ada_isu_petugas" id="isu_ya" value="1" onchange="toggleNote('isu_nota_wrap', true)" {% if fp.k_sumber_manusia.ada_isu_petugas == True %}checked{% endif %}><label for="isu_ya" class="other"><i class="fas fa-exclamation-triangle"></i> Ya (Nyatakan)</label></div>
+                <div class="pill-item"><input type="radio" name="ada_isu_petugas" id="isu_tidak" value="0" onchange="toggleNote('isu_nota_wrap', false)" {% if fp.k_sumber_manusia.ada_isu_petugas == False %}checked{% endif %}><label for="isu_tidak" class="ya"><i class="fas fa-check"></i> Tidak</label></div>
+            </div>
+            <div id="isu_nota_wrap" class="{% if fp.k_sumber_manusia.ada_isu_petugas != True %}hidden{% endif %} mt-2">
+                <input type="text" name="isu_petugas_nota" id="f_isu_petugas_nota" class="f-input" placeholder="Nyatakan krisis atau isu..." value="{{ fp.k_sumber_manusia.isu_petugas_nota|default:'' }}">
+            </div>
         </div>
     </div>
-    
-    <div class="grid grid-cols-2 gap-4">
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Terdapat kakitangan pinjaman fasiliti lain?</label><div class="flex gap-2"><div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pin_y" value="1" {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman == True %}checked{% endif %}><label for="pin_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_kakitangan_pinjaman" id="pin_t" value="0" {% if fp.k_sumber_manusia.ada_kakitangan_pinjaman == False %}checked{% endif %}><label for="pin_t" class="tidak">Tidak</label></div></div></div>
-        <div class="q-card">
-            <label class="block text-xs font-bold text-slate-500 mb-2">Isu/krisis kepada petugas?</label>
-            <div class="flex gap-2 mb-2"><div class="pill-item"><input type="radio" name="ada_isu_petugas" id="isu_y" value="1" onchange="toggleNote('isu_nota', false)" {% if fp.k_sumber_manusia.ada_isu_petugas == True %}checked{% endif %}><label for="isu_y" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="ada_isu_petugas" id="isu_t" value="0" onchange="toggleNote('isu_nota', true)" {% if fp.k_sumber_manusia.ada_isu_petugas == False %}checked{% endif %}><label for="isu_t" class="tidak">Tidak</label></div></div>
-            <div id="isu_nota" class="{% if fp.k_sumber_manusia.ada_isu_petugas != True %}hidden{% endif %} mt-2"><input type="text" name="isu_petugas_nota" class="f-input" placeholder="Nyatakan isu..." value="{{ fp.k_sumber_manusia.isu_petugas_nota|default:'' }}"></div>
+    <div class="q-card mt-3">
+        <label class="block text-xs font-bold text-slate-500 mb-3">vii. Status pertukaran perjawatan petugas dalam setahun?</label>
+        <div class="flex flex-col gap-2">
+            <label class="cb-label"><input type="radio" name="status_pertukaran" value="Tinggi / Kritikal" class="cb-input" {% if 'Kritikal' in fp.k_sumber_manusia.status_pertukaran %}checked{% endif %}><span class="cb-text text-red-600">Tinggi / Kritikal (Sering bertukar)</span></label>
+            <label class="cb-label"><input type="radio" name="status_pertukaran" value="Sederhana" class="cb-input" {% if 'Sederhana' in fp.k_sumber_manusia.status_pertukaran %}checked{% endif %}><span class="cb-text text-amber-600">Sederhana</span></label>
+            <label class="cb-label"><input type="radio" name="status_pertukaran" value="Rendah" class="cb-input" {% if 'Rendah' in fp.k_sumber_manusia.status_pertukaran %}checked{% endif %}><span class="cb-text text-green-600">Rendah / Tiada Keperluan (Kekal Stabil)</span></label>
         </div>
-        <div class="q-card col-span-2"><label class="block text-xs font-bold text-slate-500 mb-2">Status pertukaran perjawatan petugas dalam setahun?</label><select name="status_pertukaran" class="f-input"><option value="">-- Pilih --</option><option value="Sangat Kerap" {% if fp.k_sumber_manusia.status_pertukaran == 'Sangat Kerap' %}selected{% endif %}>Sangat Kerap</option><option value="Sederhana" {% if fp.k_sumber_manusia.status_pertukaran == 'Sederhana' %}selected{% endif %}>Sederhana</option><option value="Jarang Berlaku" {% if fp.k_sumber_manusia.status_pertukaran == 'Jarang Berlaku' %}selected{% endif %}>Jarang Berlaku</option></select></div>
     </div>
 </div>
+
 
 <!-- 4.2 Penjadualan & Syif -->
 <div class="sec-group">
     <div class="sec-title"><div class="sec-dot bg-purple-50 text-purple-600">4.2</div><span class="sec-label">Penjadualan & Syif</span></div>
+    
     <div class="grid grid-cols-2 gap-4">
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Bilangan Shift Kerja</label>
-            <select name="bilangan_shift" class="f-input">
-                <option value="">-- Pilih --</option>
-                <option value="1 Shift" {% if '1 Shift' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>1 Shift (Waktu Pejabat)</option>
-                <option value="2 Shift" {% if '2 Shift' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>2 Shift (Pagi & Petang)</option>
-                <option value="3 Shift" {% if '3 Shift' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>3 Shift (Operasi 24 jam)</option>
-                <option value="Standby" {% if 'Standby' in fp.k_sumber_manusia.bilangan_shift %}selected{% endif %}>On Call / Standby</option>
-            </select>
-        </div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Corak Penugasan / Penjadualan</label>
-            <select name="corak_penugasan" class="f-input">
-                <option value="">-- Pilih --</option>
-                <option value="Standard" {% if 'Standard' in fp.k_sumber_manusia.corak_penugasan %}selected{% endif %}>Kapasiti / Tenaga kerja mencukupi</option>
-                <option value="Kekurangan Staf Tinggi" {% if 'Kekurangan' in fp.k_sumber_manusia.corak_penugasan %}selected{% endif %}>Kekurangan staf tinggi (Double shift kerap)</option>
-                <option value="OT Kerap" {% if 'OT Kerap' in fp.k_sumber_manusia.corak_penugasan %}selected{% endif %}>Tugas OT kerap / Staf burnout</option>
-            </select>
-        </div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Pengurusan Jadual (Duty Roster)</label><select name="pengurusan_jadual" class="f-input"><option value="">-- Pilih --</option><option value="Manual" {% if 'Manual' in fp.k_sumber_manusia.pengurusan_jadual %}selected{% endif %}>Manual (Borang/Excel)</option><option value="Sistem Digital" {% if 'Sistem Digital' in fp.k_sumber_manusia.pengurusan_jadual %}selected{% endif %}>Sistem Digital / Automasi</option></select></div>
-        <div class="q-card"><label class="block text-xs font-bold text-slate-500 mb-2">Proses Merekod Cuti</label><select name="proses_cuti" class="f-input"><option value="">-- Pilih --</option><option value="Sistem Dalam Talian" {% if 'Sistem' in fp.k_sumber_manusia.proses_cuti %}selected{% endif %}>Sistem Dalam Talian (HRMIS)</option><option value="Manual / Kertas" {% if 'Manual' in fp.k_sumber_manusia.proses_cuti %}selected{% endif %}>Manual / Borang Kertas</option></select></div>
-    </div>
-</div>
-
-<!-- SOALAN DINAMIK ADMIN -->
-{% if soalan_dinamik %}
-<div class="sec-group bg-slate-50">
-    <div class="sec-title"><div class="sec-dot bg-slate-200 text-slate-600"><i class="fas fa-list-check"></i></div><span class="sec-label">Maklumat Tambahan (Dinamik)</span></div>
-    <div class="grid grid-cols-2 gap-4">
-        {% for s in soalan_dinamik %}
-            <div class="q-card {% if s.jenis_input == 'textarea' or s.jenis_input == 'fail' %}col-span-2{% endif %}">
-                <label class="block text-xs font-bold text-slate-500 mb-2">{{ s.teks_soalan }} {% if s.is_wajib %}<span class="text-red-500">*</span>{% endif %}</label>
-                {% if s.jenis_input == 'fail' %}
-                    <div class="file-upload-wrapper" id="w-dyn-{{ s.id }}">
-                        <input type="file" name="soalan_dyn_{{ s.id }}" class="file-upload-input" onchange="handleFile(this, 'd-dyn-{{ s.id }}')" {% if s.is_wajib and not s.jawapan_fail %}required{% endif %}>
-                        <div class="file-display" id="d-dyn-{{ s.id }}">
-                            {% if s.jawapan_fail %}<i class="fas fa-file-check text-2xl text-emerald-500 mb-1"></i><p class="text-[10px] truncate">{{ s.jawapan_fail.name }}</p>
-                            {% else %}<i class="fas fa-cloud-upload-alt text-2xl text-slate-400 mb-1"></i><p class="text-[10px]">Klik/Seret fail</p>{% endif %}
-                        </div>
-                    </div>
-                {% elif s.jenis_input == 'textarea' %}
-                    <textarea name="soalan_dyn_{{ s.id }}" class="f-input h-20" {% if s.is_wajib %}required{% endif %}>{{ s.jawapan_teks }}</textarea>
-                {% elif s.jenis_input == 'ya_tidak' %}
-                    <div class="flex gap-2"><div class="pill-item"><input type="radio" name="soalan_dyn_{{ s.id }}" id="dy_{{s.id}}" value="Ya" {% if s.jawapan_teks == 'Ya' %}checked{% endif %}><label for="dy_{{s.id}}" class="ya">Ya</label></div><div class="pill-item"><input type="radio" name="soalan_dyn_{{ s.id }}" id="dt_{{s.id}}" value="Tidak" {% if s.jawapan_teks == 'Tidak' %}checked{% endif %}><label for="dt_{{s.id}}" class="tidak">Tidak</label></div></div>
-                {% else %}
-                    <input type="text" name="soalan_dyn_{{ s.id }}" class="f-input" value="{{ s.jawapan_teks }}" {% if s.is_wajib %}required{% endif %}>
-                {% endif %}
+        <!-- Bilangan Shift -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">i. Bilangan Shift Kerja (Boleh pilih >1):</label>
+            <input type="hidden" name="jenis_shift" id="f_jenis_shift" value="{{ fp.k_sumber_manusia.bilangan_shift|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-shift">
+                <label class="cb-label"><input type="checkbox" class="cb-input shift-cb" value="1 Shift (Waktu Pejabat: 8 pagi - 5 petang)"> <span class="cb-text">1 Shift (Waktu Pejabat: 8 pagi - 5 petang)</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input shift-cb" value="2 Shift (Pagi & Petang)"> <span class="cb-text">2 Shift (Pagi & Petang)</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input shift-cb" value="3 Shift (Pagi, Petang & Malam / Operasi 24 jam)"> <span class="cb-text">3 Shift (Pagi, Petang & Malam / Operasi 24 jam)</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input shift-cb" value="Sistem Panggilan Tugas (On Call / Standby)"> <span class="cb-text">Sistem Panggilan Tugas (On Call / Standby)</span></label>
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input shift-cb" id="shift_other_cb" value="Other"> <span class="cb-text text-xs">Lain-lain:</span> <input type="text" id="shift_other_text" class="f-input ml-2 py-1 px-2" style="width:160px;"></label>
             </div>
-        {% endfor %}
+        </div>
+
+        <!-- Corak Penugasan -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">ii. Corak Penugasan / Penjadualan Syif:</label>
+            <input type="hidden" name="corak_penugasan" id="f_corak_penugasan" value="{{ fp.k_sumber_manusia.corak_penugasan|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-corak">
+                <label class="cb-label"><input type="checkbox" class="cb-input corak-cb" value="Mengikut standard / Norma ditetapkan (Kapasiti mencukupi)"> <span class="cb-text">Mengikut standard / Norma ditetapkan</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input corak-cb" value="Kekurangan staf tinggi / Double shift kerap diamalkan"> <span class="cb-text">Kekurangan staf tinggi / Double shift kerap diamalkan</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input corak-cb" value="Tugas on-call / kerja lebih masa (OT) kerap diamalkan sehingga staf burnout"> <span class="cb-text">Tugas OT kerap diamalkan sehingga staf burnout</span></label>
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input corak-cb" id="corak_other_cb" value="Other"> <span class="cb-text text-xs">Lain-lain:</span> <input type="text" id="corak_other_text" class="f-input ml-2 py-1 px-2" style="width:160px;"></label>
+            </div>
+        </div>
+
+        <!-- Pengurusan Jadual (Duty Roster) -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iii. Pengurusan Jadual (Duty Roster):</label>
+            <input type="hidden" name="pengurusan_jadual" id="f_pengurusan_jadual" value="{{ fp.k_sumber_manusia.pengurusan_jadual|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-roster">
+                <label class="cb-label"><input type="checkbox" class="cb-input roster-cb" value="Disediakan secara manual (Borang/Excel)"> <span class="cb-text">Disediakan secara manual (Borang/Excel)</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input roster-cb" value="Sistem Penjadualan Digital / Automasi"> <span class="cb-text">Sistem Penjadualan Digital / Automasi</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input roster-cb" value="Dibuat secara tetap - tiada rotasi"> <span class="cb-text">Dibuat secara tetap - tiada rotasi</span></label>
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input roster-cb" id="roster_other_cb" value="Other"> <span class="cb-text text-xs">Lain-lain:</span> <input type="text" id="roster_other_text" class="f-input ml-2 py-1 px-2" style="width:160px;"></label>
+            </div>
+        </div>
+
+        <!-- Proses Merekod Cuti -->
+        <div class="q-card">
+            <label class="block text-xs font-bold text-slate-500 mb-2">iv. Proses Merekod Masa Cuti:</label>
+            <input type="hidden" name="proses_cuti" id="f_proses_cuti" value="{{ fp.k_sumber_manusia.proses_cuti|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-cuti">
+                <label class="cb-label"><input type="checkbox" class="cb-input cuti-cb" value="Sistem Dalam Talian (HRMIS)"> <span class="cb-text">Sistem Dalam Talian (HRMIS)</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input cuti-cb" value="Manual / Borang / Kertas"> <span class="cb-text">Manual / Borang / Kertas</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input cuti-cb" value="Hybrid (Fizikal & Pangkalan data)"> <span class="cb-text">Hybrid (Fizikal & Pangkalan data)</span></label>
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input cuti-cb" id="cuti_other_cb" value="Other"> <span class="cb-text text-xs">Lain-lain:</span> <input type="text" id="cuti_other_text" class="f-input ml-2 py-1 px-2" style="width:160px;"></label>
+            </div>
+        </div>
+
+        <!-- Isu Penjadualan & Syif -->
+        <div class="q-card col-span-2">
+            <label class="block text-xs font-bold text-slate-500 mb-2">v. Isu Penjadualan & Syif:</label>
+            <input type="hidden" name="isu_penjadualan" id="f_isu_penjadualan" value="{{ fp.k_sumber_manusia.isu_penjadualan|default:'' }}">
+            <div class="flex flex-col gap-1 cb-group-isu">
+                <label class="cb-label"><input type="checkbox" class="cb-input isu-cb" value="Kekurangan Staf Utama Menyebabkan Penugasan Syif Tidak Seimbang"> <span class="cb-text">Kekurangan Staf Utama (Beban Kerja Berlebihan)</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input isu-cb" value="Pertindihan Jadual Waktu Bekerja / Kekurangan Pengganti Cuti"> <span class="cb-text">Pertindihan Jadual / Kekurangan Pengganti</span></label>
+                <label class="cb-label"><input type="checkbox" class="cb-input isu-cb" value="Jadual Syif Kerap Ditukar (Perubahan Minit Akhir / Kurang Notice)"> <span class="cb-text">Syif Kerap Ditukar Last Minute</span></label>
+                <label class="cb-label border-t border-slate-100 pt-2"><input type="checkbox" class="cb-input isu-cb" id="isu_other_cb" value="Other"> <span class="cb-text text-xs">Lain-lain:</span> <input type="text" id="isu_other_text" class="f-input ml-2 py-1 px-2" style="width:300px;"></label>
+            </div>
+        </div>
     </div>
 </div>
-{% endif %}
 
 <!-- Wishlist Sub-Topik -->
 <div class="sec-group bg-purple-50 border-purple-200">
@@ -211,14 +266,15 @@
 
 <!-- SUBMIT -->
 <div class="flex items-center justify-between pt-2">
-    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">Batal</a>
-    <button type="submit" onclick="prepareSubmit()" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Sumber Manusia</button>
+    <a href="{% url 'home:pilih_modul' fp.pk %}" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm">Batal</a>
+    <button type="submit" onclick="syncAllCheckboxes()" class="btn-submit"><i class="fas fa-save mr-2"></i> Kemaskini Sumber Manusia</button>
 </div>
 
 </form>
 </main>
 
 <script>
+    // ── FILE UPLOAD LOGIC ──
     function handleFile(inputElement, displayId) {
         const file = inputElement.files[0];
         const display = document.getElementById(displayId);
@@ -228,47 +284,60 @@
             inputElement.value = ""; return;
         }
         const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        display.innerHTML = `<p class="text-[10px] font-bold text-emerald-600 truncate"><i class="fas fa-check-circle"></i> ${file.name} (${sizeMB} MB)</p>`;
+        display.innerHTML = `<i class="fas fa-file-check text-3xl text-emerald-500 mb-2"></i><p class="text-[10px] font-bold text-emerald-600 truncate">${file.name} (${sizeMB} MB)</p>`;
         inputElement.parentElement.classList.add('border-emerald-400', 'bg-emerald-50');
     }
 
     function toggleNote(id, show) {
         const wrap = document.getElementById(id);
-        if(wrap) { if(!show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
+        if(wrap) { if(show) wrap.classList.remove('hidden'); else wrap.classList.add('hidden'); }
     }
 
-    function addRow(tbodyId, placeholders, existingData = null) {
-        const tbody = document.getElementById(tbodyId);
-        const tr = document.createElement('tr');
-        let html = '';
-        placeholders.forEach((ph, index) => {
-            const val = existingData ? existingData[index] : '';
-            html += `<td><input type="text" class="dyn-input" placeholder="${ph}" value="${val}"></td>`;
-        });
-        html += `<td class="text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 p-1"><i class="fas fa-trash-alt"></i></button></td>`;
-        tr.innerHTML = html;
-        tbody.appendChild(tr);
+    // ── MULTI-CHECKBOX SYNC LOGIC ──
+    function bindCheckboxGroup(hiddenId, cbClass, otherCbId, otherTextId) {
+        const hidden = document.getElementById(hiddenId);
+        if(!hidden) return function(){};
+        const cbs = document.querySelectorAll('.' + cbClass);
+        const otherCb = document.getElementById(otherCbId);
+        const otherText = document.getElementById(otherTextId);
+        
+        // Initial Load
+        const savedRaw = hidden.value;
+        if(savedRaw && otherCb) {
+            const savedItems = savedRaw.split('|||').map(s=>s.trim()).filter(Boolean);
+            savedItems.forEach(item => {
+                let matched = false;
+                cbs.forEach(cb => { if(cb.value === item && cb.id !== otherCbId) { cb.checked = true; matched = true; } });
+                if(!matched) { otherCb.checked = true; otherText.value = item; }
+            });
+        }
+
+        return function sync() {
+            let selected = [];
+            cbs.forEach(cb => {
+                if(cb.checked && (!otherCb || cb.id !== otherCbId)) selected.push(cb.value);
+            });
+            if(otherCb && otherCb.checked && otherText.value.trim() !== '') selected.push(otherText.value.trim());
+            hidden.value = selected.join('|||');
+        };
     }
+
+    let syncShift, syncCorak, syncRoster, syncCuti, syncIsu;
 
     document.addEventListener("DOMContentLoaded", function() {
-        const rawKakitangan = '{{ fp.k_sumber_manusia.json_kakitangan|safe|escapejs }}';
-        if(rawKakitangan && rawKakitangan !== '""' && rawKakitangan !== '[]') {
-            try { JSON.parse(rawKakitangan).forEach(row => addRow('tbody-kakitangan', ['Nama', 'Jawatan/Gred', 'Status'], row)); } catch(e) {}
-        }
+        syncShift = bindCheckboxGroup('f_jenis_shift', 'shift-cb', 'shift_other_cb', 'shift_other_text');
+        syncCorak = bindCheckboxGroup('f_corak_penugasan', 'corak-cb', 'corak_other_cb', 'corak_other_text');
+        syncRoster = bindCheckboxGroup('f_pengurusan_jadual', 'roster-cb', 'roster_other_cb', 'roster_other_text');
+        syncCuti = bindCheckboxGroup('f_proses_cuti', 'cuti-cb', 'cuti_other_cb', 'cuti_other_text');
+        syncIsu = bindCheckboxGroup('f_isu_penjadualan', 'isu-cb', 'isu_other_cb', 'isu_other_text');
     });
 
-    function getTableData(tbodyId) {
-        let data = [];
-        Array.from(document.getElementById(tbodyId).rows).forEach(tr => {
-            let rowVals = [];
-            tr.querySelectorAll('input').forEach(inp => rowVals.push(inp.value.trim()));
-            if(rowVals.some(v => v !== '')) data.push(rowVals);
-        });
-        return JSON.stringify(data);
-    }
-
-    function prepareSubmit() {
-        document.getElementById('json_kakitangan_data').value = getTableData('tbody-kakitangan');
+    function syncAllCheckboxes() {
+        if(syncShift) syncShift(); 
+        if(syncCorak) syncCorak(); 
+        if(syncRoster) syncRoster(); 
+        if(syncCuti) syncCuti(); 
+        if(syncIsu) syncIsu(); 
     }
 </script>
 </body>
